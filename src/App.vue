@@ -1,40 +1,31 @@
 <script setup>
 import TopNavBar from './components/TopNavbar.vue'
-</script>
+import { useProjectStore, useErrorStore  } from '@/stores';
+import { watch } from 'vue';
+const projectStore = useProjectStore();
+    projectStore.updateAvailableProjects();
+const errorStore = useErrorStore();
 
-<script>
-export default {
-  name: 'Soile Runner',
-  data() {
-    return {
-      token: undefined
-    }
-  },
+function showErrorToast(message, type)
+{  
 
-  methods: {
-    async login(username, password)
-    {
-      
-    }
-  }
+  $bvToast.toast(message, {
+          title: 'Issue with ' + type,
+          variant: 'danger',
+          solid: true
+        })
 }
+
+watch(errorStore.latestError, (newError) => {
+  if(newError)
+  {
+    showErrorToast(newError.message,newError.class);
+  }
+})
+
 </script>
 <template>
   <TopNavBar></TopNavBar>
   <router-view></router-view>
 </template>
 
-<style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
-}
-</style>

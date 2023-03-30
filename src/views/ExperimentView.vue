@@ -7,10 +7,8 @@
   
 <script>
 
-
-
 export default {
-    name: 'ExperimentRunner',
+    name: 'ExperimentView',
     data() {
         return {
             id: undefined,

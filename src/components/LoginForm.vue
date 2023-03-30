@@ -1,5 +1,5 @@
 <template> 
-<b-dropdown-form @submit="submitForm" ref="loginForm">
+<b-dropdown-form @submit.prevent="submitForm" ref="loginForm">
     <b-form-group label="Username or Email" label-for="dropdown-form-email" @submit.stop.prevent>
       <b-form-input
         id="dropdown-form-email"
@@ -29,6 +29,7 @@
 </template>
 
 <script>
+import { useAuthStore } from '@/stores/auth';
 
 export default {
     name: 'DropDownLoginForm',
@@ -43,9 +44,10 @@ export default {
         }
     }, 
     methods: {
-      submitForm()
+      async submitForm()
       {
-        console.log(this.form);
+        const authStore = useAuthStore();
+        await authStore.login(this.form.nameOrEmail, this.form.password, this.form.rememberMe ? '1' : '');        
         this.$emit("collapse");
         this.resetData();
       },
@@ -56,6 +58,7 @@ export default {
         this.form.rememberMe = false
         
       }
+      
     }
   
   }

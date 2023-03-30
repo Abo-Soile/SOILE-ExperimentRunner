@@ -88,6 +88,7 @@ export default {
             this.psychoPyCSS.setAttribute("href", currentStyle);            
             document.head.appendChild(this.psychoPyCSS);
         }
+        
 
     },
     mounted() {
@@ -109,7 +110,7 @@ export default {
         }
         this.setupScript();
     },
-    unmounted() {/*  */
+    beforeUnmount() {/*  */
         this.clearScripts();
     },
     watch:

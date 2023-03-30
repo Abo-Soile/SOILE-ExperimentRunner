@@ -1,5 +1,5 @@
 {
-  "name": "soile-vite-testing",
+  "name": "soile-experimentrunner-frontend",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -9,14 +9,17 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "vue": "^3.2.45",
+    "@vue/compat": "^3.2.47",
+    "axios": "^1.3.4",
     "bootstrap": "^5.2.3",
-    "bootstrap-vue": "^2.23.1",    
-    "vue-router": "^4.1.6",
-    "@vue/compat": "^3.2.47",  
-    "underscore": "^1.13.6",
+    "bootstrap-vue": "^2.23.1",
     "fast-levenshtein": "^3.0.0",
-    "jquery" : "^3.6.3"
+    "http-status-codes": "^2.2.0",
+    "jquery": "^3.6.3",
+    "pinia": "^2.0.33",
+    "underscore": "^1.13.6",
+    "vue": "^3.2.45",
+    "vue-router": "^4.1.6"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.0.0",
