@@ -42,6 +42,7 @@ export default {
     },
   },
   components: { QuestionnaireComponent, QuestionnaireComponent },
+  emits: ["dataUpdate"]
 };
 </script>
 

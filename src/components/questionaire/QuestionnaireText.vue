@@ -9,7 +9,7 @@
       <div v-if="data.type=='text'"> {{ content }} </div>
       <h3 v-else-if="data.type=='subtitle'"> {{ content }} </h3>
       <h1 v-else-if="data.type=='title'" > {{ content }} </h1>
-      <a v-else-if="data.type=='link'" :href="data.target" target="_blank" > {{ content }} </a>
+      <a v-else-if="data.type=='link'" :href="data.href" target="_blank" > {{ content }} </a>
     </div>
   </template>
   

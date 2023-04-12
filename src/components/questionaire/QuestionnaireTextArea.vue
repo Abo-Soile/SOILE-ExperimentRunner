@@ -1,6 +1,5 @@
 <template>
-  <b-container>
-    <b-row>
+  <div>
         <label v-if="hasLabel" :for="source_data.id">{{ source_data.label }}</label>
         <b-form-textarea 
           :style="getComputedStyle"
@@ -10,10 +9,8 @@
           :max_rows=source_data.rows
           :rows=source_data.rows
           no-resize
-        />        
-    </b-row>
-    
-  </b-container>
+        />            
+  </div>
 </template>
 
 <script>
@@ -46,6 +43,16 @@ export default {
         });
       }
     },
+    source_data()
+    {
+      // reset if the source data changes!
+      this.value = undefined;
+      this.$emit("dataUpdate", {
+          isValid: this.isValid,
+          target: this.source_data.id,
+          value: this.value
+        });
+    }
   },
   computed: {
     isValid() {

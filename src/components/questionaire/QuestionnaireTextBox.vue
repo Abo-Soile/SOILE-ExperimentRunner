@@ -1,5 +1,5 @@
 <template>
-  
+    <div>
     <label class="mb-2 mr-sm-2 mb-sm-0" :for=source_data.id >{{ source_data.label }}</label>
     <b-input-group class="mb-2 mr-sm-2 mb-sm-0" v-if="source_data.linebreak">
       <b-form-input 
@@ -25,6 +25,7 @@
           v-model="value"
         />
     </b-input-group>  
+  </div>
 </template>
 
 <script>
@@ -40,23 +41,25 @@ export default {
       value: undefined,
     };
   },
-  methods: {},
+  methods: {
+    emitUpdate(valid, id, value)
+    {
+      this.$emit("dataUpdate", {
+          isValid: valid,
+          target: id,
+          value: value
+        });
+    }
+  },
   watch: {
     value() {
-      if (this.isValid) {
-        console.log("Emitting update");
-        this.$emit("dataUpdate", {
-          isValid: true,
-          target: this.source_data.id,
-          value: this.value,
-        });
-      } else {
-        this.$emit("dataUpdate", {
-          isValid: false,
-          target: this.source_data.id,
-        });
-      }
+      console.log("Emitting update");
+      this.emitUpdate(this.isValid, this.source_data.id, this.value )            
     },
+    source_data(newValue)
+    {
+      this.emitUpdate(this.isValid, this.source_data.id, this.value ? this.value : "" );
+    }
   },
   computed: {
     isValid() {
@@ -78,6 +81,10 @@ export default {
 
     }
   },
+  mounted()
+  {
+
+  }
 };
 </script>
 

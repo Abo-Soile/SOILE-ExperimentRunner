@@ -23,12 +23,13 @@ export default defineConfig({
   ],
   server: {
     proxy: {
-      "/exp/:id/*" :{
-        target: 'localhost:8081',
-        rewrite: (path) => path.replace(/^\/exp/, '/run')
+      "^/exp/.*/.*/.*" :{
+        target: 'https://localhost:8081',
+        rewrite: (path) => path.replace(/^\/exp/, '/run'),
+        secure: false
       },
       "/api/*" :{
-        target: 'localhost:8081',
+        target: 'https://localhost:8081',
         rewrite: (path) => path.replace(/^\/api/, '')
       }
     }

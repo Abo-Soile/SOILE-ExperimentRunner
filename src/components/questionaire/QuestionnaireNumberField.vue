@@ -1,4 +1,5 @@
 <template>
+  <div>
   <label class="mb-2 mr-sm-2 mb-sm-0" :for="source_data.id">{{ source_data.label }}</label>
   <b-form-input class="mb-2 mr-sm-2 mb-sm-0"
   :no-wheel="true" 
@@ -9,6 +10,7 @@
   :id="source_data.id"
     v-model="value">
   </b-form-input>
+</div>
 </template>
 
 <script>
@@ -41,6 +43,12 @@ export default {
         });
       }
     },
+    source_data(newValue) 
+    {
+      if (newValue.value) {
+      this.value = newValue.value;
+    }
+    }
   },
   computed: {
     isValid() {
@@ -54,9 +62,7 @@ export default {
     },
   },
   mounted() {
-    if (this.source_data.value) {
-      this.value = this.source_data.value;
-    }
+
   },
 };
 </script>

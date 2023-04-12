@@ -27,6 +27,7 @@ export const useErrorStore = defineStore({
             }
             this.errors[errorClass].push({message: message, timestamp: new Date()});
             this.latestError = {message : message, class: errorClass}
+            console.log(errorClass, message)
         },
         clearErrors()
         {

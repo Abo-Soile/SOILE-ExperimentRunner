@@ -10,8 +10,9 @@ const routes = [
         name: 'Welcome',
         component: WelcomeView
     },
+    
     {
-        path: '/exp/:id',
+        path: '/exp/:id/:taskID/',        
         name: 'Experiment Runner',
         component: ExperimentView,
         props: true
@@ -31,15 +32,23 @@ export const router = createRouter({
     routes: routes
 });
 
-router.beforeEach(async (to) => {
+// We will skip this for
+
+/*router.beforeEach(async (to) => {
     // redirect to login page if not logged in and trying to access a restricted page
     const publicPages = ['/login', '/'];    
     // signup is special.
     const authRequired = !publicPages.includes(to.path) && ! to.path.startsWith('/signup');
+    const isExp = to.path.startsWith('/exp');
     const auth = useAuthStore();
-
-    if (authRequired && !auth.user) {
-        auth.returnUrl = to.fullPath;
-        return '/login';
-    }
-});
+    console.log("Routing to " + to.path)
+    console.log("Authenticated: " + auth.authed)
+    console.log("Auth required: " + authRequired)
+    if (authRequired && !auth.authed ) {
+        if(!isExp)
+        {
+            auth.returnUrl = to.fullPath;
+            return '/';
+        }
+    }    
+});*/

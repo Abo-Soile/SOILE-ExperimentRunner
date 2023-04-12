@@ -1,27 +1,41 @@
-// stores/users.js
-import { defineStore } from 'pinia'
-// Import axios to make HTTP requests
-import axios from "axios"
+import { defineStore } from 'pinia';
 
-export const useUserStore = defineStore("user", {
+import axios from 'axios';
+
+
+export const useUserStore = defineStore({
+    id: 'user',
     state: () => ({
-        signedUpProjects: [],
+        // initialize state from session storage to enable user to stay logged in for the session (not using local store)
+        currentTaskSettings: {},
+        isRunningTask: false
     }),
-    getters: {
-      getUsers(state){
-          return state.signedUpProjects
-        }
-    },
     actions: {
-      async fetchSignedUpProjects() {
-        try {
-          const data = await axios.get('/login')
-            this.users = data.data
-          }
-          catch (error) {
-            alert(error)
-            console.log(error)
+        async updateTaskSettings(projectID) {
+            console.log(projectID)
+            if (projectID) {
+                try {
+                    const response = await axios.post("/projectexec/" + projectID + "/getcurrenttaskinfo")
+                    this.currentTaskSettings = response.data;
+                }
+                catch (error) {
+                    this.processAxiosError(error)
+                }
+            }
+        },
+        processAxiosError(err) {
+            //const errorStore = useErrorStore()
+            console.log(err);
+            throw (err)
+            //errorStore.raiseError(err.response?.status, err.response?.data)
+        },
+        setTaskActive()
+        {
+            this.isRunningTask = true
+        },
+        setTaskNotRunning()
+        {
+            this.isRunningTask = false
         }
-      }
-    },
-})
+    }
+});

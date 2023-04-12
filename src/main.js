@@ -6,13 +6,13 @@ import './axios'
 import { createPinia } from 'pinia'
 import { router } from './helpers';
 // Import Bootstrap and BootstrapVue CSS files (order is important)
-import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
+import { BootstrapVue, IconsPlugin, BVToastPlugin } from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
-
 const app = createApp(App);
 app.use(BootstrapVue)
 .use(IconsPlugin)
+.use(BVToastPlugin)
 .use(createPinia())
 .use(router)
 .mount('#app')

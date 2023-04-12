@@ -1,22 +1,35 @@
 <script setup>
 import TopNavBar from './components/TopNavbar.vue'
-import { useProjectStore, useErrorStore  } from '@/stores';
+import { storeToRefs } from 'pinia'
+import { useProjectStore, useErrorStore, useUserStore, useAuthStore } from '@/stores';
 import { watch } from 'vue';
-const projectStore = useProjectStore();
-    projectStore.updateAvailableProjects();
-const errorStore = useErrorStore();
 
+const errorStore = useErrorStore();
+const authStore = useAuthStore();
+const projectStore = useProjectStore();
+const userStore = useUserStore();
+authStore.updateLoginStatus();
+projectStore.updateAvailableProjects();
+projectStore.fetchSignedUpProjects();
+const {errors, latestError} = storeToRefs(errorStore)
+const {isRunningTask} = storeToRefs(userStore)
 function showErrorToast(message, type)
 {  
-
+  try {
   $bvToast.toast(message, {
           title: 'Issue with ' + type,
           variant: 'danger',
           solid: true
         })
+      }
+      catch(error)
+      {
+        console.log("Issue with " + type + ": " + message )
+      }
 }
 
-watch(errorStore.latestError, (newError) => {
+watch(latestError, (newError) => {
+  console.log("Received new errror")
   if(newError)
   {
     showErrorToast(newError.message,newError.class);
@@ -25,7 +38,7 @@ watch(errorStore.latestError, (newError) => {
 
 </script>
 <template>
-  <TopNavBar></TopNavBar>
+  <TopNavBar v-if="!isRunningTask"></TopNavBar>
   <router-view></router-view>
 </template>
 
