@@ -1,4 +1,5 @@
 <template>
+  <div>
   <b-form-checkbox-group class="mb-2 mr-sm-2 mb-sm-0" stacked>
     <b-form-checkbox v-for="option in options" v-model="value" :key="option.label" :value="option.value"
       class="d-flex justify-content-start tickbox">
@@ -6,6 +7,7 @@
     </b-form-checkbox>
 
   </b-form-checkbox-group>
+</div>
 </template>
 
 <script>

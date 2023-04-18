@@ -1,7 +1,6 @@
-import { createRouter, createWebHistory } from 'vue-router';
+import VueRouter from 'vue-router'
 
-import { useAuthStore } from '@/stores';
-import { ExperimentView, WelcomeView, SignupView } from '@/views';
+import { ExperimentView, WelcomeView, SignupView ,ResearcherView } from '@/views';
 
 
 const routes = [
@@ -10,7 +9,11 @@ const routes = [
         name: 'Welcome',
         component: WelcomeView
     },
-    
+    {
+        path: '/management',
+        name: 'Welcome',
+        component: ResearcherView
+    },
     {
         path: '/exp/:id/:taskID/',        
         name: 'Experiment Runner',
@@ -26,29 +29,7 @@ const routes = [
 ]
 
 
-export const router = createRouter({
-    history: createWebHistory(import.meta.env.BASE_URL),
-    linkActiveClass: 'active',
+export const router = new VueRouter({
+    mode: 'history',    
     routes: routes
 });
-
-// We will skip this for
-
-/*router.beforeEach(async (to) => {
-    // redirect to login page if not logged in and trying to access a restricted page
-    const publicPages = ['/login', '/'];    
-    // signup is special.
-    const authRequired = !publicPages.includes(to.path) && ! to.path.startsWith('/signup');
-    const isExp = to.path.startsWith('/exp');
-    const auth = useAuthStore();
-    console.log("Routing to " + to.path)
-    console.log("Authenticated: " + auth.authed)
-    console.log("Auth required: " + authRequired)
-    if (authRequired && !auth.authed ) {
-        if(!isExp)
-        {
-            auth.returnUrl = to.fullPath;
-            return '/';
-        }
-    }    
-});*/

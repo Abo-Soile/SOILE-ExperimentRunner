@@ -1,4 +1,5 @@
 <template>
+  <div>
   <b-input-group v-for="(element, index) in component_data" :key="index">
     <QuestionnaireDropDownMenu
       v-if="element.type == 'dropdownmenu'"
@@ -16,6 +17,7 @@
     <QuestionnaireSingleSelect v-else-if="element.type=='selectradio'" @dataUpdate="dataUpdate" :source_data="element.data"/>
     <QuestionnaireText v-else-if="element.type == 'html'" :data="element.data" />
   </b-input-group>
+</div>
 </template>
 
 <script>

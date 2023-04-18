@@ -1,25 +1,16 @@
 import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
+import vue from '@vitejs/plugin-vue2'
 import { fileURLToPath, URL } from 'url';
 
 // https://vitejs.dev/config/
 export default defineConfig({  
   resolve: {
-    alias: {
-      vue: '@vue/compat',
+    alias: {      
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
   },
   plugins: [
-    vue({
-      template: {
-        compilerOptions: {
-          compatConfig: {
-            MODE: 2
-          }
-        }
-      }
-    })
+    vue({})
   ],
   server: {
     proxy: {

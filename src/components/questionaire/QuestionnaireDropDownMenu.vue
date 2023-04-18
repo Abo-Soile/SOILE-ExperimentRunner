@@ -1,4 +1,5 @@
 <template>
+  <div>
   <label class="mb-2 mr-sm-2 mb-sm-0" :for="source_data.id">{{ source_data.label }}</label>
   <b-input-group class="mb-2 mr-sm-2 mb-sm-0">
     <b-form-select class="mb-2 mr-sm-2 mb-sm-0" :options="source_data.options" v-model="value">
@@ -7,6 +8,7 @@
       </template>
     </b-form-select>
   </b-input-group>
+</div>
 </template>
 
 <script>

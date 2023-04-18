@@ -1,5 +1,7 @@
 <template>
+  <div>
       <QuestionnaireComponent v-for="(element, index) in inlineGroups" :key='"component_" + index' :component_data="element" @dataUpdate="dataUpdate" />
+    </div>
 </template>
 
 <script>

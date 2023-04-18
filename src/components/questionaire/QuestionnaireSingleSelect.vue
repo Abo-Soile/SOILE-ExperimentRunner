@@ -1,4 +1,5 @@
 <template>
+  <div>
   <b-input-group>
     <b-form-radio-group class="mb-2 mr-sm-2 mb-sm-0" v-model="value" stacked>
       <b-form-radio v-for="option in source_data.options" :key="option.id"
@@ -7,6 +8,7 @@
       </b-form-radio>
     </b-form-radio-group>
   </b-input-group>
+</div>
 </template>
 
 <script>

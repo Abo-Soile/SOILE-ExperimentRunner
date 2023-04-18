@@ -1,4 +1,4 @@
-import { createApp } from 'vue'
+import Vue from 'vue'
 import './style.css'
 import App from './App.vue'
 import './axios'
@@ -9,10 +9,15 @@ import { router } from './helpers';
 import { BootstrapVue, IconsPlugin, BVToastPlugin } from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
-const app = createApp(App);
-app.use(BootstrapVue)
-.use(IconsPlugin)
-.use(BVToastPlugin)
-.use(createPinia())
-.use(router)
-.mount('#app')
+import { BaklavaVuePlugin } from '@baklavajs/plugin-renderer-vue'
+import '@baklavajs/plugin-renderer-vue/dist/styles.css'
+import VueRouter from 'vue-router';
+
+Vue.use(VueRouter);
+Vue.use(BootstrapVue)
+Vue.use(IconsPlugin)
+Vue.use(BVToastPlugin)
+Vue.use(BaklavaVuePlugin)
+Vue.use(createPinia())
+const app = new Vue({ router, render : h=> h(App)})
+.$mount('#app')
