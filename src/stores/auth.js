@@ -12,13 +12,40 @@ export const useAuthStore = defineStore({
     state: () => ({
         // initialize state from session storage to enable user to stay logged in for the session (not using local store)
         user: JSON.parse(sessionStorage.getItem('soile-user')),
-        jwtToken: JSON.parse(sessionStorage.getItem('soile-jwtToke')),
+        roles: JSON.parse(sessionStorage.getItem('soile-userroles')),
+        jwtToken: JSON.parse(sessionStorage.getItem('soile-jwtToken')),
         projectToken: JSON.parse(sessionStorage.getItem('soile-projectToken')),
         isAnonymous: JSON.parse(sessionStorage.getItem('soile-anonymous')),
         returnUrl: null,
         authed: false
         }),
     actions: {
+        isAuthed()
+        {
+            return this.authed;
+        },
+        isAdmin()
+        {
+            if(this.isAuthed())
+            {
+                return this.roles.contains("Admin");
+            }
+            else
+            {
+                return false;
+            }
+        },
+        isResearcher()
+        {
+            if(this.isAuthed())
+            {
+                return this.roles.contains("Admin") || this.roles.contains("Researcher");
+            }
+            else
+            {
+                return false;
+            }
+        },
         async refreshSession() {
             if (this.jwtToken) {
                 this.setAccessToken(this.jwtToken);
@@ -36,17 +63,8 @@ export const useAuthStore = defineStore({
                     console.log(error)
                     this.processAxiosError(error);
                 }
-            }
-            // refresh the list of Projects and 
-            try {
-                this.updateUserData();
-            }
-            catch (error) {
-                console.log(error)
-                this.processAxiosError(error);
-            }
-
-        },
+            }        
+        },        
         async login(username, password, remember) {
 
             var loginData = {
@@ -63,7 +81,7 @@ export const useAuthStore = defineStore({
                     })
                 console.log(response?.data);                
                 // update pinia state
-                this.user = this.updateLoginStatus();
+                await this.updateLoginStatus();
                 this.setAccessToken(response?.data.token)
                 // store user details and jwt in local storage to keep user logged in between page refreshes
                 sessionStorage.setItem('soile-user', JSON.stringify(this.user));
@@ -81,11 +99,14 @@ export const useAuthStore = defineStore({
                 const response = await axios.post('/logout')
                 // reset user and update available projects.
                 this.user = null;
+                this.roles = [];       
+                this.authed = false;        
                 sessionStorage.removeItem('soile-user');
                 this.setAccessToken(null);
                 this.setProjectToken(null);
                 const listStore = useProjectStore();
                 listStore.clearData();
+                await this.updateLoginStatus();
                 await listStore.updateAvailableProjects();
                 console.log("Logged Out");
             }
@@ -94,8 +115,10 @@ export const useAuthStore = defineStore({
             }
 
         },
+
         async updateUserData() {
             const listStore = useProjectStore();
+            await this.updateLoginStatus();
             await listStore.updateAvailableProjects();
             await listStore.fetchSignedUpProjects();
         },
@@ -150,13 +173,14 @@ export const useAuthStore = defineStore({
                 console.log("Auth succeeded")
                 console.log(response?.data);
                 this.authed = true;
-                return response?.data.user;
+                this.user = response?.data.user
+                this.roles = response?.data.roles                
             }
             catch(error)
             {
                 if (error.response?.status == 401) {
+                    // We are no longer authorized
                     this.authed = false;
-                    return undefined;
                 }
                 else{
                     throw(error);
@@ -181,10 +205,16 @@ export const useAuthStore = defineStore({
 
         },
         processAxiosError(err) {
-            //const errorStore = useErrorStore()
+            const errorStore = useErrorStore()
             console.log(err);
-            throw(err)
-            //errorStore.raiseError(err.response?.status, err.response?.data)
+            if(err.response?.status === 401 || err.response?.status === 403)
+            {
+                errorStore.raiseError("warn", "No Authorization or Authentication unsuccessful (code " + err.response?.status + ")")
+            }
+            else
+            {
+                errorStore.raiseError("danger", err.response?.message + "/" + errorStore.getReason(err.response?.status))
+            }                        
         }
     }
 });

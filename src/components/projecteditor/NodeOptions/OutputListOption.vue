@@ -8,26 +8,27 @@
   </template>
   
   <script lang="ts">
-  import { Component, Prop, Vue } from 'vue-property-decorator';
-  import { INodeOption, INodeInterface } from "baklavajs/baklavajs-core/types";
+import { ComponentInterface } from '../NodeInterfaces/ComponentInterface';
+import { defineComponent } from 'vue';
 
-
-  @Component
-  export default class OutputListOption extends Vue {
-
-
-    @Prop({ type: Object })
-    option!: INodeOption|INodeInterface;
-
-    public title = "";
-    public items = new Array<string>;
-
+  export default defineComponent ({
+    props: {
+      intf: {
+            type: Object as () => ComponentInterface,
+            required: true,
+        },
+    },
+    data() {
+      return {
+        title :"",
+        items : new Array<string>
+      }
+    },  
     mounted()
     {
-      console.log("mounting");
-      this.items = this.option.items || [];
-      this.title = this.option.title || "Outputs:"
+      this.title = this.intf.data.title;
+      this.items = this.intf.data.items;
     }
-  }
+  })
   </script>
  

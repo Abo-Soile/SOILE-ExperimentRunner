@@ -4,30 +4,28 @@ export const useErrorStore = defineStore({
     id: 'errors',
     state: () => ({
         // initialize state from local storage to enable user to stay logged in
-        errors: {},   
+        errors: [],   
         latestError:{}     
     }),
     actions: {
-        raiseError(errorClass, message) {
-            if(!errorClass)
-            {
-                errorClass = 500
-            }
+        raiseError(severity, message) {
             if(!message)
             {
                 message = "Unknown error"
             }
-            if(!isNaN(errorClass))        
+            this.errors.push({severity: severity, message: message, timestamp: new Date()});
+            this.latestError = {message : message, severity: severity, timestamp: new Date()}
+            console.log(severity, message)
+        },
+        getReason(errorCode)
+        {
+            if(!isNaN(errorCode))        
             {
-                errorClass = getReasonPhrase(errorClass);
+                return getReasonPhrase(errorCode);
             }
-            if(!this.errors[errorClass])
-            {
-                this.errors[errorClass] = [];
+            else{
+                return "Unknown Error"
             }
-            this.errors[errorClass].push({message: message, timestamp: new Date()});
-            this.latestError = {message : message, class: errorClass}
-            console.log(errorClass, message)
         },
         clearErrors()
         {

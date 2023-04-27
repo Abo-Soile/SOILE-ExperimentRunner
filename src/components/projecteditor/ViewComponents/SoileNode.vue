@@ -1,253 +1,163 @@
 <template>
-    <div :id="node.id" :class="classes" :style="styles">
-        <div class="__title" @mousedown.self.stop="startDrag" @contextmenu.self.prevent="openContextMenu">
-            <span v-if="!renaming">{{ node.name }}</span>
+    <div
+        :id="node.id"
+        ref="el"
+        class="baklava-node"
+        :class="classes"
+        :style="styles"
+        :data-node-type="node.type"
+        @pointerdown="select"
+    >
+        <div class="__title" @pointerdown.self.stop="startDrag">
+            <template v-if="!renaming">
+                <div class="__title-label">
+                    {{ node.title }}
+                </div>
+                <div class="__menu">
+                    <vertical-dots class="--clickable" @click="openContextMenu" />
+                    <context-menu
+                        v-model="showContextMenu"
+                        :x="0"
+                        :y="0"
+                        :items="contextMenuItems"
+                        @click="onContextMenuClick"
+                    />
+                </div>
+            </template>
             <input
                 v-else
-                type="text"
-                class="dark-input"
+                ref="renameInputEl"
                 v-model="tempName"
+                type="text"
+                class="baklava-input"
                 placeholder="Node Name"
-                v-click-outside="doneRenaming"
+                @blur="doneRenaming"
                 @keydown.enter="doneRenaming"
             />
-
-            <component
-                :is="plugin.components.contextMenu"
-                v-model="contextMenu.show"
-                :x="contextMenu.x"
-                :y="contextMenu.y"
-                :items="contextMenu.items"
-                @click="onContextMenu"
-            ></component>
         </div>
 
         <div class="__content">
             <!-- Outputs -->
             <div class="__outputs">
-                <component
-                    :is="plugin.components.nodeInterface"
-                    v-for="(output, name) in node.outputInterfaces"
-                    :key="output.id"
-                    :name="name"
-                    :intf="output"
-                ></component>
-            </div>
-
-            <!-- Options -->
-            <div class="__options">
-                <template v-for="[name, option] in node.options" :key="name">
-                    <component
-                        :is="plugin.components.nodeOption"
-                        :name="name"
-                        :option="option"
-                        :componentName="option.optionComponent"
-                        :node="node"
-                        @openSidebar="openSidebar(name)"
-                    ></component>
-
-                    <teleport
-                        :key="'sb_' + name"
-                        to="#sidebar"
-                        v-if="
-                            plugin.sidebar.nodeId === node.id &&
-                            plugin.sidebar.optionName === name &&
-                            option.sidebarComponent
-                        "
-                    >
-                        <component
-                            :is="plugin.components.nodeOption"
-                            :key="node.id + name"
-                            :name="name"
-                            :option="option"
-                            :componentName="option.sidebarComponent"
-                            :node="node"
-                        ></component>
-                    </teleport>
-                </template>
+                <NodeInterface v-for="output in displayedOutputs" :key="output.id" :node="node" :intf="output" />
             </div>
 
             <!-- Inputs -->
             <div class="__inputs">
-                <component
-                    :is="plugin.components.nodeInterface"
-                    v-for="(input, name) in node.inputInterfaces"
-                    :key="input.id"
-                    :name="name"
-                    :intf="input"
-                ></component>
+                <NodeInterface v-for="input in displayedInputs" :key="input.id" :node="node" :intf="input" />
+            </div>
+            <div class="__options">
+                <NodeInterface v-for="option in displayedOptions" :key="option.id" :node="node" :intf="option" />
             </div>
         </div>
     </div>
 </template>
 
-<script lang="ts">
-import { Watch, Options, Vue, Prop, Inject } from "vue-property-decorator";
+<script setup lang="ts">
+import { ref, computed, toRef, nextTick, onUpdated, onMounted } from "vue";
+import { AbstractNode, GRAPH_NODE_TYPE_PREFIX, IGraphNode } from "@baklavajs/core";
+import { useDragMove, useGraph, useViewModel } from "@baklavajs/renderer-vue";
+import { Components, Icons } from "@baklavajs/renderer-vue";
+import { Node } from "@baklavajs/renderer-vue";
 
-// @ts-ignore
-import { IViewNode } from "@baklavajs/plugin-renderer-vue/dist/baklavajs-plugin-renderer-vue/types";
-import ClickOutside from "v-click-outside";
-import { ViewPlugin } from "@baklavajs/plugin-renderer-vue";
-import { OptionPlugin } from "@baklavajs/plugin-options-vue";
-import { sanitizeName } from "@baklavajs/plugin-renderer-vue/dist/baklavajs-plugin-renderer-vue/src/utility/cssNames";
-import { INodeInterface
- } from "@baklavajs/core/dist/baklavajs-core/types";
-interface IPosition {
-    x: number;
-    y: number;
-}
+import { useGraphStore } from "@/stores";
 
-@Options({
-    directives: {
-        ClickOutside: ClickOutside.directive,
-    },
+const graphStore = useGraphStore();
+const contextMenu = Components.ContextMenu;
+const VerticalDots = Icons.VerticalDots;
+const NodeInterface = Node.NodeInterface;
+
+const props = withDefaults(
+    defineProps<{
+        node: AbstractNode;
+        selected?: boolean;
+    }>(),
+    { selected: false },
+);
+const emit = defineEmits<{
+    (e: "select"): void;
+}>();
+const { viewModel } = useViewModel();
+const { graph, switchGraph } = useGraph();
+const dragMove = useDragMove(toRef(props.node, "position"));
+const el = ref<HTMLElement | null>(null);
+const renaming = ref(false);
+const tempName = ref("");
+const renameInputEl = ref<HTMLInputElement | null>(null);
+const showContextMenu = ref(false);
+const contextMenuItems = computed(() => {
+    const items = [
+        { value: "rename", label: "Rename" },
+        { value: "delete", label: "Delete" },
+    ];
+    if (props.node.type.startsWith(GRAPH_NODE_TYPE_PREFIX)) {
+        items.push({ value: "editSubgraph", label: "Edit Subgraph" });
+    }
+    return items;
+});
+const classes = computed(() => ({
+    "--selected": props.selected,
+    "--dragging": dragMove.dragging.value,
+    "--two-column": !!props.node.twoColumn,
+}));
+const styles = computed(() => ({
+    top: `${props.node.position?.y ?? 0}px`,
+    left: `${props.node.position?.x ?? 0}px`,
+    width: `${props.node.width ?? 200}px`,
+}));
+const displayedInputs = computed(() => Object.values(props.node.inputs).filter((ni) => !ni.hidden && ni.port));
+const displayedOutputs = computed(() => Object.values(props.node.outputs).filter((ni) => !ni.hidden && ni.port));
+const displayedOptions = computed(() => 
+{
+    let inputOptions = Object.values(props.node.outputs).filter((ni) => !ni.hidden && !ni.port);
+    let outputOptions = Object.values(props.node.inputs).filter((ni) => !ni.hidden && !ni.port);    
+    return inputOptions.concat(outputOptions)
 })
-export default class NodeView extends Vue {
-    @Prop({ type: Object })
-    node!: IViewNode;
-
-    @Prop({ type: Boolean, default: false })
-    selected!: boolean;
-
-    @Inject()
-    plugin!: ViewPlugin;
-
-    @Inject()
-    selectedNodeViews!: NodeView[];
-
-    draggingStartPosition: IPosition | null = null;
-    draggingStartPoint: IPosition | null = null;
-    renaming = false;
-    tempName = "";
-
-    contextMenu = {
-        show: false,
-        x: 0,
-        y: 0,
-        items: [
-            { value: "rename", label: "Rename" },
-            { value: "delete", label: "Delete" },
-        ],
-    };
-
-    get classes() {
-        return {
-            "node": true,
-            "--selected": this.selected,
-            "--dragging": !!this.draggingStartPoint,
-            "--two-column": !!this.node.twoColumn,
-            [`--type-${sanitizeName(this.node.type)}`]: true,
-            [this.node.customClasses]: true,
-        };
+const select = () => {
+    emit("select");
+};
+const startDrag = (ev: PointerEvent) => {
+    dragMove.onPointerDown(ev);
+    document.addEventListener("pointermove", dragMove.onPointerMove);
+    document.addEventListener("pointerup", stopDrag);
+    select();
+};
+const stopDrag = () => {
+    dragMove.onPointerUp();
+    document.removeEventListener("pointermove", dragMove.onPointerMove);
+    document.removeEventListener("pointerup", stopDrag);
+};
+const openContextMenu = () => {
+    showContextMenu.value = true;
+};
+const onContextMenuClick = async (action: string) => {
+    switch (action) {
+        case "delete":
+            graph.value.removeNode(props.node);
+            break;
+        case "rename":
+            tempName.value = props.node.title;
+            renaming.value = true;
+            await nextTick();
+            renameInputEl.value?.focus();
+            break;
+        case "editSubgraph":
+            switchGraph((props.node as AbstractNode & IGraphNode).template);
+            break;
     }
-
-    get styles() {
-        return {
-            top: `${this.node.position.y}px`,
-            left: `${this.node.position.x}px`,
-            width: `${this.node.width}px`,
-        };
+};
+const doneRenaming = () => {
+    if(graphStore.isNameOk(props.node,tempName.value))
+    {        
+        props.node.title = tempName.value
     }
-
-    mounted() {
-        this.node.events.addInterface.addListener(this, () => this.update());
-        this.node.events.removeInterface.addListener(this, () => this.update());
-        this.node.events.addOption.addListener(this, () => this.update());
-        this.node.events.removeOption.addListener(this, () => this.update());
-        this.plugin.hooks.renderNode.execute(this);
+    renaming.value = false;
+};
+const onRender = () => {
+    if (el.value) {
+        viewModel.value.hooks.renderNode.execute({ node: props.node, el: el.value });
     }
-
-    updated() {
-        this.plugin.hooks.renderNode.execute(this);
-    }
-
-    beforeDestroy() {
-        this.node.events.addInterface.removeListener(this);
-        this.node.events.removeInterface.removeListener(this);
-        this.node.events.addOption.removeListener(this);
-        this.node.events.removeOption.removeListener(this);
-    }
-
-    update() {
-        this.$forceUpdate();
-    }
-
-    @Watch('count', { deep: true })
-    onCountChanged(newValue: {outputInterfaces : [] }, oldValue: { outputInterfaces : [] }) {
-        outputInterfaces
-    }
-    startDrag(ev: MouseEvent) {
-        this.select();
-
-        if (this.selectedNodeViews.length === 0 || this.selectedNodeViews[0] === undefined) {
-            this.selectedNodeViews.splice(0, this.selectedNodeViews.length);
-            this.selectedNodeViews.push(this);
-        }
-
-        this.selectedNodeViews.forEach((elem: any) => {
-            elem.draggingStartPoint = {
-                  x: ev.screenX,
-                  y: ev.screenY,
-            };
-            elem.draggingStartPosition = {
-                  x: elem.node.position.x,
-                  y: elem.node.position.y,
-            };
-            document.addEventListener("mousemove", elem.handleMove);
-            document.addEventListener("mouseup", elem.stopDrag);
-        });
-    }
-
-    select() {
-        this.$emit("select", this);
-    }
-
-    stopDrag() {
-        this.selectedNodeViews.forEach((elem: any) => {
-            elem.draggingStartPoint = null;
-            elem.draggingStartPosition = null;
-            document.removeEventListener("mousemove", elem.handleMove);
-            document.removeEventListener("mouseup", elem.stopDrag);
-        });
-    }
-
-    handleMove(ev: MouseEvent) {
-        this.selectedNodeViews.forEach((elem: any) => {
-            if (elem.draggingStartPoint) {
-                const dx = ev.screenX - elem.draggingStartPoint.x;
-                const dy = ev.screenY - elem.draggingStartPoint.y;
-                elem.node.position.x = elem.draggingStartPosition.x + dx / elem.plugin.scaling;
-                elem.node.position.y = elem.draggingStartPosition.y + dy / elem.plugin.scaling;
-            }
-        });
-    }
-
-    openContextMenu(ev: MouseEvent) {
-        this.contextMenu.show = true;
-        this.contextMenu.x = ev.offsetX;
-        this.contextMenu.y = ev.offsetY;
-    }
-
-    onContextMenu(action: string) {
-        switch (action) {
-            case "delete":
-                this.plugin.editor.removeNode(this.node);
-                break;
-            case "rename":
-                this.tempName = this.node.name;
-                this.renaming = true;
-        }
-    }
-
-    doneRenaming() {
-        this.node.name = this.tempName;
-        this.renaming = false;
-    }
-
-    openSidebar(optionName: string) {
-        this.plugin.sidebar.nodeId = this.node.id;
-        this.plugin.sidebar.optionName = optionName;
-        this.plugin.sidebar.visible = true;
-    }
-}
+};
+onMounted(onRender);
+onUpdated(onRender);
 </script>

@@ -1,0 +1,3 @@
+export { default as SideBarButton } from "./SideBarButton.vue"
+export { default as TaskSideBarOption } from "./TaskSideBarOption.vue"
+export { default as FilterSideBarOption } from "./FilterSideBarOption.vue"

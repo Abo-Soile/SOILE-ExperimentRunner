@@ -1,25 +1,27 @@
 <template>
-    <ProjectEditor></ProjectEditor>
+    <Editor></Editor>
 </template>
   
 <script>
-import axios from 'axios';
-import ProjectEditor from '../components/projecteditor/ProjectEditor.vue';
-import { mapState } from 'pinia'
-import { useErrorStore } from '@/stores';
-import { useUserStore } from '@/stores';
+import Editor from '@/components/projecteditor/Editor.vue';
 
 
 export default {
-
+    
     name: 'ResearcherView',
-    components: { ProjectEditor },
+    components: { Editor },
     data() {
         return {
             code: undefined,
-            running: false
+            running: false,
+            currentTabs: []
         }
     },    
+    mounted()
+    {
+
+    },
+
 }
 </script>
   

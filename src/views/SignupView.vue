@@ -10,20 +10,20 @@
                 <h4> Note this token carfully as it is needed to continue if you quit your current execution.</h4>
             </div>
             <router-link :to="'/exp/'+selectedProject.uuid + '/' + userStore.currentTaskSettings.id + '/'" custom v-slot="{ navigate }" @click="startProject(selectedProject.uuid)">
-                <b-button v-if="justSignedUp[selectedProject.uuid]" @click="navigate" role="link">Start project</b-button>
-                <b-button v-else @click="navigate" role="link">Continue project</b-button>
+                <Button v-if="justSignedUp[selectedProject.uuid]" @click="navigate" role="link">Start project</Button>
+                <Button v-else @click="navigate" role="link">Continue project</Button>
             </router-link>
         </div>
         <div v-else>
-            <b-button v-if="authStore.user" @click="signUp()">Sign up as user</b-button>
-            <b-button v-else @click="signUp()">Sign up</b-button>
+            <Button v-if="authStore.user" @click="signUp()">Sign up as user</Button>
+            <Button v-else @click="signUp()">Sign up</Button>
         </div>
     </div>
     <router-link v-else to="/">Back to Start</router-link>
 </template>
 
 <script setup>
-
+import Button from 'primevue/button';
 import { useProjectStore, useAuthStore, useUserStore } from '@/stores';
 import { storeToRefs } from 'pinia';
 import { onMounted, watch } from 'vue';
@@ -62,7 +62,10 @@ watch(projectStore.selectedProject, async (newID) => {
 onMounted( async () => {
     console.log("Signup Mounted: ")
     console.log(projectStore.selectedProject)
-    await userStore.updateTaskSettings(projectStore.selectedProject.uuid);
+    if(authStore.authed)
+    {
+        await userStore.updateTaskSettings(projectStore.selectedProject.uuid);
+    }
 })
 
 

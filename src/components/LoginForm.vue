@@ -1,65 +1,64 @@
-<template> 
-<b-dropdown-form @submit.prevent="submitForm" ref="loginForm">
-    <b-form-group label="Username or Email" label-for="dropdown-form-email" @submit.stop.prevent>
-      <b-form-input
-        id="dropdown-form-email"
-        size="sm"
-        v-model="form.nameOrEmail"
-        placeholder="email@example.com"
-        ref="nameOrEmail"
-        required
-      ></b-form-input>
-    </b-form-group>
-
-    <b-form-group label="Password" label-for="dropdown-form-password" @submit.stop.prevent>
-      <b-form-input
-        id="dropdown-form-password"
-        type="password"
-        v-model="form.password"
-        size="sm"
-        placeholder="Password"
-        ref="password"
-        required
-      ></b-form-input>
-    </b-form-group>
-
-    <b-form-checkbox v-model="form.rememberMe" class="mb-3">Remember me</b-form-checkbox>
-    <b-button type="submit" variant="primary" size="sm" >Sign In</b-button>
-  </b-dropdown-form>
+<template>
+  <div>      
+      <form @submit.prevent="submitForm">
+        <div class="p-fluid">
+          <div class="p-field">
+            <label for="username">Username</label>
+            <InputText id="username" v-model="username" />
+          </div>
+          <div class="p-field">
+            <label for="password">Password</label>
+            <Password id="password" :feedback="false" v-model="password" />
+          </div>
+          <div class="p-field-checkbox">
+            <label for="rememberMe">Remember Me</label>
+            <Checkbox v-model="rememberMe" :binary="true" name="rememberMe" label="Remember Me"  />
+          </div>
+          <div class="p-field">
+            <Button type="submit" label="Log in" class="p-button-success" />
+          </div>
+        </div>
+      </form>    
+  </div>
 </template>
 
 <script>
-import { useAuthStore } from '@/stores/auth';
+import  Card  from 'primevue/card';
+import  InputText  from 'primevue/inputtext';
+import  Password  from 'primevue/password';
+import  Checkbox  from 'primevue/checkbox';
+import  Button  from 'primevue/button';
+import { useAuthStore } from '../stores';
 
 export default {
-    name: 'DropDownLoginForm',
-    data() {
-        return {
 
-         form: {
-            nameOrEmail: "",
-            password: "",
-            rememberMe: false
-        }
-        }
-    }, 
-    methods: {
-      async submitForm()
-      {
-        const authStore = useAuthStore();
-        await authStore.login(this.form.nameOrEmail, this.form.password, this.form.rememberMe ? '1' : '');        
-        this.$emit("collapse");
-        this.resetData();
-      },
-      resetData()
-      {
-        this.form.nameOrEmail = "",
-        this.form.password = "",
-        this.form.rememberMe = false
-        
+  components: {
+    Card,
+    InputText,
+    Password,
+    Checkbox,
+    Button,
+  },
+  data() {
+    return {
+      username: '',
+      password: '',
+      rememberMe: false,
+    };
+  },
+  setup()
+    {
+      const authStore = useAuthStore();
+      return {
+        login : authStore.login,        
       }
-      
-    }
+    },
   
-  }
-  </script>
+  methods: {
+    async submitForm() {
+      await this.login(this.username, this.password, this.rememberMe );
+      this.$emit("submitted")
+    },
+  },
+};
+</script>

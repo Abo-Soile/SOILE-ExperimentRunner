@@ -1,38 +1,63 @@
-import { Node } from "@baklavajs/core";
 import { v4 as uuidv4 } from 'uuid'
+import { INodeState, NodeInterface } from "@baklavajs/core";
+import { allowMultipleConnections } from "@baklavajs/engine"
+import { FilterSideBarOption, SideBarButton } from "../NodeOptions"
+import { markRaw } from "vue";
+import { displayInSideBar } from "./utilities";
+import { DynamicNode } from "@baklavajs/core";
+import { ComponentInterface } from '../NodeInterfaces/ComponentInterface';
+import { useGraphStore } from "@/stores";
 
-export default class FilterNode extends Node {
-  public type = "FilterNodeNode";
-  public name = "Filter";
-  Filters = new Map<string,string>
 
-  constructor() {
-    super();    
-    this.twoColumn = true;
-    this.name = "Filter" + uuidv4();
-    this.addInputInterface("Previous", null, null, { twoColumn: true });
-    this.getInterface("Previous").value =  {type: "InputConnection", value: this.name};
-    this.updateEdit();
-    console.log("Generated Node")
-    console.log(this);
+export default class FilterNode extends DynamicNode<I,O> {
+  public type = "FilterNode";
+  public name = "Filter";  
+  public twoColumn = true;  
+  myTitle = this.type;
+  graphStore = useGraphStore();
+
+  public set title( newTitle : string)
+  {
+    if(this.graphStore.isNameOk(this,newTitle))
+    {      
+      this.myTitle = this.graphStore.updateName(this,this.myTitle,newTitle);
+    }
+  }
+  public get title() : string
+  {
+    return this.myTitle;
   }
 
-  public load(state) {
-    super.load(state);
+  Filters = new Map<string,string>  
+  
+  public inputs = {
+    previous: new NodeInterface("Previous", []).use(allowMultipleConnections),
+    edit: new NodeInterface("Edit", undefined).setComponent(markRaw(SideBarButton)).setPort(false),
+    sideBarOption1: new ComponentInterface<FilterNode>("SideBar", this, FilterSideBarOption).setHidden(true).use(displayInSideBar, true).setPort(false)
+  };
+
+  public outputs = {    
+  };
+
+  constructor() {
+    super();      
+    this.initializeIo();
   }
 
   public addFilter(name: string, filterString: string)
   {
     //this.addOption(outputName, "TextOption");
     this.Filters.set(name,filterString);
-    this.addOutputInterface(name, { twoColumn: true });
-    this.getInterface(name).value = {type: "OutputConnection", value: name};
+    this.addOutput(name, new NodeInterface(name, "OutputConnection") );    
+
   }
   public removeFilter(name: string)
   {
-    console.log()
+    console.log("Removing filter: " + name)
     //this.removeOption(outputName);
-    this.removeInterface(name);
+    const success = this.removeOutput(name);
+    console.log(success)
+    console.log(this.outputs)
     this.Filters.delete(name);
 
   }
@@ -40,9 +65,27 @@ export default class FilterNode extends Node {
   {
     return this.Filters;
   }
-  updateEdit()
+
+  load(state: INodeState<any, any>): void {
+      console.log(state);
+  }
+  onPlaced(): void {
+    this.graphStore.setupNode(this);
+    if(this.title === this.type)
+    {
+      console.log("Getting unique name")
+      this.myTitle = this.graphStore.getUniqueName(this);
+    }
+  }
+  onUpdate()
   {
-    this.removeOption("Edit")
-    this.addOption("Edit", "ButtonOption",() => this,"FilterSideBarOption");        
+    return {
+             inputs: this.inputs,
+             outputs: this.outputs
+            }
+  }
+  onDestroy()
+  {
+    this.graphStore.removeNode(this);
   }
 }

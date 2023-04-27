@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia';
+import { useErrorStore } from './errors';
 
 import axios from 'axios';
 
@@ -24,10 +25,16 @@ export const useUserStore = defineStore({
             }
         },
         processAxiosError(err) {
-            //const errorStore = useErrorStore()
+            const errorStore = useErrorStore()
             console.log(err);
-            throw (err)
-            //errorStore.raiseError(err.response?.status, err.response?.data)
+            if(err.response?.status === 401 || err.response?.status === 403)
+            {
+                errorStore.raiseError("warn", "No Authorization or Authentication unsuccessful (code " + err.response?.status + ")")
+            }
+            else
+            {
+                errorStore.raiseError("danger", err.response?.message + "/" + errorStore.getReason(err.response?.status))
+            }            
         },
         setTaskActive()
         {

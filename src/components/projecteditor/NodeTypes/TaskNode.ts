@@ -1,66 +1,112 @@
-import { Node } from "@baklavajs/core";
+import { Node, NodeInterface, CalculateFunction } from "@baklavajs/core";
+import { TextInterface } from "@baklavajs/renderer-vue";
+import { allowMultipleConnections } from "@baklavajs/engine"
 import { v4 as uuidv4 } from 'uuid'
+import { SideBarButton, TaskSideBarOption } from "../NodeOptions"
+import { markRaw } from "vue";
+import { displayInSideBar } from "./utilities";
+import OutputListOption from "../NodeOptions/OutputListOption.vue";
+import { ComponentInterface } from "../NodeInterfaces/ComponentInterface";
+import axios from 'axios'
+import { InputInterface } from "../NodeInterfaces/InputInterface";
+import { useGraphStore } from "@/stores/graph";
+interface Inputs {
+  previous: any[];
+}
+
+interface Outputs {
+  next: string;
+}
 
 
-export default class TaskNode extends Node {
+
+export default class TaskNode extends Node<Inputs,Outputs> {
   public type = "TaskNode";
-  public name = "Task";
-  twoColumn = true;
-  outputs = new Array<string>;
-
-  constructor() {
-    super();    
-    this.name = "Task" + uuidv4();
-    this.addInputInterface("Previous",null, null, { twoColumn: true, maxConnections: Infinity});
-    this.getInterface("Previous").value =  {type: "InputConnection", value: this.name};
-    this.addOutputInterface("Next", { twoColumn: true, maxConnections: 1});
-    this.getInterface("Next").value =  {type: "OutputConnection", value: this.name};
-    this.addOption("Outputs", "OutputListOption",undefined, undefined, {items : this.outputs, title: "Outputs:"});        
-    this.updateEdit();
-    console.log("Generated Node")
-    console.log(this);
-  }
-
-  public load(state) {
-    super.load(state);
-  }
-
-  calculate() {    
-
-
-  }
-
-  public addOutput(outputName: string)
+  myTitle = this.type;
+  public set title( newTitle : string)
   {
-    //this.addOption(outputName, "TextOption");
-    this.outputs.push(outputName);
-    if(this.outputs.length == 1)
-    {
-      this.updateEdit();
+    console.log("Setting title")
+    if(this.graphStore.isNameOk(this,newTitle))
+    {      
+      console.log("updating title to" + newTitle);
+       const changedTitle = this.graphStore.updateName(this,this.myTitle,newTitle);
+       console.log("The changed Title is" + changedTitle);
+       this.myTitle = changedTitle
     }
-    //this.addOutputInterface(outputName);
-    //this.getInterface(outputName).value = {type: "Output", value: this.name + "." + outputName};
   }
-  public printStatus()
+  public get title() : string
   {
-    console.log("YeeHaw");
-    console.log(this)
-  }
-  public removeOutput(outputName: string)
-  {
-    console.log()
-    //this.removeOption(outputName);
-    this.outputs.splice(this.outputs.indexOf(outputName),1)
-    //this.removeInterface(outputName);
-  }
-  public getOutputs()
-  {
-    return this.outputs;
+    return this.myTitle;
   }
 
-  updateEdit()
+
+  public twoColumn = true;
+  public taskOutputs = new Array<string>;  
+  public task = {uuid : "", name: "", version: "", tag: "", type: ""}
+  public graphStore = useGraphStore();
+  public inputs = {
+    previous: new InputInterface("Previous", "InputConnection").use(allowMultipleConnections),
+    type: new TextInterface("TaskType", "Type: " + this.task.type).setPort(false),
+    taskInformation: new TextInterface("TaskInformation", "Task: " + (this.task.name != "" ? this.task.name + "@" + this.task.tag : "") ).setPort(false),
+    outputs: new ComponentInterface("Outputs", { items: this.taskOutputs, title: "Outputs" }, OutputListOption).setPort(false),
+    edit: new NodeInterface("Edit", undefined).setComponent(markRaw(SideBarButton)).setPort(false),
+    sideBarOption1: new ComponentInterface("SideBar", this, TaskSideBarOption).setHidden(true).use(displayInSideBar, true).setPort(false)
+  };
+
+  isValid(){
+    return this.task.uuid != "" && this.task.version != "";
+  }
+
+  public outputs = {
+    next: new NodeInterface("Next", "OutputConnection"),
+  };
+
+  public constructor() {
+    super();
+    this.id = "Task " + uuidv4();
+    this.initializeIo();
+  }
+
+  public getOutputs() {
+    return this.taskOutputs;
+  }
+  public addTaskOutput(outputName: string) {
+    this.graphStore.addOutput(this, outputName);
+  }
+  public removeTaskOutput(outputName: string) {
+    console.log()
+    this.taskOutputs.splice(this.taskOutputs.indexOf(outputName), 1)
+  }
+
+  public calculate: CalculateFunction<Inputs, Outputs> = ({ previous }) => {
+    if (previous.length > 0) {
+      console.log(previous)
+      console.log(this.inputs.previous)
+    }
+    return { next: this.id };
+  }
+
+  public setTaskInformation(data : { uuid: string, name: string})
   {
-    this.removeOption("Edit")
-    this.addOption("Edit", "ButtonOption",() => this,"TaskSideBarOption");        
+    this.task.uuid = data.uuid;
+    this.task.name = data.name;
+    this.inputs.taskInformation.value = "Task: " + (this.task.name != "" ? this.task.name + "@" + this.task.tag : "")
+  }
+  public setTaskVersion(version : string, tag : string)
+  {
+    this.task.version = version;   
+    this.task.tag = tag; 
+    this.inputs.taskInformation.value = "Task: " + (this.task.name != "" ? this.task.name + "@" + this.task.tag : "")
+  }
+  onPlaced(): void {
+    this.graphStore.setupNode(this);
+    if(this.title == this.type)
+    {
+      this.myTitle = this.graphStore.getUniqueName(this);
+    }
+  }
+  onDestroy()
+  {
+    this.graphStore.removeNode(this);
   }
 }

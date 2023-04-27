@@ -17,24 +17,26 @@
         <!--<JsRunner v-if="type == 'javascript'"></JSRunner>-->
     </div>
     <div v-else>
-        <b-button @click="setTaskActive">Start Task</b-button>
+        <Button @click="setTaskActive">Start Task</Button>
     </div>
 </template>
   
 <script>
 import axios from 'axios';
-import SoileQuestionnaire from '../components/questionaire/SoileQuestionnaire.vue';
+import SoileQuestionnaire from '../components/questionnaire/SoileQuestionnaire.vue';
 import SoileExpRunner from '../components/experimentlang/SoileExpRunner.vue';
 import PsychoJsRunner from '../components/psychopy/PsychoJsRunner.vue';
 import { mapState } from 'pinia'
 import { useErrorStore } from '@/stores';
-import { useUserStore } from '@/stores';
+import { useUserStore } from '@/stores/users';
+import Button from 'primevue/button';
 
+console.log(useUserStore)
 
 export default {
 
     name: 'ExperimentView',
-    components: { SoileQuestionnaire, SoileExpRunner, PsychoJsRunner },
+    components: { SoileQuestionnaire, SoileExpRunner, PsychoJsRunner, Button },
     data() {
         return {
             code: undefined,
@@ -47,7 +49,7 @@ export default {
          */
         setTaskActive()
         {
-            console.log("Activatig task")
+            console.log("Activating task")
             const userStore = useUserStore();
             userStore.setTaskActive()
         },

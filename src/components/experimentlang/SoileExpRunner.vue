@@ -130,6 +130,8 @@ export default {
   },
   mounted() {
     console.log("Mounting soile with code: ")
+    if(typeof this.code === 'string')
+    {
     console.log(this.code);    
     window.SOILE2 = SOILE2;
     this.active = true;
@@ -140,7 +142,8 @@ export default {
     }
     this.startSoile(this.code);
     //console.log(window.testJS)        
-   
+    }
+
   }
 }
 </script>
