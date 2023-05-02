@@ -8,4 +8,4 @@ export interface TaskVersion
 {
     version: string,
     tag: string
-}
+} 

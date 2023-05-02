@@ -1,10 +1,15 @@
 <template>
-    <div style="height: 100vh; width: 100vw" @oncontextmenu="parseEvent()">
+    <div style="height:100%"  @oncontextmenu="parseEvent()">
         <baklava-editor :view-model="baklava" >
             <template #node="nodeProps">
             <SoileNode v-if="isSoileNode(nodeProps.node.type)" v-bind="nodeProps" />
             <BaklavaNode v-else v-bind="nodeProps" />
         </template>
+            <template #toolbar="toolbarProps">    
+                <div class="baklava-toolbar"> 
+                    <button class="baklava-button" @click="saveProject()"> <component :is="saveIcon" /> </button>                   
+                </div>            
+            </template>
         </baklava-editor>
     </div>
 </template>
@@ -15,7 +20,7 @@ import { defineComponent } from "vue";
 import { EditorComponent, useBaklava } from "@baklavajs/renderer-vue";
 import TaskNode from "./NodeTypes/TaskNode";
 import FilterNode from "./NodeTypes/FilterNode";
-import { Components } from "@baklavajs/renderer-vue";
+import { Components, Icons } from "@baklavajs/renderer-vue";
 import "@baklavajs/themes/dist/syrup-dark.css";
 const BaklavaNode = Components.Node;
 import { DependencyEngine } from "@baklavajs/engine";
@@ -31,7 +36,7 @@ export default {
     },
     data() {
         return {
-            
+            saveIcon: Icons.DeviceFloppy
         };
     },
     
@@ -67,7 +72,7 @@ export default {
         },
         saveProject()
         {
-            console.log(this.editor.save());
+            console.log(this.baklava.editor.save());
         },
         loadProject()
         {
@@ -89,3 +94,4 @@ export default {
     top: 85%;
 }
 </style>
+

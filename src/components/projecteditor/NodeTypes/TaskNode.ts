@@ -1,4 +1,4 @@
-import { Node, NodeInterface, CalculateFunction } from "@baklavajs/core";
+import { Node, NodeInterface, CalculateFunction, INodeState, NodeInterfaceDefinitionStates } from "@baklavajs/core";
 import { TextInterface } from "@baklavajs/renderer-vue";
 import { allowMultipleConnections } from "@baklavajs/engine"
 import { v4 as uuidv4 } from 'uuid'
@@ -10,6 +10,8 @@ import { ComponentInterface } from "../NodeInterfaces/ComponentInterface";
 import axios from 'axios'
 import { InputInterface } from "../NodeInterfaces/InputInterface";
 import { useGraphStore } from "@/stores/graph";
+import { mapValues } from '../utils/utils.ts';
+import { SoileNodeState } from "./SoileNodeState";
 interface Inputs {
   previous: any[];
 }
@@ -109,4 +111,24 @@ export default class TaskNode extends Node<Inputs,Outputs> {
   {
     this.graphStore.removeNode(this);
   }
+  
+
+  public save(): INodeState<any,any> {
+    
+    const inputStates = mapValues(this.inputs, (intf) => intf.save()) as NodeInterfaceDefinitionStates<any>;
+    const outputStates = mapValues(this.outputs, (intf) => intf.save()) as NodeInterfaceDefinitionStates<any>;
+
+    const state: SoileNodeState<any, any> = {
+        type: this.type,
+        id: this.id,
+        title: this.title,
+        inputs: inputStates,
+        outputs: outputStates,    
+        taskOutputs: this.taskOutputs    
+    };
+
+    return this.hooks.afterSave.execute(state);
+}
+
+
 }

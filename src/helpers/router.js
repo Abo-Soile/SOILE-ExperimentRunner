@@ -1,7 +1,9 @@
-import VueRouter from 'vue-router'
-
-import { ExperimentView, WelcomeView, SignupView ,ResearcherView } from '@/views';
-
+import { createRouter, createWebHistory } from 'vue-router';
+import { ExperimentView } from '@/views';
+import { WelcomeView } from '@/views';
+import { SignupView }  from '@/views';
+import { ManagementView } from '@/views';
+import { useUserStore } from '@/stores/users';
 
 const routes = [
     {
@@ -11,8 +13,8 @@ const routes = [
     },
     {
         path: '/management',
-        name: 'Welcome',
-        component: ResearcherView
+        name: 'ManagementView',
+        component: ManagementView
     },
     {
         path: '/exp/:id/:taskID/',        
@@ -28,8 +30,15 @@ const routes = [
     }
 ]
 
-
-export const router = new VueRouter({
-    mode: 'history',    
+export const router = createRouter({
+    history: createWebHistory(import.meta.env.BASE_URL),
+    linkActiveClass: 'active',
     routes: routes
+});
+
+router.beforeEach(async (to) => {
+    // redirect to login page if not logged in and trying to access a restricted page
+    const userStore = useUserStore();
+    // regardless on where we are, we are NOt currently running a task.
+    userStore.setTaskNotRunning();
 });

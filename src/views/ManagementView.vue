@@ -12,9 +12,11 @@
               <template #header>
                 <span> {{ experiment.name }} </span>
                 <Button icon="pi pi-cog" @click="changeExperiment(index)" />
-                <Button icon="pi pi-times" @click="closeTab(index, experiments)" />                
+                <Button icon="pi pi-times" @click="closeTab(index, experiments)" />
               </template>
-              <Editor name="experiment.name"></Editor>
+              <div style="width:100%; height:80vh">
+                <Editor name="experiment.name"></Editor>
+              </div>
             </TabPanel>
           </TabView>
         </TabPanel>
@@ -24,21 +26,23 @@
               <template #header>
                 <span> {{ task.name }} </span>
                 <Button icon="pi pi-cog" @click="changeTask(index)" />
-                <Button icon="pi pi-times" @click="closeTab(index, tasks)" />                
+                <Button icon="pi pi-times" @click="closeTab(index, tasks)" />
               </template>
             </TabPanel>
           </TabView>
           <!-- Content for the Tasks tab goes here -->
         </TabPanel>
         <TabPanel v-if="projects.elements.length > 0" header="Projects">
-          <TabView  v-model:activeIndex="projects.active">
+          <TabView v-model:activeIndex="projects.active">
             <TabPanel v-for="(project, index) in projects.elements">
               <template #header>
                 <span> {{ project.name }} </span>
                 <Button icon="pi pi-cog" @click="changeProject(index)" />
-                <Button icon="pi pi-times" @click="closeTab(index, projects)" />                
+                <Button icon="pi pi-times" @click="closeTab(index, projects)" />
               </template>
-              <Editor name="project.name"></Editor>
+              <div style="width:100%; height:80vh">
+                <Editor name="project.name"></Editor>
+              </div>
               <!-- Content for Sub-Tab 1 goes here -->
             </TabPanel>
           </TabView>
@@ -46,14 +50,8 @@
         </TabPanel>
       </TabView>
     </div>
-    <ConfirmDialog 
-    :target=currentTarget 
-    message="Are you sure you want to close this? All unsaved changes will be lost" 
-    reject="Cancel"
-    :isVisible=showConfirm 
-    @confirm="confirmation(true)"
-    @reject="confirmation(false)"
-    />
+    <ConfirmDialog :target=currentTarget message="Are you sure you want to close this? All unsaved changes will be lost"
+      reject="Cancel" :isVisible=showConfirm @confirm="confirmation(true)" @reject="confirmation(false)" />
   </div>
 </template>
   
@@ -69,17 +67,17 @@ import { useGraphStore } from "@/stores/graph.ts";
 import { ref, computed, reactive } from "vue";
 import ConfirmDialog from '@/components/dialogs/ConfirmDialog.vue';
 
-const experiments = reactive({ active: 0, elements: []});
-const projects = reactive({ active: 0, elements: []});
-const tasks = reactive({ active: 0, elements: []});
+const experiments = reactive({ active: 0, elements: [] });
+const projects = reactive({ active: 0, elements: [] });
+const tasks = reactive({ active: 0, elements: [] });
 const graphStore = useGraphStore();
 const currentTarget = ref({});
 const showConfirm = ref(false);
-function createElement(prefix, element) {  
+function createElement(prefix, element) {
   const existentNames = element.elements.map((x) => x.name)
   const name = uniqueID(prefix, existentNames);
-  element.elements.push({name: name});
-  element.active = element.elements.length -1;
+  element.elements.push({ name: name });
+  element.active = element.elements.length - 1;
 }
 
 function uniqueID(prefix, existing) {
@@ -91,24 +89,22 @@ function uniqueID(prefix, existing) {
   return prefix + " " + i;
 }
 
-function closeTab (index, target) {
+function closeTab(index, target) {
   console.log("Trying to close tab")
   console.log(currentTarget)
-    console.log("Could set target")
-    currentTarget.value = {index: index, target: target};
-    showConfirm.value = true;      
+  console.log("Could set target")
+  currentTarget.value = { index: index, target: target };
+  showConfirm.value = true;
 }
-function tabSelected (index, target) {
-  console.log("Selected tab " + index)  
+function tabSelected(index, target) {
+  console.log("Selected tab " + index)
 }
-function confirmation(close)
-{
+function confirmation(close) {
   console.log("Getting confirmation with value " + close)
   console.log(currentTarget)
-  if(close)
-  {
-    currentTarget.value.target.elements.splice(currentTarget.value.index,1);  
-    currentTarget.value.active = currentTarget.value.index -1;
+  if (close) {
+    currentTarget.value.target.elements.splice(currentTarget.value.index, 1);
+    currentTarget.value.active = currentTarget.value.index - 1;
   }
   currentTarget.value = {};
   showConfirm.value = false;
@@ -167,7 +163,7 @@ const items = computed(() => [
       {
         label: 'Open',
         icon: 'pi pi-fw pi-folder-open'
-        
+
       },
     ]
   }

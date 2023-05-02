@@ -3,7 +3,9 @@ import TopNavBar from './components/TopNavbar.vue'
 import { storeToRefs } from 'pinia'
 import { useProjectStore, useErrorStore, useUserStore, useAuthStore } from '@/stores';
 import { watch } from 'vue';
-
+import { useToast } from "primevue/usetoast";
+import Toast from 'primevue/toast';
+const toastInstance = useToast();
 const errorStore = useErrorStore();
 const authStore = useAuthStore();
 const projectStore = useProjectStore();
@@ -13,34 +15,26 @@ projectStore.updateAvailableProjects();
 projectStore.fetchSignedUpProjects();
 const {errors, latestError} = storeToRefs(errorStore)
 const {isRunningTask} = storeToRefs(userStore)
-function showErrorToast(message, type)
+function showErrorToast(severity, message)
 {  
-  try {
-  $bvToast.toast(message, {
-          title: 'Issue with ' + type,
-          variant: 'danger',
-          solid: true
-        })
-      }
-      catch(error)
-      {
-        console.log("Issue with " + type + ": " + message )
-      }
+  console.log("Adding error Toast");
+  toastInstance.add({ severity : severity, detail: message, life: 3000 })
 }
 
 watch(latestError, (newError) => {
   console.log("Received new errror")
   if(newError)
   {
-    showErrorToast(newError.message,newError.class);
+    showErrorToast(newError.severity,newError.message);
   }
 })
 
 </script>
 <template>
-  <div>
-    <TopNavBar v-if="!isRunningTask"></TopNavBar>
+  <div class="mainapp">
+    <TopNavBar v-if="!isRunningTask">     
+    </TopNavBar>     
+    <Toast />   
     <router-view></router-view>
   </div>
 </template>
-
