@@ -1,17 +1,21 @@
 <template>
     <div>
-        <label for="experiment"> Select Task </label>
-        <DropDown :selected=currentTask @itemSelected="setExperiment" id="experiment" :options="availableExperiments"></DropDown>
+        <label for="experiment"> Select Experiment </label>
+        <DropDown :selected=currentExperiment @itemSelected="setExperiment" id="experiment" :options="availableExperiments"></DropDown>
         <div v-if="availableVersions.items.length != 0">
-            <label  for="taskVersion"> Select Task Version </label>
-            <DropDown @itemSelected="setExperimentVersion" :selected=currentVersion  id="taskVersion" :options="availableVersions"></DropDown>
+            <label  for="experimentVersion"> Select Experiment Version </label>
+            <DropDown @itemSelected="setExperimentVersion" :selected=currentVersion  id="experimentVersion" :options="availableVersions"></DropDown>
         </div>
-        <label for="addOutput">Add Outputs</label>
+        <!--<label for="addOutput">Add Outputs</label>
         <input class="baklava-input" type="text" :value=newOutput @input="event => newOutput = event.target.value" name="addOutput">
         <button class="baklava-button " @click="createOutput()"> Create output </button>
         <div v-for="output in currentOutputs">
             <label :for=output> {{ output }}</label>
             <button class="baklava-button " :name=output @click="removeOutput(output)"> Remove output </button>
+        </div>
+        -->
+        <div>
+            <button class="baklava-button " @click="editExperiment()">Edit experiment</button>
         </div>
     </div>
 </template>
@@ -22,16 +26,15 @@ import DropDown from "./DropDown.vue";
 import { SelectionItem } from "./DropDown.vue";
 import ExperimentNode from "../NodeTypes/ExperimentNode";
 import { ComponentInterface } from "../NodeInterfaces/ComponentInterface";
-import { useEditorStore, useErrorStore } from "@/stores";
-import { useGraphStore } from "@/stores/graph.ts";
+import { useEditorStore, useGraphStore, useElementStore, useErrorStore } from "@/stores";
 
-import axios from "axios";
+
 export default defineComponent({
 
     components: { DropDown },
     props: {
         intf: {
-            type: Object as () => ComponentInterface<TaskNode>,
+            type: Object as () => ComponentInterface<ExperimentNode>,
             required: true,
         },
     },
@@ -39,19 +42,19 @@ export default defineComponent({
         return {
             nodeID: "",
             newOutput: "", 
-            currentTask: { text: "",
+            currentExperiment: { text: "",
                             value: ""},
             currentVersion: { text: "",
                             value: ""},
-            taskVersions: [],
+            experimentVersions: [],
         }
     },
     setup()
     {
-        const projectStore = useEditorStore();
+        const elementStore = useElementStore();
         const graphStore = useGraphStore();
         const errorStore = useErrorStore();
-        return { projectStore, errorStore, graphStore }
+        return { elementStore: elementStore, errorStore, graphStore }
     },
     methods: {
         createOutput() {
@@ -97,14 +100,14 @@ export default defineComponent({
         availableExperiments()
         {
             return {
-                name: "Task Selection",
-                items: this.projectStore.availableExperiments.map((x : {name : string,  uuid: string}) => { return {value: x.uuid, text: x.name}} )
+                name: "Experiment Selection",
+                items: this.elementStore.availableExperiments.map((x : {name : string,  uuid: string}) => { return {value: x.uuid, text: x.name}} )
             }
         },
         availableVersions() : { items: SelectionItem[], name : string }
         {
             return {
-                name: "Task Versions",
+                name: "Experiment Versions",
                 items: this.experimentVersions.filter((x : { tag? : string}) => x.tag).map( (x : { tag: string, version: string }) => { return {value : x.version, text: x.tag }})
             }
         }
@@ -113,8 +116,8 @@ export default defineComponent({
     {
         async currentExperiment(newValue) 
         {
-            this.currentNode.setTaskInformation({uuid: newValue.value, name: newValue.text});                                    
-            this.taskVersions = await this.projectStore.getTaskOptions(newValue.value);            
+            this.currentNode.setExperimentInformation({uuid: newValue.value, name: newValue.text});                                    
+            this.experimentVersions = await this.elementStore.getExperimentOptions(newValue.value);            
             this.currentVersion = Object as () => SelectionItem
         },
         currentVersion(newValue)
@@ -124,7 +127,7 @@ export default defineComponent({
     },
     mounted() {
         console.log(this)
-        this.projectStore.updateAvailableExperiments();
+        this.elementStore.updateAvailableExperiments();
         this.nodeID = this.intf.id;            
     }
 })

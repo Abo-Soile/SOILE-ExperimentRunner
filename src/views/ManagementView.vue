@@ -5,43 +5,43 @@
       <!-- Left-hand toolbar goes here -->
     </div>
     <div class="content">
-      <TabView>
-        <TabPanel v-if="experiments.length > 0" header="Experiments">
-          <TabView v-model:activeIndex="activeExperiment">
-            <TabPanel v-for="(experiment, index) in experiments">
+      <TabView v-model:activeIndex="activeElement">
+        <TabPanel v-if="editorStore.experiments.elements.length > 0" header="Experiments">
+          <TabView v-model:activeIndex="editorStore.experiments.active">
+            <TabPanel v-for="(experiment, index) in editorStore.experiments.elements">
               <template #header>
                 <span> {{ experiment.name }} </span>
                 <Button icon="pi pi-cog" @click="changeExperiment(index)" />
-                <Button icon="pi pi-times" @click="closeTab(index, experiments)" />
+                <Button icon="pi pi-times" @click="closeTab(index, editorStore.experiments)" />
               </template>
               <div style="width:100%; height:80vh">
-                <Editor name="experiment.name"></Editor>
+                <Editor :isProjectEditor=false :data=experiment.data name="experiment.name"></Editor>
               </div>
             </TabPanel>
           </TabView>
         </TabPanel>
-        <TabPanel v-if="tasks.length > 0" header="Tasks">
-          <TabView v-model:ctiveIndex="activeTask">
-            <TabPanel v-for="(task, index) in tasks">
+        <TabPanel v-if="editorStore.tasks.elements.length > 0" header="Tasks">
+          <TabView v-model:activeIndex="editorStore.tasks.active">
+            <TabPanel v-for="(task, index) in editorStore.tasks.elements">
               <template #header>
                 <span> {{ task.name }} </span>
                 <Button icon="pi pi-cog" @click="changeTask(index)" />
-                <Button icon="pi pi-times" @click="closeTab(index, tasks)" />
+                <Button icon="pi pi-times" @click="closeTab(index, editorStore.tasks)" />
               </template>
             </TabPanel>
           </TabView>
           <!-- Content for the Tasks tab goes here -->
         </TabPanel>
-        <TabPanel v-if="projects.elements.length > 0" header="Projects">
-          <TabView v-model:activeIndex="projects.active">
-            <TabPanel v-for="(project, index) in projects.elements">
+        <TabPanel v-if="editorStore.projects.elements.length > 0" header="Projects">
+          <TabView v-model:activeIndex="editorStore.projects.active">
+            <TabPanel v-for="(project, index) in editorStore.projects.elements">
               <template #header>
                 <span> {{ project.name }} </span>
                 <Button icon="pi pi-cog" @click="changeProject(index)" />
-                <Button icon="pi pi-times" @click="closeTab(index, projects)" />
+                <Button icon="pi pi-times" @click="closeTab(index, editorStore.projects)" />
               </template>
               <div style="width:100%; height:80vh">
-                <Editor name="project.name"></Editor>
+                <Editor :isProjectEditor=true :data=project.data name="project.name"></Editor>
               </div>
               <!-- Content for Sub-Tab 1 goes here -->
             </TabPanel>
@@ -62,8 +62,7 @@ import TabPanel from 'primevue/tabpanel';
 import Button from 'primevue/button';
 import PanelMenu from 'primevue/panelmenu';
 import Editor from "@/components/projecteditor/Editor.vue"
-import { useGraphStore } from "@/stores/graph.ts";
-import { useEditorStore } from "@/stores/editing.js";
+import { useElementStore, useEditorStore } from "@/stores";
 
 
 import { ref, computed, reactive } from "vue";
@@ -71,31 +70,26 @@ import ConfirmDialog from '@/components/dialogs/ConfirmDialog.vue';
 import ObjectSelectionDialog from '../components/utils/ObjectSelectionDialog.vue';
 
 
+const elementStore = useElementStore();
 const editorStore = useEditorStore();
-const experiments = reactive({ active: 0, elements: [] });
-const projects = reactive({ active: 0, elements: [] });
-const tasks = reactive({ active: 0, elements: [] });
-const graphStore = useGraphStore();
+//const experiments = reactive({ active: 0, elements: [] });
+//const projects = reactive({ active: 0, elements: [] });
+//const editorStore.tasks = reactive({ active: 0, elements: [] });
 const currentTarget = ref({});
 const showConfirm = ref(false);
 const elementType = ref('');
 const showSelector = ref(false);
-function createElement(prefix, element) {
-  const existentNames = element.elements.map((x) => x.name)
-  const name = uniqueID(prefix, existentNames);
-  element.elements.push({ name: name });
-  element.active = element.elements.length - 1;
-}
-
-function uniqueID(prefix, existing) {
-  var i = 1;
-  // ugly but we need unique names.
-  while ([...existing.values()].some(v => v === prefix + " " + i)) {
-    i = i + 1;
+const activeElement = computed (() => {
+  const expOffset = editorStore.experiments.elements.length > 0 ? 1 : 0;
+  const taskOffset = editorStore.tasks.elements.length > 0 ? 1 : 0;
+  switch(editorStore.activeElement)
+  {
+    case "": return 0;
+    case "Task": return expOffset
+    case "Project": return expOffset + taskOffset
+    case "Experiment": return 0
   }
-  return prefix + " " + i;
-}
-
+})
 function closeTab(index, target) {
   console.log("Trying to close tab")
   console.log(currentTarget)
@@ -116,7 +110,7 @@ function confirmation(close) {
   currentTarget.value = {};
   showConfirm.value = false;
 }
-//const projectsPresent = computed(() => projects.length > 0
+//const editorStore.projectsPresent = computed(() => editorStore.projects.length > 0
 function showOpenElementDialog(typeForDialog)
 {
   elementType.value = typeForDialog;
@@ -148,7 +142,7 @@ const items = computed(() => [
         icon: 'pi pi-fw pi-plus',
         command: () => {
           console.log("Tring to create Project")
-          createElement("Project", projects)
+          editorStore.createElement("Project")
         }
       },
       {
@@ -169,7 +163,7 @@ const items = computed(() => [
         icon: 'pi pi-fw pi-plus',
         command: () => {
           console.log("Tring to create Project")
-          createElement("Task", tasks)
+          editorStore.createElement("Task")
         }
       },
       {
@@ -190,7 +184,7 @@ const items = computed(() => [
         icon: 'pi pi-fw pi-plus',
         command: () => {
           console.log("Tring to create Project")
-          createElement("Experiment", experiments)
+          editorStore.createElement("Experiment")
           
         }
       },

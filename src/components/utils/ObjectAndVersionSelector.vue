@@ -6,7 +6,7 @@
 <script>
 
 import Dropdown from 'primevue/dropdown'
-import { useEditorStore } from '../../stores';
+import { useElementStore } from '../../stores';
 
 export default {
 
@@ -29,8 +29,8 @@ export default {
     },
 
     setup() {
-        const editorStore = useEditorStore();
-        return { editorStore }
+        const elementStore = useElementStore();
+        return { elementStore: elementStore }
     },
     computed:
     {
@@ -48,7 +48,7 @@ export default {
         'selectedItem.uuid': {
             async handler(newValue)
             {
-                this.availableVersions = await this.editorStore.getOptionsForElement(newValue, this.objectType)
+                this.availableVersions = await this.elementStore.getOptionsForElement(newValue, this.objectType)
             }
         }
     },
@@ -56,9 +56,9 @@ export default {
         // TODO: heck whether this savely works with onMounted or whether this should be done with onDisplay
         console.log("Selector Mounted")
         this.loading = true;
-        await this.editorStore.updateAvailableOptions(this.objectType);
+        await this.elementStore.updateAvailableOptions(this.objectType);
         console.log(this.objectType)
-        this.availableItems = await this.editorStore.getListForType(this.objectType) 
+        this.availableItems = await this.elementStore.getListForType(this.objectType) 
         console.log(this.availableItems);
         this.loading = false;
     }

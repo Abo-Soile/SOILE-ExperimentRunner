@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid'
-import { DynamicNodeDefinition, INodeState, NodeInterface, NodeInterfaceDefinitionStates } from "@baklavajs/core";
+import { DynamicNodeDefinition, INodeState, Node, NodeInterface, NodeInterfaceDefinitionStates } from "@baklavajs/core";
 import { allowMultipleConnections } from "@baklavajs/engine"
 import { FilterSideBarOption, SideBarButton } from "../NodeOptions"
 import { markRaw } from "vue";
@@ -12,7 +12,7 @@ import { FilterNodeState } from './SoileNodeState';
 import { SoileNodeState } from '../Interfaces/SoileNodeProperties';
 
 
-export default class FilterNode extends DynamicNode<any,any> implements SoileNodeState{
+export default class FilterNode extends Node<any,any> implements SoileNodeState{
   public type = "FilterNode";
   public name = "Filter";  
   public twoColumn = true;    
@@ -46,7 +46,7 @@ export default class FilterNode extends DynamicNode<any,any> implements SoileNod
   };
 
   public outputs = {
-    default: new NodeInterface("Default", [])
+    default: new NodeInterface("Default", "OutputConnection")
   };
 
 

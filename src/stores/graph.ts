@@ -15,7 +15,8 @@ export const useGraphStore = defineStore({
         outputInformation: new Map<string, Map<string, string[]>>(),
         nodeNames: new Map<string, Map<any, string>>(),
         startNodes: new Map<string, string>(),
-        graphs: new Map<string, Graph>()        
+        graphs: new Map<string, Graph>()   
+             
     }),
     actions: {
         processAxiosError(err: { response: { status: any, data: any } }) {

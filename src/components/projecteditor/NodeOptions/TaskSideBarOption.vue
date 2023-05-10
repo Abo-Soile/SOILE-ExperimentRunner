@@ -22,8 +22,7 @@ import DropDown from "./DropDown.vue";
 import { SelectionItem } from "./DropDown.vue";
 import TaskNode from "../NodeTypes/TaskNode";
 import { ComponentInterface } from "../NodeInterfaces/ComponentInterface";
-import { useEditorStore, useErrorStore } from "@/stores";
-import { useGraphStore } from "@/stores/graph.ts";
+import { useGraphStore, useElementStore, useErrorStore } from "@/stores";
 
 import axios from "axios";
 export default defineComponent({
@@ -48,10 +47,10 @@ export default defineComponent({
     },
     setup()
     {
-        const projectStore = useEditorStore();
+        const elementStore = useElementStore();
         const graphStore = useGraphStore();
         const errorStore = useErrorStore();
-        return { projectStore, errorStore, graphStore }
+        return { elementStore, errorStore, graphStore }
     },
     methods: {
         createOutput() {
@@ -98,7 +97,7 @@ export default defineComponent({
         {
             return {
                 name: "Task Selection",
-                items: this.projectStore.availableTasks.map((x : {name : string,  uuid: string}) => { return {value: x.uuid, text: x.name}} )
+                items: this.elementStore.availableTasks.map((x : {name : string,  uuid: string}) => { return {value: x.uuid, text: x.name}} )
             }
         },
         availableVersions() : { items: SelectionItem[], name : string }
@@ -114,7 +113,7 @@ export default defineComponent({
         async currentTask(newValue) 
         {
             this.currentNode.setTaskInformation({uuid: newValue.value, name: newValue.text});                                    
-            this.taskVersions = await this.projectStore.getTaskOptions(newValue.value);            
+            this.taskVersions = await this.elementStore.getTaskOptions(newValue.value);            
             this.currentVersion = Object as () => SelectionItem
         },
         currentVersion(newValue)
@@ -124,7 +123,7 @@ export default defineComponent({
     },
     mounted() {
         console.log(this)
-        this.projectStore.updateAvailableTasks();
+        this.elementStore.updateAvailableTasks();
         this.nodeID = this.intf.id;            
     }
 })

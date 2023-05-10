@@ -2,6 +2,7 @@ import { IBaklavaViewModel } from "@baklavajs/renderer-vue";
 import TaskNode from "../components/projecteditor/NodeTypes/TaskNode";
 import FilterNode from "../components/projecteditor/NodeTypes/FilterNode";
 import { Graph, NodeInterface } from "@baklavajs/core";
+import ExperimentNode from "../components/projecteditor/NodeTypes/ExperimentNode";
 
 
 
@@ -10,45 +11,67 @@ export function loadSoileProjectToBaklava(baklava : IBaklavaViewModel, soileJson
 
 
     // this is a map of InstanceIDs to OutputInterfaces
-    const nextMap = new Map<string, NodeInterface>()
+    const nextMap = new Map<String, NodeInterface>()
     // and this is a map of InstanceIDs to "Previous" interfaces
-    const previousMap = new Map<string, NodeInterface>()
+    const previousMap = new Map<String, NodeInterface>()
     const connections = new Array<{from : String, to : String}>();
+    const filterconnections = new Array<{from : NodeInterface, to : String}>();
     const graph = baklava.editor.graph;
     for(const task of soileJson.tasks)
     {        
         const t = new TaskNode();
-        graph.addNode(t);
+        graph.addNode(t);        
         t.setTaskInformation({uuid: task.UUID, name: task.name});
         t.setTaskVersion(task.version, task.tag);
         t.title = task.instanceID;
+        nextMap.set(task.instanceID, t.outputs.next);
+        previousMap.set(task.instanceID, t.inputs.previous);
         for(const output of task.outputs)
         {
             t.addTaskOutput(output)
         }
-        if(task.next)
-        {
-            connections.push({from: task.instanceID, to : task.next});
-        }
+        connections.push({from: task.instanceID, to : task.next});        
     }
     for(const filter of soileJson.filters)
     {
         
         const f = new FilterNode();
         graph.addNode(f);
-        f.title = filter.instanceID;
-        for()
-        t.title = task.instanceID;
-        for(const output of task.outputs)
+        f.title = filter.instanceID;        
+        for(const { i , option } of filter.options.map((value,index) => ({index,option})))
         {
-            t.addTaskOutput(output)
-        }
-        if(task.next)
-        {
-            connections.push({from: task.instanceID, to : task.next});
-        }
+            f.addFilter(option.name ? option.name : "Filter " + i , option.filter)
+            filterconnections.push({ from : f.outputs[option.name], to : option.next})
+        }        
+        connections.push({from: filter.instanceID, to : filter.defaultOption});
+        nextMap.set(filter.instanceID, f.outputs.default);
+        previousMap.set(filter.instanceID, f.inputs.previous);
     }
-
+    for(const experiment of soileJson.experiments)
+    {
+        const e = new ExperimentNode;
+        graph.addNode(e);
+        e.title = experiment.instanceID;
+        e.setExperimentInformation({uuid: experiment.UUID, name : experiment.name})
+        e.setTaskVersion(experiment.version, experiment.tag)
+        nextMap.set(experiment.instanceID, e.outputs.next);
+        previousMap.set(experiment.instanceID, e.inputs.previous);
+        connections.push({from: experiment.instanceID, to: experiment.next})
+    }
+    for(const connection of connections)
+    {
+        if(connection.to != "end")
+        {
+            graph.addConnection(previousMap.get(connection.from) as NodeInterface, nextMap.get(connection.to) as NodeInterface)
+        }        
+    }
+    for(const connection of filterconnections)
+    {
+        if(connection.to != "end")
+        {
+            graph.addConnection(connection.from, nextMap.get(connection.to) as NodeInterface)
+        }        
+    }
 
 }
 
@@ -120,6 +143,44 @@ export function BaklavaToSoileProjectJSON(graph: Graph ) {
 }
 
 
+interface FilterInstance 
+{
+    instanceID: string,
+    "options": [
+      {
+        "name": string,
+        "filter": string,
+        "next": string
+      }
+    ],
+    defaultOption: string
+    position: {
+        x : number,
+        y: number
+    }
+  }
+
+interface TaskInstance {
+    "UUID": string,
+    "name": string,
+    "version": string,
+    "tag": string,
+    "instanceID": string,
+    filter?: string,
+    "outputs": [
+      string
+    ],
+    next: string,
+    codeType: {
+      "language": string,
+      "version": string
+    }
+    position: {
+        x : number,
+        y: number
+    }
+
+  }
 
 interface SOILEProject {
     
@@ -128,27 +189,7 @@ interface SOILEProject {
         "version": string,
         "tag": string,
         "tasks": [
-          {
-            "UUID": string,
-            "name": string,
-            "version": string,
-            "tag": string,
-            "instanceID": string,
-            filter?: string,
-            "outputs": [
-              string
-            ],
-            next?: string,
-            codeType: {
-              "language": string,
-              "version": string
-            }
-            position: {
-                x : number,
-                y: number
-            }
-
-          }
+          TaskInstance
         ],
         "experiments": [
           {
@@ -159,12 +200,12 @@ interface SOILEProject {
             "elements": [
               {
                 "elementType": string,
-                "data": string
+                "data": [ FilterInstance | TaskInstance ]
               }
             ],
             "randomize": boolean,
             "instanceID": string,
-            next?: string
+            next: string,
             position: {
                 x : number,
                 y: number
@@ -172,23 +213,9 @@ interface SOILEProject {
           }
         ],
         "filters": [
-          {
-            "instanceID": string,
-            "options": [
-              {
-                "name": string,
-                "filter": string,
-                "next": string
-              }
-            ],
-            "defaultOption": string
-            position: {
-                x : number,
-                y: number
-            }
-          }
+          FilterInstance
         ],
         "start": string,
         "private": boolean
       }
-}
+

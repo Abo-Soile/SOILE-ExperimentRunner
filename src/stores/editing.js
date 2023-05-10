@@ -7,120 +7,65 @@ export const useEditorStore = defineStore({
     id: 'editing',
     state: () => ({
         // initialize the state. We don't update from the local storage, because this could contain privilegded data        
-        availableTasks: [],
-        availableExperiments: [],                
-        availableProjects: [],
-        outputInformation: new Map(),
-        nodeNames: new Map(),
-        nodeCounts: new Map(),
-        experiments : { active: 0, elements: [] },
-        projects : { active: 0, elements: [] },
-        tasks : { active: 0, elements: [] }
+        experiments: { active: 0, elements: [] },
+        projects: { active: 0, elements: [] },
+        tasks: { active: 0, elements: [] },
+        activeElement: "",
     }),
     actions: {
-        async updateAvailableProjects() {
+        createElement(type) {
+            const store = this.getStoreForType(type);
+            const existentNames = store.elements.map((x) => x.name)
+            const name = this.uniqueID(type, existentNames);
+            store.elements.push({ name: name });
+            store.active = store.elements.length - 1;
+            this.activeElement = type;
+        },
+        // load an element and push 
+        async loadElement(type, elementName, elementID, elementVersion) {
+            const store = this.getStoreForType(type);
+            for (const [i, element] of store.elements) {
+                if (element.name === elementName && element.version === elementVersion) {
+                    store.active = i;
+                    return;
+                }
+            }
+            // not present, so we need to actually load it.
+            const data = await this.loadObject(type, elementID, elementVersion)
+            store.elements.push({ name: elementName, version: elementVersion, data: data })
+            store.active = store.elements.length - 1;
+            this.activeElement = type;
+        },
+        getStoreForType(type) {
+            switch (type) {
+                case "Task": return this.tasks;
+                case "Project": return this.projects;
+                case "Experiment": return this.experiments;
+            }
+        },
+        uniqueID(prefix, existing) {
+            var i = 1;
+            // ugly but we need unique names.
+            while ([...existing.values()].some(v => v === prefix + " " + i)) {
+                i = i + 1;
+            }
+            return prefix + " " + i;
+        },
+        async loadObject(type, id, version) {
             try {
-                const response = await axios.post('/project/list');
-                console.log(response?.data);
-                
-                // update pinia state
-                this.availableProjects = response?.data;
-                console.log(this.availableProjects);
+                const response = await axios.get("/" + type.toLowerCase() + "/" + id + "/" + version)
+                return response.data;
             }
-            catch (e) {
-                console.log("Error" + e);                
-                this.processAxiosError(e);
+            catch (err) {
+                this.processAxiosError(err)
             }
-        },        
-        async updateAvailableExperiments() {
-            try {
-                const response = await axios.post('/experiment/list');
-                console.log(response?.data);
-                
-                // update pinia state
-                this.availableExperiments = response?.data;
-            }
-            catch (e) {
-                console.log("Error" + e);                
-                this.processAxiosError(e);
-            }
-        },
-        async updateAvailableTasks() {
-            try {
-                const response = await axios.post('/task/list');
-                console.log(response?.data);
-                
-                // update pinia state
-                this.availableTasks = response?.data;
-            }
-            catch (e) {
-                console.log("Error" + e);                
-                this.processAxiosError(e);
-            }
-        },
-        async getTaskOptions(uuid) {
-            try {
-                const response = await axios.post('/task/'+ uuid +'/list');
-                return response?.data
-            }
-            catch (e) {
-                console.log("Error" + e);                
-                this.processAxiosError(e);
-            }
-        },
-        async getProjectOptions(uuid) {
-            try {
-                const response = await axios.post('/project/'+ uuid +'/list');
-                return response?.data
-            }
-            catch (e) {
-                console.log("Error" + e);                
-                this.processAxiosError(e);
-            }
-        },
-        async getExperimentOptions(uuid) {
-            try {
-                const response = await axios.post('/experiment/'+ uuid +'/list');
-                return response?.data
-            }
-            catch (e) {
-                console.log("Error" + e);                
-                this.processAxiosError(e);
-            }
-        },
-        // get the list of objects for the given type. Makes it easier to write reusable components
-        async getListForType(type)
-        {
-            switch(type)
-            {
-                case "task": return this.availableTasks; 
-                case "project": return this.availableProjects;
-                case "experiment": return this.availableExperiments;
-            }
-        },
-        async getOptionsForElement(uuid, type)
-        {
-            switch(type)
-            {
-                case "task": return await this.getTaskOptions(uuid);
-                case "project": return await this.getProjectOptions(uuid);
-                case "experiment": return await this.getElementOptions(uuid);
-            }
-        },
-        async updateAvailableOptions(type)
-        {
-            switch(type)
-            {
-                case "task": await this.updateAvailableTasks();
-                case "project": await this.updateAvailableProjects();
-                case "experiment": await this.updateAvailableExperiments();
-            }
-        },        
+
+        },                
         processAxiosError(err) {
             const errorStore = useErrorStore()
-            errorStore.processAxiosError(err)          
+            errorStore.processAxiosError(err)
 
-        },       
+        },
 
     }
 });

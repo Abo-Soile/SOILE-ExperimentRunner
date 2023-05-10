@@ -5,24 +5,29 @@ export const checkConnection = (from : NodeInterface, to : NodeInterface) => {
     console.log(to)
     if (from.value === "OutputConnection") {
         if (from.connectionCount > 0) {
-            return { connectionAllowed: false }
+            console.log("Connection not allowed")            
+            return { connectionAllowed: false, connectionsInDanger: [] }
         }
         // this is a hack and should optimally be checked in a different way else...
         if (to.name === "Previous") {
-            return { connectionAllowed: true }
+            console.log("Connection allowed")            
+            return { connectionAllowed: true, connectionsInDanger: [] }
         }
         else {
-            return { connectionAllowed: false }
+            console.log("Connection not allowed")            
+            return { connectionAllowed: false, connectionsInDanger: [] }
         }
     }
     else {
         // this is for potential Output-Links for future use.
         // we need to use the same hack again...
         if (to.name === "Previous") {
-            return { connectionAllowed: false }
+            console.log("Connection not allowed")            
+            return { connectionAllowed: false, connectionsInDanger: [] }
         }
         else {
-            return { connectionAllowed: true }
+            console.log("Connection allowed")            
+            return { connectionAllowed: true, connectionsInDanger: [] }
         }
     }
 }

@@ -18,18 +18,22 @@
 
 <script>
 
-import { EditorComponent, useBaklava } from "@baklavajs/renderer-vue";
+import { EditorComponent, useBaklava, Components, Icons } from "@baklavajs/renderer-vue";
+import { DependencyEngine } from "@baklavajs/engine";
+import "@baklavajs/themes/dist/syrup-dark.css";
+
+
 import TaskNode from "./NodeTypes/TaskNode";
 import FilterNode from "./NodeTypes/FilterNode";
-import { Components, Icons } from "@baklavajs/renderer-vue";
-import "@baklavajs/themes/dist/syrup-dark.css";
-const BaklavaNode = Components.Node;
-import { DependencyEngine } from "@baklavajs/engine";
+import ExperimentNode from "./NodeTypes/ExperimentNode";
 import SoileNode from "./ViewComponents/SoileNode.vue";
-import { BaklavaToSoileProjectJSON } from "../../helpers/baklavasoileConverter";
-const saveIcon = Icons.DeviceFloppy;
+
+import { BaklavaToSoileProjectJSON, loadSoileProjectToBaklava } from "../../helpers/baklavasoileConverter";
 import { checkConnection } from './events/graphEvents.ts'
 import { useGraphStore } from "../../stores";
+
+const BaklavaNode = Components.Node;
+const saveIcon = Icons.DeviceFloppy;
 
 export default {
     components: { "baklava-editor": EditorComponent, BaklavaNode, SoileNode, saveIcon },
@@ -37,6 +41,12 @@ export default {
         name: {
             type: String,
             required: true
+        },
+        isProjectEditor: {
+            type: Boolean
+        },
+        data: {
+            type: Object            
         }
     },
     data() {
@@ -51,11 +61,15 @@ export default {
         const baklava = useBaklava();
         baklava.editor.registerNodeType(TaskNode)
         baklava.editor.registerNodeType(FilterNode)
-        baklava.editor.graphHooks.checkConnection.subscribe("soile:connectionCheck", (c) => checkConnection(c.from, c.to))        
-        const engine = new DependencyEngine(baklava.editor);
+        if(props.isProjectEditor)
+        {
+            baklava.editor.registerNodeType(ExperimentNode);
+        }        
+        baklava.editor.graphHooks.checkConnection.subscribe("soile:connectionCheck", (c) => checkConnection(c.from, c.to))                
+        /*const engine = new DependencyEngine(baklava.editor);
         console.log(baklava.editor)
         console.log(engine)
-        engine.start();
+        engine.start();*/
         return { baklava, graphStore }
     },
     methods: {
@@ -80,7 +94,16 @@ export default {
         loadProject() {
             //TODO (popup)
         },
-
+    },
+    mounted()
+    {
+        // TODO: Check, if we need to clean up the graph in order not to screw things up...
+        if(this.data)
+        {
+            loadSoileProjectToBaklava(this.baklava, this.data)
+        }
+        console.log("Editor mounted");
+        console.log(this.data);
     }
 };
 </script>

@@ -2,16 +2,15 @@ import { Node, NodeInterface, CalculateFunction, INodeState, NodeInterfaceDefini
 import { TextInterface } from "@baklavajs/renderer-vue";
 import { allowMultipleConnections } from "@baklavajs/engine"
 import { v4 as uuidv4 } from 'uuid'
-import { SideBarButton, TaskSideBarOption } from "../NodeOptions"
+import { SideBarButton, ExperimentSideBarOption} from "../NodeOptions"
 import { markRaw } from "vue";
 import { displayInSideBar } from "./utilities";
 import OutputListOption from "../NodeOptions/OutputListOption.vue";
 import { ComponentInterface } from "../NodeInterfaces/ComponentInterface";
 import axios from 'axios'
 import { InputInterface } from "../NodeInterfaces/InputInterface";
-import { useGraphStore } from "@/stores/graph";
-import { mapValues } from '../utils/utils.ts';
-import { TaskNodeState } from "./SoileNodeState";
+import { useGraphStore } from "@/stores/";
+import { SoileNodeState } from "../Interfaces/SoileNodeProperties";
 interface Inputs {
   previous: any[];
 }
@@ -44,7 +43,7 @@ export default class ExperimentNode extends Node<Inputs,Outputs> implements Soil
 
   public twoColumn = true;
   public taskOutputs = new Array<string>;  
-  public task = {uuid : "", name: "", version: "", tag: "", type: ""}
+  public experiment = {uuid : "", name: "", version: "", tag: ""}
   public graphStore = useGraphStore();
   
   public isStartNode()
@@ -53,16 +52,17 @@ export default class ExperimentNode extends Node<Inputs,Outputs> implements Soil
   }
 
   public inputs = {
-    previous: new InputInterface("Previous", "InputConnection").use(allowMultipleConnections),
-    type: new TextInterface("TaskType", "Type: " + this.task.type).setPort(false),
-    taskInformation: new TextInterface("TaskInformation", "Task: " + (this.task.name != "" ? this.task.name + "@" + this.task.tag : "") ).setPort(false),
+    previous: new InputInterface("Previous", "InputConnection").use(allowMultipleConnections),    
+    ExperimentName: new TextInterface("ExperimentName", "Experiment: " + (this.experiment.name != "" ? this.experiment.name : "" ) ).setPort(false),
+    ExperimentVersion: new TextInterface("ExperimenVersion", "Version: " + this.experiment.tag ).setPort(false),
+    // Potentially we don't need this, but it might be necessary.
     outputs: new ComponentInterface("Outputs", { items: this.taskOutputs, title: "Outputs" }, OutputListOption).setPort(false),
     edit: new NodeInterface("Edit", undefined).setComponent(markRaw(SideBarButton)).setPort(false),
-    sideBarOption1: new ComponentInterface("SideBar", this, TaskSideBarOption).setHidden(true).use(displayInSideBar, true).setPort(false)
+    sideBarOption1: new ComponentInterface("SideBar", this, ExperimentSideBarOption).setHidden(true).use(displayInSideBar, true).setPort(false)
   };
 
   isValid(){
-    return this.task.uuid != "" && this.task.version != "";
+    return this.experiment.uuid != "" && this.experiment.version != "";
   }
 
   public outputs = {
@@ -71,7 +71,7 @@ export default class ExperimentNode extends Node<Inputs,Outputs> implements Soil
 
   public constructor() {
     super();
-    this.id = "Task " + uuidv4();
+    this.id = "Experiment " + uuidv4();
     this.initializeIo();
   }
 
@@ -95,17 +95,17 @@ export default class ExperimentNode extends Node<Inputs,Outputs> implements Soil
     return { next: this.id };
   }
 
-  public setTaskInformation(data : { uuid: string, name: string})
+  public setExperimentInformation(data : { uuid: string, name: string})
   {
-    this.task.uuid = data.uuid;
-    this.task.name = data.name;
-    this.inputs.taskInformation.value = "Task: " + (this.task.name != "" ? this.task.name + "@" + this.task.tag : "")
+    this.experiment.uuid = data.uuid;
+    this.experiment.name = data.name;
+    this.inputs.ExperimentName.value = "Task: " + this.experiment.name
   }
   public setTaskVersion(version : string, tag : string)
   {
-    this.task.version = version;   
-    this.task.tag = tag; 
-    this.inputs.taskInformation.value = "Task: " + (this.task.name != "" ? this.task.name + "@" + this.task.tag : "")
+    this.experiment.version = version;   
+    this.experiment.tag = tag; 
+    this.inputs.ExperimentVersion.value = "Version: " + this.experiment.tag;
   }
   onPlaced(): void {
     this.graphStore.setupNode(this);
