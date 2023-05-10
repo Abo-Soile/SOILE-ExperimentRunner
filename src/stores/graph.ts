@@ -14,6 +14,8 @@ export const useGraphStore = defineStore({
         // initialize the state. We don't update from the local storage, because this could contain privilegded data
         outputInformation: new Map<string, Map<string, string[]>>(),
         nodeNames: new Map<string, Map<any, string>>(),
+        startNodes: new Map<string, string>(),
+        graphs: new Map<string, Graph>()        
     }),
     actions: {
         processAxiosError(err: { response: { status: any, data: any } }) {
@@ -40,9 +42,20 @@ export const useGraphStore = defineStore({
             }
 
         },
-
+        setStartNode(node: TaskNode | ExperimentNode | FilterNode)
+        {
+            const graph = node.graph;
+            this.startNodes.set(graph?.id, node.id)
+        },
+        isStartNode(node: TaskNode | ExperimentNode | FilterNode) : boolean
+        {
+            const graph = node.graph;
+            this.setupGraph(graph);
+            return this.startNodes.get(graph?.id) === node.id
+        },
         setupGraph(graph: Graph) {
-            if (!(graph.id in this.nodeNames)) {
+            if (!(graph.id in this.graphs)) {
+                this.graphs.set(graph.id, graph)
                 const nodeNameMap = new Map<any, string>();
                 for (const node of graph.nodes) {
                     nodeNameMap.set(node, node.title)
@@ -50,6 +63,15 @@ export const useGraphStore = defineStore({
                 this.nodeNames.set(graph.id, nodeNameMap);
                 this.outputInformation.set(graph.id, new Map())
             }
+        },
+        // Remove a graph from the 
+        removeGraph(graph: Graph)
+        {
+            const id = graph.id;
+            this.graphs.delete(id);
+            this.nodeNames.delete(id);
+            this.outputInformation.delete(id);
+            this.startNodes.delete(id);
         },
         refineName(name: string) {
             return name.replace(" ", "_");
@@ -78,6 +100,10 @@ export const useGraphStore = defineStore({
                     this.outputInformation.get(node.graph?.id).set(node.id, node.taskOutputs);
                 }
             }
+            if(!this.startNodes.has(node.graph?.id))
+            {
+                this.setStartNode(node);
+            }
         },
         removeNode(node: TaskNode | ExperimentNode | FilterNode) {
             this.outputInformation.delete(node.id);
@@ -100,7 +126,10 @@ export const useGraphStore = defineStore({
             this.setupNode(node)
             const currentOutputs = this.outputInformation.get(node.graph?.id).get(node.id);
             currentOutputs.splice(currentOutputs.indexOf(outputName), 1)
-        }
+        },
+        convertGraphToSOILE(name: string, graph: Graph )
+        {
 
+        }
     }
 });

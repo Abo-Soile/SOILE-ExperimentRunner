@@ -8,22 +8,16 @@ import { DynamicNode } from "@baklavajs/core";
 import { ComponentInterface } from '../NodeInterfaces/ComponentInterface';
 import { useGraphStore } from "@/stores";
 import { mapValues } from '../utils/utils';
-import { FilterNodeState } from './SoileNodeState';
-import { SoileNodeState } from '../Interfaces/SoileNodeProperties';
+import { FilterNodeState, TaskNodeState } from './SoileNodeState';
+import { TextInterface } from '@baklavajs/renderer-vue';
 
 
-export default class FilterNode extends DynamicNode<any,any> implements SoileNodeState{
+export default class FilterNode extends DynamicNode<any,any> {
   public type = "FilterNode";
   public name = "Filter";  
-  public twoColumn = true;    
-  defaultOption = '';
+  public twoColumn = true;  
   myTitle = this.type;
   graphStore = useGraphStore();
-
-  public isStartNode()
-  {
-    return this.graphStore.isStartNode(this);  
-  }
 
   public set title( newTitle : string)
   {
@@ -37,18 +31,13 @@ export default class FilterNode extends DynamicNode<any,any> implements SoileNod
     return this.myTitle;
   }
 
-  Filters = new Map<string,{filterstring : string, interfaceID : string}>  
+  Filters = new Map<string,string>  
   
   public inputs = {
     previous: new NodeInterface("Previous", []).use(allowMultipleConnections),
     edit: new NodeInterface("Edit", uuidv4()).setComponent(markRaw(SideBarButton)).setPort(false),
     sideBarOption1: new ComponentInterface<FilterNode>("SideBar", this, FilterSideBarOption).setHidden(true).use(displayInSideBar, true).setPort(false)
   };
-
-  public outputs = {
-    default: new NodeInterface("Default", [])
-  };
-
 
   constructor() {
     super();      
@@ -59,15 +48,15 @@ export default class FilterNode extends DynamicNode<any,any> implements SoileNod
   {
     //this.addOption(outputName, "TextOption");
     console.log(this.inputs)
-    //this.Filters.set(name,filterString);
+    this.Filters.set(name,filterString);
     console.log(this.inputs.edit.value)
     const newValue = uuidv4();
     console.log(newValue)
     this.inputs.edit.value = newValue;
     console.log(this.inputs);
-    this.addOutput(name, new NodeInterface(name, "OutputConnection") );        
-    this.Filters.set(name,{ filterstring: filterString, interfaceID : this.outputs[name].id });    
+    this.addOutput(name, new NodeInterface(name, "OutputConnection") );    
   }
+  
   public removeFilter(name: string)
   {
     console.log("Removing filter: " + name)
@@ -100,7 +89,7 @@ export default class FilterNode extends DynamicNode<any,any> implements SoileNod
     console.log(outputs);
     console.log(this.outputs)
     return {             
-             outputs: this.outputs 
+             outputs: this.outputs
             } 
   }
   onDestroy()
@@ -111,7 +100,6 @@ export default class FilterNode extends DynamicNode<any,any> implements SoileNod
   public save(): INodeState<any,any> {
     console.log("Saving Filter")
     const inputStates = mapValues(this.inputs, (intf) => intf.save()) as NodeInterfaceDefinitionStates<any>;
-    // we don't have any outputs present, but we know that they will have the correct type
     const outputStates = mapValues(this.outputs, (intf) => intf.save()) as NodeInterfaceDefinitionStates<any>;
 
     const state: FilterNodeState<any, any> = {
@@ -120,11 +108,9 @@ export default class FilterNode extends DynamicNode<any,any> implements SoileNod
         title: this.title,
         inputs: inputStates,
         outputs: outputStates,    
-        filters: this.Filters,
-        default: this.outputs.default.id
+        filters: this.Filters    
     };
 
     return this.hooks.afterSave.execute(state);
   }
-
 }

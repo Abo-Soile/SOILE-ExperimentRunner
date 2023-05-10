@@ -33,6 +33,7 @@
                 placeholder="Node Name"
                 @blur="doneRenaming"
                 @keydown.enter="doneRenaming"
+                
             />
         </div>
 
@@ -61,6 +62,7 @@ import { Components, Icons } from "@baklavajs/renderer-vue";
 import { Node } from "@baklavajs/renderer-vue";
 
 import { useGraphStore } from "@/stores";
+import { SoileNodeState } from "../Interfaces/SoileNodeProperties";
 
 const graphStore = useGraphStore();
 const contextMenu = Components.ContextMenu;
@@ -69,7 +71,7 @@ const NodeInterface = Node.NodeInterface;
 
 const props = withDefaults(
     defineProps<{
-        node: AbstractNode;
+        node: AbstractNode & SoileNodeState;
         selected?: boolean;
     }>(),
     { selected: false },
@@ -100,10 +102,11 @@ const classes = computed(() => ({
     "--dragging": dragMove.dragging.value,
     "--two-column": !!props.node.twoColumn,
 }));
-const styles = computed(() => ({
+const styles = computed(() => ({    
     top: `${props.node.position?.y ?? 0}px`,
     left: `${props.node.position?.x ?? 0}px`,
     width: `${props.node.width ?? 200}px`,
+    "box-shadow" : props.node.isStartNode() ? "0 0 0 3px green" : undefined,        
 }));
 const displayedInputs = computed(() => Object.values(props.node.inputs).filter((ni) => !ni.hidden && ni.port));
 const displayedOutputs = computed(() => Object.values(props.node.outputs).filter((ni) => !ni.hidden && ni.port));

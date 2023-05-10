@@ -31,6 +31,17 @@ export const useErrorStore = defineStore({
         {
             errors = {};
             latestError = {};
-        }
+        },
+        processAxiosError(err) {
+            console.log(err);
+            if(err.response?.status === 401 || err.response?.status === 403)
+            {
+                this.raiseError("warn", "No Authorization or Authentication unsuccessful (code " + err.response?.status + ")")
+            }
+            else
+            {
+                this.raiseError("error", err.message + "/" + this.getReason(err.status))
+            }            
+        },
     }
 });

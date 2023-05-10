@@ -206,15 +206,7 @@ export const useAuthStore = defineStore({
         },
         processAxiosError(err) {
             const errorStore = useErrorStore()
-            console.log(err);
-            if(err.response?.status === 401 || err.response?.status === 403)
-            {
-                errorStore.raiseError("warn", "No Authorization or Authentication unsuccessful (code " + err.response?.status + ")")
-            }
-            else
-            {
-                errorStore.raiseError("danger", err.response?.message + "/" + errorStore.getReason(err.response?.status))
-            }                        
+            errorStore.processAxiosError(err)                   
         }
     }
 });

@@ -1,4 +1,4 @@
-import { Node, NodeInterface, CalculateFunction } from "@baklavajs/core";
+import { Node, NodeInterface, CalculateFunction, INodeState, NodeInterfaceDefinitionStates } from "@baklavajs/core";
 import { TextInterface } from "@baklavajs/renderer-vue";
 import { allowMultipleConnections } from "@baklavajs/engine"
 import { v4 as uuidv4 } from 'uuid'
@@ -10,6 +10,8 @@ import { ComponentInterface } from "../NodeInterfaces/ComponentInterface";
 import axios from 'axios'
 import { InputInterface } from "../NodeInterfaces/InputInterface";
 import { useGraphStore } from "@/stores/graph";
+import { mapValues } from '../utils/utils.ts';
+import { TaskNodeState } from "./SoileNodeState";
 interface Inputs {
   previous: any[];
 }
@@ -20,7 +22,7 @@ interface Outputs {
 
 
 
-export default class ExperimentNode extends Node<Inputs,Outputs> {
+export default class ExperimentNode extends Node<Inputs,Outputs> implements SoileNodeState{
   public type = "ExperimentNode";
   myTitle = this.type;
   public set title( newTitle : string)
@@ -44,6 +46,12 @@ export default class ExperimentNode extends Node<Inputs,Outputs> {
   public taskOutputs = new Array<string>;  
   public task = {uuid : "", name: "", version: "", tag: "", type: ""}
   public graphStore = useGraphStore();
+  
+  public isStartNode()
+  {
+    return this.graphStore.isStartNode(this);  
+  }
+
   public inputs = {
     previous: new InputInterface("Previous", "InputConnection").use(allowMultipleConnections),
     type: new TextInterface("TaskType", "Type: " + this.task.type).setPort(false),
@@ -71,9 +79,7 @@ export default class ExperimentNode extends Node<Inputs,Outputs> {
     return this.taskOutputs;
   }
   public addTaskOutput(outputName: string) {
-    //this.addOption(outputName, "TextOption");
     this.graphStore.addOutput(this, outputName);
-    //this.taskOutputs.push(outputName);
   }
   public removeTaskOutput(outputName: string) {
     console.log()
@@ -81,6 +87,7 @@ export default class ExperimentNode extends Node<Inputs,Outputs> {
   }
 
   public calculate: CalculateFunction<Inputs, Outputs> = ({ previous }) => {
+    console.log("Trying to calculate")
     if (previous.length > 0) {
       console.log(previous)
       console.log(this.inputs.previous)
@@ -110,5 +117,6 @@ export default class ExperimentNode extends Node<Inputs,Outputs> {
   onDestroy()
   {
     this.graphStore.removeNode(this);
-  }
+  }    
+
 }

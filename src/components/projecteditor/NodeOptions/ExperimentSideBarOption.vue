@@ -1,10 +1,10 @@
 <template>
     <div>
-        <label for="task"> Select Task </label>
-        <DropDown :selected=currentTask @itemSelected="setTask" id="task" :options="availableTasks"></DropDown>
+        <label for="experiment"> Select Task </label>
+        <DropDown :selected=currentTask @itemSelected="setExperiment" id="experiment" :options="availableExperiments"></DropDown>
         <div v-if="availableVersions.items.length != 0">
             <label  for="taskVersion"> Select Task Version </label>
-            <DropDown @itemSelected="setTaskVersion" :selected=currentVersion  id="taskVersion" :options="availableVersions"></DropDown>
+            <DropDown @itemSelected="setExperimentVersion" :selected=currentVersion  id="taskVersion" :options="availableVersions"></DropDown>
         </div>
         <label for="addOutput">Add Outputs</label>
         <input class="baklava-input" type="text" :value=newOutput @input="event => newOutput = event.target.value" name="addOutput">
@@ -20,7 +20,7 @@
 import { defineComponent } from "vue";
 import DropDown from "./DropDown.vue";
 import { SelectionItem } from "./DropDown.vue";
-import TaskNode from "../NodeTypes/TaskNode";
+import ExperimentNode from "../NodeTypes/ExperimentNode";
 import { ComponentInterface } from "../NodeInterfaces/ComponentInterface";
 import { useEditorStore, useErrorStore } from "@/stores";
 import { useGraphStore } from "@/stores/graph.ts";
@@ -69,12 +69,12 @@ export default defineComponent({
             }
             this.newOutput = "";
         },
-        async setTask(selected : { text: String, value: String})
+        async setExperiment(selected : { text: String, value: String})
         {
             this.currentTask = selected;
            
         },
-        async setTaskVersion(selected : { text: String, value: String})
+        async setExperimentVersion(selected : { text: String, value: String})
         {       
             this.currentVersion = selected;
             
@@ -86,7 +86,7 @@ export default defineComponent({
 
     },
     computed: {
-        currentNode() : TaskNode
+        currentNode() : ExperimentNode
         {        
            return this.intf.data;
         },
@@ -94,24 +94,24 @@ export default defineComponent({
             console.log(this.intf)
             return this.intf.data.taskOuputs;
         },
-        availableTasks()
+        availableExperiments()
         {
             return {
                 name: "Task Selection",
-                items: this.projectStore.availableTasks.map((x : {name : string,  uuid: string}) => { return {value: x.uuid, text: x.name}} )
+                items: this.projectStore.availableExperiments.map((x : {name : string,  uuid: string}) => { return {value: x.uuid, text: x.name}} )
             }
         },
         availableVersions() : { items: SelectionItem[], name : string }
         {
             return {
                 name: "Task Versions",
-                items: this.taskVersions.filter((x : { tag? : string}) => x.tag).map( (x : { tag: string, version: string }) => { return {value : x.version, text: x.tag }})
+                items: this.experimentVersions.filter((x : { tag? : string}) => x.tag).map( (x : { tag: string, version: string }) => { return {value : x.version, text: x.tag }})
             }
         }
     },    
     watch:
     {
-        async currentTask(newValue) 
+        async currentExperiment(newValue) 
         {
             this.currentNode.setTaskInformation({uuid: newValue.value, name: newValue.text});                                    
             this.taskVersions = await this.projectStore.getTaskOptions(newValue.value);            
@@ -119,12 +119,12 @@ export default defineComponent({
         },
         currentVersion(newValue)
         {
-            this.currentNode.setTaskVersion(newValue.value,newValue.text);            
+            this.currentNode.setExperimentVersion(newValue.value,newValue.text);            
         }
     },
     mounted() {
         console.log(this)
-        this.projectStore.updateAvailableTasks();
+        this.projectStore.updateAvailableExperiments();
         this.nodeID = this.intf.id;            
     }
 })

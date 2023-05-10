@@ -20,22 +20,11 @@ export const useUserStore = defineStore({
                     this.currentTaskSettings = response.data;
                 }
                 catch (error) {
-                    this.processAxiosError(error)
+                    const errorStore = useErrorStore()
+                    errorStore.processAxiosError(error)
                 }
             }
-        },
-        processAxiosError(err) {
-            const errorStore = useErrorStore()
-            console.log(err);
-            if(err.response?.status === 401 || err.response?.status === 403)
-            {
-                errorStore.raiseError("warn", "No Authorization or Authentication unsuccessful (code " + err.response?.status + ")")
-            }
-            else
-            {
-                errorStore.raiseError("danger", err.response?.message + "/" + errorStore.getReason(err.response?.status))
-            }            
-        },
+        },        
         setTaskActive()
         {
             this.isRunningTask = true

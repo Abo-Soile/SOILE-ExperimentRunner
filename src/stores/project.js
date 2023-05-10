@@ -6,15 +6,10 @@ import { useErrorStore } from './errors';
 export const useProjectStore = defineStore({
     id: 'projects',
     state: () => ({
-        // initialize the state. We don't update from the local storage, because this could contain privilegded data
-        projects: [],   
+        // initialize the state. We don't update from the local storage, because this could contain privilegded data        
         selectedProject: JSON.parse(sessionStorage.getItem('soile-selectedproject')),             
         signedUpProjects: [],
-        availableTasks: [],
-        availableExperiments: [],                
-        outputInformation: new Map(),
-        nodeNames: new Map(),
-        nodeCounts: new Map()
+        availableProjectInstances: [],
     }),
     actions: {
         async updateAvailableProjects() {
@@ -23,53 +18,17 @@ export const useProjectStore = defineStore({
                 console.log(response?.data);
                 
                 // update pinia state
-                this.projects = response?.data;
+                this.availableProjectInstances = response?.data;
             }
             catch (e) {
                 console.log("Error" + e);                
                 this.processAxiosError(e);
             }
         },        
-        async updateAvailableExperiments() {
-            try {
-                const response = await axios.post('/experiment/list');
-                console.log(response?.data);
-                
-                // update pinia state
-                this.availableExperiments = response?.data;
-            }
-            catch (e) {
-                console.log("Error" + e);                
-                this.processAxiosError(e);
-            }
-        },
-        async updateAvailableTasks() {
-            try {
-                const response = await axios.post('/task/list');
-                console.log(response?.data);
-                
-                // update pinia state
-                this.availableTasks = response?.data;
-            }
-            catch (e) {
-                console.log("Error" + e);                
-                this.processAxiosError(e);
-            }
-        },
-        async getTaskOptions(uuid) {
-            try {
-                const response = await axios.post('/task/'+ uuid +'/list');
-                return response?.data
-            }
-            catch (e) {
-                console.log("Error" + e);                
-                this.processAxiosError(e);
-            }
-        },
         selectProject(index)
         {            
             console.log("Selecting Project")
-            this.selectedProject = this.projects[index];
+            this.selectedProject = this.availableProjectInstances[index];
             console.log("Selected Project: ")
             console.log(this.selectedProject)
             sessionStorage.setItem('soile-selectedproject', JSON.stringify(this.selectedProject));            
@@ -98,15 +57,7 @@ export const useProjectStore = defineStore({
         },
         processAxiosError(err) {
             const errorStore = useErrorStore()
-            console.log(err);
-            if(err.response?.status === 401 || err.response?.status === 403)
-            {
-                errorStore.raiseError("warn", "No Authorization or Authentication unsuccessful (code " + err.response?.status + ")")
-            }
-            else
-            {
-                errorStore.raiseError("danger", err.response?.message + "/" + errorStore.getReason(err.response?.status))
-            }            
+            errorStore.processAxiosError(err)          
 
         },       
 

@@ -1,0 +1,66 @@
+<template>
+    <Dropdown v-model="selectedElement" :options="availableItems" :loading=loading optionLabel="name" :placeholder="'Select ' + objectType" />
+    <Dropdown v-if="selectedElement" v-model="selectedVersion" :options="availableVersions" optionLabel="tag" placeholder="Select Version" />
+</template>
+
+<script>
+
+import Dropdown from 'primevue/dropdown'
+import { useEditorStore } from '../../stores';
+
+export default {
+
+    components: { Dropdown },
+    emits: ['updateSelection', 'updateVersion'],
+    props: {
+        objectType: {
+            type: String,
+            required: true
+        }
+    },
+    data() {
+        return {
+            selectedElement: undefined,
+            selectedVersion: undefined,
+            loading: true,
+            availableItems: [],
+            availableVersions: []
+        }
+    },
+
+    setup() {
+        const editorStore = useEditorStore();
+        return { editorStore }
+    },
+    computed:
+    {
+        selectedItem() { return {name: this.selectedElement?.name, uuid : this.selectedElement?.uuid, version: this.selectedVersion?.version}},        
+    },
+    watch:
+    {
+        selectedItem: {
+            handler(newValue)
+            {
+                this.$emit("updateSelection",newValue);
+            },
+            deep: true
+        },
+        'selectedItem.uuid': {
+            async handler(newValue)
+            {
+                this.availableVersions = await this.editorStore.getOptionsForElement(newValue, this.objectType)
+            }
+        }
+    },
+    async mounted() {
+        // TODO: heck whether this savely works with onMounted or whether this should be done with onDisplay
+        console.log("Selector Mounted")
+        this.loading = true;
+        await this.editorStore.updateAvailableOptions(this.objectType);
+        console.log(this.objectType)
+        this.availableItems = await this.editorStore.getListForType(this.objectType) 
+        console.log(this.availableItems);
+        this.loading = false;
+    }
+}
+</script>

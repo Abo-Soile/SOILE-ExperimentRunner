@@ -1,16 +1,33 @@
 import { INodeState, NodeInterfaceDefinitionStates } from "@baklavajs/core";
 
-export class SoileNodeState<I,O> implements INodeState<I,O>
+
+interface NodePosition 
+{
+    x : Number,
+    y : Number
+}
+
+export interface TaskNodeState<I,O> extends INodeState<I,O>
 {
     type: string;
+    start: boolean;
+    id: string;
+    title: string;
+    taskUUID: string;
+    taskVersion: string
+    inputs: NodeInterfaceDefinitionStates<any>;
+    outputs: NodeInterfaceDefinitionStates<any>;
+    taskOutputs: Array<string>;    
+}
+
+export interface FilterNodeState<I,O> extends INodeState<I,O>
+{
+    type: string;
+    start: boolean;
     id: string;
     title: string;
     inputs: NodeInterfaceDefinitionStates<any>;
     outputs: NodeInterfaceDefinitionStates<any>;
-    taskOutputs: Array<string>;
-}
-
-export class DynamicSoileNodeState<I,O> implements INodeState<I,O>
-{
-
+    filters: Map<string,any>;
+    default: string;
 }

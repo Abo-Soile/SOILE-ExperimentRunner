@@ -18,11 +18,14 @@ const {isRunningTask} = storeToRefs(userStore)
 function showErrorToast(severity, message)
 {  
   console.log("Adding error Toast");
-  toastInstance.add({ severity : severity, detail: message, life: 3000 })
+  console.log(severity)
+  console.log(message)
+  toastInstance.add({ severity: severity, detail: message, life: 3000 })
 }
 
 watch(latestError, (newError) => {
-  console.log("Received new errror")
+  console.log("Received new error")
+  console.log(newError)
   if(newError)
   {
     showErrorToast(newError.severity,newError.message);

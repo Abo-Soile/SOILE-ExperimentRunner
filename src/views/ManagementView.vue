@@ -52,6 +52,7 @@
     </div>
     <ConfirmDialog :target=currentTarget message="Are you sure you want to close this? All unsaved changes will be lost"
       reject="Cancel" :isVisible=showConfirm @confirm="confirmation(true)" @reject="confirmation(false)" />
+    <ObjectSelectionDialog v-model:visible="showSelector" :object-type="elementType" @selected="openSelectionTab"></ObjectSelectionDialog>
   </div>
 </template>
   
@@ -62,17 +63,23 @@ import Button from 'primevue/button';
 import PanelMenu from 'primevue/panelmenu';
 import Editor from "@/components/projecteditor/Editor.vue"
 import { useGraphStore } from "@/stores/graph.ts";
+import { useEditorStore } from "@/stores/editing.js";
 
 
 import { ref, computed, reactive } from "vue";
 import ConfirmDialog from '@/components/dialogs/ConfirmDialog.vue';
+import ObjectSelectionDialog from '../components/utils/ObjectSelectionDialog.vue';
 
+
+const editorStore = useEditorStore();
 const experiments = reactive({ active: 0, elements: [] });
 const projects = reactive({ active: 0, elements: [] });
 const tasks = reactive({ active: 0, elements: [] });
 const graphStore = useGraphStore();
 const currentTarget = ref({});
 const showConfirm = ref(false);
+const elementType = ref('');
+const showSelector = ref(false);
 function createElement(prefix, element) {
   const existentNames = element.elements.map((x) => x.name)
   const name = uniqueID(prefix, existentNames);
@@ -109,7 +116,27 @@ function confirmation(close) {
   currentTarget.value = {};
   showConfirm.value = false;
 }
-//const projectsPresent = computed(() => projects.length > 0)
+//const projectsPresent = computed(() => projects.length > 0
+function showOpenElementDialog(typeForDialog)
+{
+  elementType.value = typeForDialog;
+  showSelector.value = true;
+}
+/**
+ * Open a tab for the selected Type of Element in the respective tabs rider. 
+ * @param {} element 
+ */
+function openSelectionTab(element)
+{
+  if(element)
+  {
+    
+  } 
+  else{
+    showSelector.value = false;
+  } 
+}
+
 
 const items = computed(() => [
   {
@@ -126,7 +153,10 @@ const items = computed(() => [
       },
       {
         label: 'Open',
-        icon: 'pi pi-fw pi-folder-open'
+        icon: 'pi pi-fw pi-folder-open',
+        command: () => {
+          showOpenElementDialog("project");
+        }
       },
     ]
   },
@@ -144,7 +174,10 @@ const items = computed(() => [
       },
       {
         label: 'Open',
-        icon: 'pi pi-fw pi-folder-open'
+        icon: 'pi pi-fw pi-folder-open',
+        command: () => {
+          showOpenElementDialog("task");
+        }
       },
     ]
   },
@@ -158,12 +191,15 @@ const items = computed(() => [
         command: () => {
           console.log("Tring to create Project")
           createElement("Experiment", experiments)
+          
         }
       },
       {
         label: 'Open',
-        icon: 'pi pi-fw pi-folder-open'
-
+        icon: 'pi pi-fw pi-folder-open',
+        command: () => {
+          showOpenElementDialog("experiment");
+        }
       },
     ]
   }

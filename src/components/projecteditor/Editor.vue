@@ -1,14 +1,16 @@
 <template>
-    <div style="height:100%"  @oncontextmenu="parseEvent()">
-        <baklava-editor :view-model="baklava" >
+    <div style="height:100%" @oncontextmenu="parseEvent()">
+        <baklava-editor :view-model="baklava">
             <template #node="nodeProps">
-            <SoileNode v-if="isSoileNode(nodeProps.node.type)" v-bind="nodeProps" />
-            <BaklavaNode v-else v-bind="nodeProps" />
-        </template>
-            <template #toolbar="toolbarProps">    
-                <div class="baklava-toolbar"> 
-                    <button class="baklava-button" @click="saveProject()"> <component :is="saveIcon" /> </button>                   
-                </div>            
+                <SoileNode v-if="isSoileNode(nodeProps.node.type)" v-bind="nodeProps" />
+                <BaklavaNode v-else v-bind="nodeProps" />
+            </template>
+            <template #toolbar="toolbarProps">
+                <div class="baklava-toolbar">
+                    <button class="baklava-button" @click="saveProject()">
+                        <saveIcon />
+                    </button>
+                </div>
             </template>
         </baklava-editor>
     </div>
@@ -16,7 +18,6 @@
 
 <script>
 
-import { defineComponent } from "vue";
 import { EditorComponent, useBaklava } from "@baklavajs/renderer-vue";
 import TaskNode from "./NodeTypes/TaskNode";
 import FilterNode from "./NodeTypes/FilterNode";
@@ -25,37 +26,40 @@ import "@baklavajs/themes/dist/syrup-dark.css";
 const BaklavaNode = Components.Node;
 import { DependencyEngine } from "@baklavajs/engine";
 import SoileNode from "./ViewComponents/SoileNode.vue";
+import { BaklavaToSoileProjectJSON } from "../../helpers/baklavasoileConverter";
+const saveIcon = Icons.DeviceFloppy;
+import { checkConnection } from './events/graphEvents.ts'
+import { useGraphStore } from "../../stores";
 
 export default {
-    components: {"baklava-editor": EditorComponent, BaklavaNode, SoileNode},
+    components: { "baklava-editor": EditorComponent, BaklavaNode, SoileNode, saveIcon },
     props: {
         name: {
             type: String,
             required: true
-        }        
+        }
     },
     data() {
         return {
-            saveIcon: Icons.DeviceFloppy
         };
     },
-    
-    created() {     
+
+    created() {
     },
-    setup(props)
-    {
+    setup(props) {
+        const graphStore = useGraphStore();
         const baklava = useBaklava();
         baklava.editor.registerNodeType(TaskNode)
         baklava.editor.registerNodeType(FilterNode)
-        const engine = new DependencyEngine(baklava.editor);        
+        baklava.editor.graphHooks.checkConnection.subscribe("soile:connectionCheck", (c) => checkConnection(c.from, c.to))        
+        const engine = new DependencyEngine(baklava.editor);
         console.log(baklava.editor)
         console.log(engine)
         engine.start();
-        return { baklava }
-    },  
+        return { baklava, graphStore }
+    },
     methods: {
-        isSoileNode(nodeType)
-        {
+        isSoileNode(nodeType) {
             return nodeType === "TaskNode" || nodeType === "FilterNode" || nodeType === "ExperimentNode"
         },
         addNodeWithCoordinates(nodeType, x, y) {
@@ -66,25 +70,17 @@ export default {
             this.editor.addConnection
             return n;
         },
-        parseEvent(event)
-        {
+        parseEvent(event) {
             console.log(event);
         },
-        saveProject()
-        {
+        saveProject() {
             console.log(this.baklava.editor.save());
+            console.log(BaklavaToSoileProjectJSON(this.baklava.editor.save()));
         },
-        loadProject()
-        {
+        loadProject() {
             //TODO (popup)
         },
-        checkConnection(from, to)
-        {
-            console.log(from);
-            console.log(to)
-            
 
-        }
     }
 };
 </script>

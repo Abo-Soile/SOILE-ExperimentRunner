@@ -11,7 +11,7 @@ import axios from 'axios'
 import { InputInterface } from "../NodeInterfaces/InputInterface";
 import { useGraphStore } from "@/stores/graph";
 import { mapValues } from '../utils/utils.ts';
-import { SoileNodeState } from "./SoileNodeState";
+import { TaskNodeState } from "./SoileNodeState";
 interface Inputs {
   previous: any[];
 }
@@ -22,7 +22,7 @@ interface Outputs {
 
 
 
-export default class TaskNode extends Node<Inputs,Outputs> {
+export default class TaskNode extends Node<Inputs,Outputs> implements SoileNodeState{
   public type = "TaskNode";
   myTitle = this.type;
   public set title( newTitle : string)
@@ -46,6 +46,12 @@ export default class TaskNode extends Node<Inputs,Outputs> {
   public taskOutputs = new Array<string>;  
   public task = {uuid : "", name: "", version: "", tag: "", type: ""}
   public graphStore = useGraphStore();
+  
+  public isStartNode()
+  {
+    return this.graphStore.isStartNode(this);  
+  }
+
   public inputs = {
     previous: new InputInterface("Previous", "InputConnection").use(allowMultipleConnections),
     type: new TextInterface("TaskType", "Type: " + this.task.type).setPort(false),
@@ -81,6 +87,7 @@ export default class TaskNode extends Node<Inputs,Outputs> {
   }
 
   public calculate: CalculateFunction<Inputs, Outputs> = ({ previous }) => {
+    console.log("Trying to calculate")
     if (previous.length > 0) {
       console.log(previous)
       console.log(this.inputs.previous)
@@ -110,25 +117,6 @@ export default class TaskNode extends Node<Inputs,Outputs> {
   onDestroy()
   {
     this.graphStore.removeNode(this);
-  }
-  
-
-  public save(): INodeState<any,any> {
-    
-    const inputStates = mapValues(this.inputs, (intf) => intf.save()) as NodeInterfaceDefinitionStates<any>;
-    const outputStates = mapValues(this.outputs, (intf) => intf.save()) as NodeInterfaceDefinitionStates<any>;
-
-    const state: SoileNodeState<any, any> = {
-        type: this.type,
-        id: this.id,
-        title: this.title,
-        inputs: inputStates,
-        outputs: outputStates,    
-        taskOutputs: this.taskOutputs    
-    };
-
-    return this.hooks.afterSave.execute(state);
-}
-
+  }    
 
 }
