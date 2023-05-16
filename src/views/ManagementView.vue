@@ -122,9 +122,11 @@ function showOpenElementDialog(typeForDialog)
  */
 function openSelectionTab(element)
 {
+  console.log(element)
   if(element)
   {
-    
+    editorStore.loadElement(elementType.value, element.name, element.uuid, element.version)
+    showSelector.value = false;
   } 
   else{
     showSelector.value = false;
@@ -149,7 +151,7 @@ const items = computed(() => [
         label: 'Open',
         icon: 'pi pi-fw pi-folder-open',
         command: () => {
-          showOpenElementDialog("project");
+          showOpenElementDialog("Project");
         }
       },
     ]
@@ -170,7 +172,7 @@ const items = computed(() => [
         label: 'Open',
         icon: 'pi pi-fw pi-folder-open',
         command: () => {
-          showOpenElementDialog("task");
+          showOpenElementDialog("Task");
         }
       },
     ]
@@ -192,7 +194,7 @@ const items = computed(() => [
         label: 'Open',
         icon: 'pi pi-fw pi-folder-open',
         command: () => {
-          showOpenElementDialog("experiment");
+          showOpenElementDialog("Experiment");
         }
       },
     ]

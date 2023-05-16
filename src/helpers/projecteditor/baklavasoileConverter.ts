@@ -3,7 +3,8 @@ import TaskNode from "../components/projecteditor/NodeTypes/TaskNode";
 import FilterNode from "../components/projecteditor/NodeTypes/FilterNode";
 import { Graph, NodeInterface } from "@baklavajs/core";
 import ExperimentNode from "../components/projecteditor/NodeTypes/ExperimentNode";
-
+import { TaskSideBarOption } from "@/components/projecteditor/NodeOptions";
+import { SOILEProject } from './SoileTypes'
 
 
 
@@ -17,13 +18,25 @@ export function loadSoileProjectToBaklava(baklava : IBaklavaViewModel, soileJson
     const connections = new Array<{from : String, to : String}>();
     const filterconnections = new Array<{from : NodeInterface, to : String}>();
     const graph = baklava.editor.graph;
+    var defaultX = 100
+    var defaultY = 100
+
     for(const task of soileJson.tasks)
     {        
         const t = new TaskNode();
         graph.addNode(t);        
         t.setTaskInformation({uuid: task.UUID, name: task.name});
         t.setTaskVersion(task.version, task.tag);
-        t.title = task.instanceID;
+        t.title = task.instanceID;        
+        if(task.position)
+        {
+          t.position = task.position;        
+        }
+        else{
+          t.position = {x : defaultX, y: defaultY}
+          defaultX = defaultX + 100;
+          defaultY = defaultY + 100;
+        }
         nextMap.set(task.instanceID, t.outputs.next);
         previousMap.set(task.instanceID, t.inputs.previous);
         for(const output of task.outputs)
@@ -37,7 +50,16 @@ export function loadSoileProjectToBaklava(baklava : IBaklavaViewModel, soileJson
         
         const f = new FilterNode();
         graph.addNode(f);
-        f.title = filter.instanceID;        
+        f.title = filter.instanceID;      
+        if(filter.position)
+        {
+          f.position = filter.position;        
+        }
+        else{
+          f.position = {x : defaultX, y: defaultY}
+          defaultX = defaultX + 100;
+          defaultY = defaultY + 100;
+        }  
         for(const { i , option } of filter.options.map((value,index) => ({index,option})))
         {
             f.addFilter(option.name ? option.name : "Filter " + i , option.filter)
@@ -52,6 +74,15 @@ export function loadSoileProjectToBaklava(baklava : IBaklavaViewModel, soileJson
         const e = new ExperimentNode;
         graph.addNode(e);
         e.title = experiment.instanceID;
+        if(experiment.position)
+        {
+          e.position = experiment.position;        
+        }
+        else{
+          e.position = {x : defaultX, y: defaultY}
+          defaultX = defaultX + 100;
+          defaultY = defaultY + 100;
+        }
         e.setExperimentInformation({uuid: experiment.UUID, name : experiment.name})
         e.setTaskVersion(experiment.version, experiment.tag)
         nextMap.set(experiment.instanceID, e.outputs.next);
@@ -118,7 +149,7 @@ export function BaklavaToSoileProjectJSON(graph: Graph ) {
         {
             const cnode = node as FilterNode;
             const filters = new Array<any>;
-            for(let [name, filterData] of cnode.Filters)
+            for(const [name, filterData] of cnode.Filters)
             {
                 const current = {
                     name: name,
@@ -143,79 +174,4 @@ export function BaklavaToSoileProjectJSON(graph: Graph ) {
 }
 
 
-interface FilterInstance 
-{
-    instanceID: string,
-    "options": [
-      {
-        "name": string,
-        "filter": string,
-        "next": string
-      }
-    ],
-    defaultOption: string
-    position: {
-        x : number,
-        y: number
-    }
-  }
-
-interface TaskInstance {
-    "UUID": string,
-    "name": string,
-    "version": string,
-    "tag": string,
-    "instanceID": string,
-    filter?: string,
-    "outputs": [
-      string
-    ],
-    next: string,
-    codeType: {
-      "language": string,
-      "version": string
-    }
-    position: {
-        x : number,
-        y: number
-    }
-
-  }
-
-interface SOILEProject {
-    
-        "UUID": string,
-        "name": string,
-        "version": string,
-        "tag": string,
-        "tasks": [
-          TaskInstance
-        ],
-        "experiments": [
-          {
-            "UUID": string,
-            "name": string,
-            "version": string,
-            "tag": string,
-            "elements": [
-              {
-                "elementType": string,
-                "data": [ FilterInstance | TaskInstance ]
-              }
-            ],
-            "randomize": boolean,
-            "instanceID": string,
-            next: string,
-            position: {
-                x : number,
-                y: number
-            }
-          }
-        ],
-        "filters": [
-          FilterInstance
-        ],
-        "start": string,
-        "private": boolean
-      }
 

@@ -22,8 +22,8 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import DropDown from "./DropDown.vue";
-import { SelectionItem } from "./DropDown.vue";
+import DropDown from "../components/DropDown.vue";
+import { SelectionItem } from "../components/DropDown.vue";
 import ExperimentNode from "../NodeTypes/ExperimentNode";
 import { ComponentInterface } from "../NodeInterfaces/ComponentInterface";
 import { useEditorStore, useGraphStore, useElementStore, useErrorStore } from "@/stores";

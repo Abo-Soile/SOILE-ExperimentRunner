@@ -1,42 +1,20 @@
 import { v4 as uuidv4 } from 'uuid'
-import { DynamicNodeDefinition, INodeState, Node, NodeInterface, NodeInterfaceDefinitionStates } from "@baklavajs/core";
+import { NodeInterface } from "@baklavajs/core";
 import { allowMultipleConnections } from "@baklavajs/engine"
 import { FilterSideBarOption, SideBarButton } from "../NodeOptions"
 import { markRaw } from "vue";
 import { displayInSideBar } from "./utilities";
-import { DynamicNode } from "@baklavajs/core";
 import { ComponentInterface } from '../NodeInterfaces/ComponentInterface';
-import { useGraphStore } from "@/stores";
-import { mapValues } from '../utils/utils';
-import { FilterNodeState } from './SoileNodeState';
-import { SoileNodeState } from '../Interfaces/SoileNodeProperties';
+
+import SoileNode from './SoileNode';
 
 
-export default class FilterNode extends Node<any,any> implements SoileNodeState{
+export default class FilterNode extends SoileNode{
   public type = "FilterNode";
   public name = "Filter";  
   public twoColumn = true;    
   defaultOption = '';
   myTitle = this.type;
-  graphStore = useGraphStore();
-
-  public isStartNode()
-  {
-    return this.graphStore.isStartNode(this);  
-  }
-
-  public set title( newTitle : string)
-  {
-    if(this.graphStore.isNameOk(this,newTitle))
-    {      
-      this.myTitle = this.graphStore.updateName(this,this.myTitle,newTitle);
-    }
-  }
-  public get title() : string
-  {
-    return this.myTitle;
-  }
-
   Filters = new Map<string,{filterstring : string, interfaceID : string}>  
   
   public inputs = {
@@ -49,6 +27,10 @@ export default class FilterNode extends Node<any,any> implements SoileNodeState{
     default: new NodeInterface("Default", "OutputConnection")
   };
 
+  public isValid(): boolean {
+      // need to think, what checks could be made here.
+      return true;
+  }
 
   constructor() {
     super();      
@@ -81,50 +63,6 @@ export default class FilterNode extends Node<any,any> implements SoileNodeState{
   public getFilters()
   {
     return this.Filters;
-  }
-
-  load(state: INodeState<any, any>): void {
-      console.log(state);
-  }
-  onPlaced(): void {
-    this.graphStore.setupNode(this);
-    if(this.title === this.type)
-    {
-      console.log("Getting unique name")
-      this.myTitle = this.graphStore.getUniqueName(this);
-    }
-  }
-  onUpdate(inputs: any, outputs: any)
-  {
-    console.log(inputs);
-    console.log(outputs);
-    console.log(this.outputs)
-    return {             
-             outputs: this.outputs 
-            } 
-  }
-  onDestroy()
-  {
-    this.graphStore.removeNode(this);
-  }
-
-  public save(): INodeState<any,any> {
-    console.log("Saving Filter")
-    const inputStates = mapValues(this.inputs, (intf) => intf.save()) as NodeInterfaceDefinitionStates<any>;
-    // we don't have any outputs present, but we know that they will have the correct type
-    const outputStates = mapValues(this.outputs, (intf) => intf.save()) as NodeInterfaceDefinitionStates<any>;
-
-    const state: FilterNodeState<any, any> = {
-        type: this.type,
-        id: this.id,
-        title: this.title,
-        inputs: inputStates,
-        outputs: outputStates,    
-        filters: this.Filters,
-        default: this.outputs.default.id
-    };
-
-    return this.hooks.afterSave.execute(state);
   }
 
 }

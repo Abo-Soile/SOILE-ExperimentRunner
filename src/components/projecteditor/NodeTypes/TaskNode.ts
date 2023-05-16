@@ -1,4 +1,4 @@
-import { Node, NodeInterface, CalculateFunction, INodeState, NodeInterfaceDefinitionStates } from "@baklavajs/core";
+import {  NodeInterface, CalculateFunction } from "@baklavajs/core";
 import { TextInterface } from "@baklavajs/renderer-vue";
 import { allowMultipleConnections } from "@baklavajs/engine"
 import { v4 as uuidv4 } from 'uuid'
@@ -7,11 +7,9 @@ import { markRaw } from "vue";
 import { displayInSideBar } from "./utilities";
 import OutputListOption from "../NodeOptions/OutputListOption.vue";
 import { ComponentInterface } from "../NodeInterfaces/ComponentInterface";
-import axios from 'axios'
 import { InputInterface } from "../NodeInterfaces/InputInterface";
-import { useGraphStore } from "@/stores/graph";
-import { mapValues } from '../utils/utils.ts';
-import { TaskNodeState } from "./SoileNodeState";
+
+import SoileNode from "./SoileNode";
 interface Inputs {
   previous: any[];
 }
@@ -22,41 +20,20 @@ interface Outputs {
 
 
 
-export default class TaskNode extends Node<Inputs,Outputs> implements SoileNodeState{
+export default class TaskNode extends SoileNode {
   public type = "TaskNode";
   myTitle = this.type;
-  public set title( newTitle : string)
-  {
-    console.log("Setting title")
-    if(this.graphStore.isNameOk(this,newTitle))
-    {      
-      console.log("updating title to" + newTitle);
-       const changedTitle = this.graphStore.updateName(this,this.myTitle,newTitle);
-       console.log("The changed Title is" + changedTitle);
-       this.myTitle = changedTitle
-    }
-  }
-  public get title() : string
-  {
-    return this.myTitle;
-  }
 
-
-  public twoColumn = true;
-  public taskOutputs = new Array<string>;  
-  public task = {uuid : "", name: "", version: "", tag: "", type: ""}
-  public graphStore = useGraphStore();
-  
-  public isStartNode()
-  {
-    return this.graphStore.isStartNode(this);  
-  }
+  public nodeOutputs = new Array<string>;  
+  public nodePersistent = new Array<string>;  
+  public task = {uuid : "", name: "", version: "", tag: "", type: ""}  
 
   public inputs = {
     previous: new InputInterface("Previous", "InputConnection").use(allowMultipleConnections),
     type: new TextInterface("TaskType", "Type: " + this.task.type).setPort(false),
     taskInformation: new TextInterface("TaskInformation", "Task: " + (this.task.name != "" ? this.task.name + "@" + this.task.tag : "") ).setPort(false),
-    outputs: new ComponentInterface("Outputs", { items: this.taskOutputs, title: "Outputs" }, OutputListOption).setPort(false),
+    outputs: new ComponentInterface("Outputs", { items: this.nodeOutputs, title: "Outputs" }, OutputListOption).setPort(false),
+    persistent: new ComponentInterface("Persistent", { items: this.nodePersistent, title: "Persistent Data" }, OutputListOption).setPort(false),
     edit: new NodeInterface("Edit", undefined).setComponent(markRaw(SideBarButton)).setPort(false),
     sideBarOption1: new ComponentInterface("SideBar", this, TaskSideBarOption).setHidden(true).use(displayInSideBar, true).setPort(false)
   };
@@ -76,47 +53,42 @@ export default class TaskNode extends Node<Inputs,Outputs> implements SoileNodeS
   }
 
   public getOutputs() {
-    return this.taskOutputs;
+    return this.nodeOutputs;
   }
   public addTaskOutput(outputName: string) {
     this.graphStore.addOutput(this, outputName);
   }
   public removeTaskOutput(outputName: string) {
     console.log()
-    this.taskOutputs.splice(this.taskOutputs.indexOf(outputName), 1)
+    this.nodeOutputs.splice(this.nodeOutputs.indexOf(outputName), 1)
   }
-
-  public calculate: CalculateFunction<Inputs, Outputs> = ({ previous }) => {
-    console.log("Trying to calculate")
-    if (previous.length > 0) {
-      console.log(previous)
-      console.log(this.inputs.previous)
-    }
-    return { next: this.id };
+  public getPersistent() {
+    return this.nodePersistent;
   }
-
+  public addTaskPersistent(dataName: string) {
+    this.graphStore.addPersistantData(this, dataName);
+  }
+  public removeTaskPersistent(dataName: string) {
+    this.graphStore.removePersistantData(this,dataName)
+  }
   public setTaskInformation(data : { uuid: string, name: string})
   {
     this.task.uuid = data.uuid;
     this.task.name = data.name;
+    this.task.version = "";
+    this.task.tag = "";
     this.inputs.taskInformation.value = "Task: " + (this.task.name != "" ? this.task.name + "@" + this.task.tag : "")
   }
   public setTaskVersion(version : string, tag : string)
   {
     this.task.version = version;   
+    this.elementStore.getPersistentDataForTask(this.task.uuid, this.task.version).then((persistant => {
+      for(const persistentValue of persistant)
+      {
+        this.addTaskPersistent(persistentValue);
+      }
+    }).bind(this))
     this.task.tag = tag; 
     this.inputs.taskInformation.value = "Task: " + (this.task.name != "" ? this.task.name + "@" + this.task.tag : "")
   }
-  onPlaced(): void {
-    this.graphStore.setupNode(this);
-    if(this.title == this.type)
-    {
-      this.myTitle = this.graphStore.getUniqueName(this);
-    }
-  }
-  onDestroy()
-  {
-    this.graphStore.removeNode(this);
-  }    
-
 }

@@ -8,7 +8,7 @@
 
 <script>
 
-import SOILE2 from '../../javascript/soile2.js'
+import SOILE2 from '@/javascript/experimentlang/soile2.js'
 
 
 export default {

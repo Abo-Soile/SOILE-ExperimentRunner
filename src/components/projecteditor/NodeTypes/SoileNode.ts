@@ -1,18 +1,8 @@
-import { Node, NodeInterface, CalculateFunction, INodeState, NodeInterfaceDefinitionStates } from "@baklavajs/core";
-import { TextInterface } from "@baklavajs/renderer-vue";
-import { allowMultipleConnections } from "@baklavajs/engine"
-import { v4 as uuidv4 } from 'uuid'
-import { SideBarButton, TaskSideBarOption } from "../NodeOptions"
-import { markRaw } from "vue";
-import { displayInSideBar } from "./utilities";
-import OutputListOption from "../NodeOptions/OutputListOption.vue";
-import { ComponentInterface } from "../NodeInterfaces/ComponentInterface";
-import axios from 'axios'
-import { InputInterface } from "../NodeInterfaces/InputInterface";
+import { Graph, GraphTemplate, IGraphNode, Node } from "@baklavajs/core";
 import { useGraphStore } from "@/stores/graph";
-import { mapValues } from '../utils/utils.ts';
-import { TaskNodeState } from "./SoileNodeState";
+import { useElementStore } from "@/stores/elements";
 import { SoileNodeState } from "../Interfaces/SoileNodeProperties";
+
 interface Inputs {
     previous: any[];
 }
@@ -21,19 +11,22 @@ interface Outputs {
     next: string;
 }
 
+/**
+ * Base class for Soile Nodes in Baklava. Contains functionality to essentially ensure uniqueness of Node Names (to generate unique Instance IDs)
+ */
 
-
-export default abstract class SoileNode extends Node<Inputs, Outputs> implements SoileNodeState {
+export default abstract class SoileNode extends Node<any, any> implements SoileNodeState, IGraphNode {
     public twoColumn = true;
     public graphStore = useGraphStore();
-
+    public elementStore = useElementStore();
+    public position = { x :0, y : 0, width :200, height: 400}
     public abstract type: string;
     abstract myTitle: string;
     public constructor() {
         super();
-        this.id = uuidv4();
-        this.initializeIo();
     }
+    template: GraphTemplate;
+    subgraph: Graph;
     public set title(newTitle: string) {
         console.log("Setting title")
         if (this.graphStore.isNameOk(this, newTitle)) {
@@ -63,3 +56,4 @@ export default abstract class SoileNode extends Node<Inputs, Outputs> implements
     }
 
 }
+

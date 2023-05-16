@@ -4,7 +4,9 @@ import { INodeState, NodeInterfaceDefinitionStates } from "@baklavajs/core";
 interface NodePosition 
 {
     x : Number,
-    y : Number
+    y : Number,
+    width: Number,
+    height: Number,
 }
 
 export interface TaskNodeState<I,O> extends INodeState<I,O>

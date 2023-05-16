@@ -2,11 +2,11 @@
     <div
         :id="node.id"
         ref="el"
-        class="baklava-node"
+        class="baklava-node resizableNode"
         :class="classes"
         :style="styles"
-        :data-node-type="node.type"
-        @pointerdown="select"
+        :data-node-type="node.type"        
+        @pointerdown="select"        
     >
         <div class="__title" @pointerdown.self.stop="startDrag">
             <template v-if="!renaming">
@@ -55,14 +55,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, toRef, nextTick, onUpdated, onMounted } from "vue";
+import { ref, computed, toRef, nextTick, onUpdated, onMounted, onBeforeUnmount } from "vue";
 import { AbstractNode, GRAPH_NODE_TYPE_PREFIX, IGraphNode } from "@baklavajs/core";
 import { useDragMove, useGraph, useViewModel } from "@baklavajs/renderer-vue";
 import { Components, Icons } from "@baklavajs/renderer-vue";
 import { Node } from "@baklavajs/renderer-vue";
 
 import { useGraphStore } from "@/stores";
-import { SoileNodeState } from "../Interfaces/SoileNodeProperties";
+import { ResizeObserverEntry } from "@vueuse/core";
+import SoileNode from "../NodeTypes/SoileNode";
 
 const graphStore = useGraphStore();
 const contextMenu = Components.ContextMenu;
@@ -71,7 +72,7 @@ const NodeInterface = Node.NodeInterface;
 
 const props = withDefaults(
     defineProps<{
-        node: AbstractNode & SoileNodeState;
+        node: SoileNode;
         selected?: boolean;
     }>(),
     { selected: false },
@@ -105,7 +106,7 @@ const classes = computed(() => ({
 const styles = computed(() => ({    
     top: `${props.node.position?.y ?? 0}px`,
     left: `${props.node.position?.x ?? 0}px`,
-    width: `${props.node.width ?? 200}px`,
+    width: `${props.node.position.width ?? 200}px`,
     "box-shadow" : props.node.isStartNode() ? "0 0 0 3px green" : undefined,        
 }));
 const displayedInputs = computed(() => Object.values(props.node.inputs).filter((ni) => !ni.hidden && ni.port));
@@ -161,6 +162,31 @@ const onRender = () => {
         viewModel.value.hooks.renderNode.execute({ node: props.node, el: el.value });
     }
 };
-onMounted(onRender);
+
+const handleResize = (event : Array<ResizeObserverEntry>) => {
+    // otherwise this will be overwriting tab-out events, where they are made invisible.
+    if(event[0].contentRect.width > 0 && event[0].contentRect.height > 0)
+    {
+    props.node.position.width = event[0].contentRect.width;
+    props.node.position.height = event[0].contentRect.height;
+    }
+}
+
+onMounted(() => {
+    new ResizeObserver(handleResize).observe(el.value);    
+    onRender()
+});
+onBeforeUnmount(() => {
+    el.value.removeEventListener('resize', handleResize)
+})
 onUpdated(onRender);
 </script>
+
+<style scoped>
+.resizableNode
+{
+    resize: both;
+    overflow: scroll;
+}
+
+</style>

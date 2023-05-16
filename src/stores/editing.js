@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 
 import axios from 'axios';
 import { useErrorStore } from './errors';
+import { useElementStore } from './elements';
 
 export const useEditorStore = defineStore({
     id: 'editing',
@@ -23,6 +24,7 @@ export const useEditorStore = defineStore({
         },
         // load an element and push 
         async loadElement(type, elementName, elementID, elementVersion) {
+            console.log(type)
             const store = this.getStoreForType(type);
             for (const [i, element] of store.elements) {
                 if (element.name === elementName && element.version === elementVersion) {
@@ -52,14 +54,8 @@ export const useEditorStore = defineStore({
             return prefix + " " + i;
         },
         async loadObject(type, id, version) {
-            try {
-                const response = await axios.get("/" + type.toLowerCase() + "/" + id + "/" + version)
-                return response.data;
-            }
-            catch (err) {
-                this.processAxiosError(err)
-            }
-
+            const elementStore = useElementStore();
+            return await elementStore.getElement(id, version, type)
         },                
         processAxiosError(err) {
             const errorStore = useErrorStore()

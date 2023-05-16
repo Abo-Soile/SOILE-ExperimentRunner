@@ -1,18 +1,18 @@
+import remove as removeDiacritics from 'diacritics'
 import { defineStore } from 'pinia';
-
-import axios, { AxiosError } from 'axios';
 import { useErrorStore } from './errors';
-import { Graph, Node } from '@baklavajs/core';
+import { Graph} from '@baklavajs/core';
 import TaskNode from '../components/projecteditor/NodeTypes/TaskNode';
-import FilterNode from '../components/projecteditor/NodeTypes/FilterNode';
-import ExperimentNode from '../components/projecteditor/NodeTypes/ExperimentNode';
+import SoileNode from '@/components/projecteditor/NodeTypes/SoileNode';
+import ExperimentNode from '@/components/projecteditor/NodeTypes/ExperimentNode';
 
 
 export const useGraphStore = defineStore({
     id: 'graphs',
     state: () => ({
         // initialize the state. We don't update from the local storage, because this could contain privilegded data
-        outputInformation: new Map<string, Map<string, string[]>>(),
+        nodePersistentInformation: new Map<string, Map<string,string[]>>(), 
+        nodeOutputInformation: new Map<string, Map<string,string[]>>(),
         nodeNames: new Map<string, Map<any, string>>(),
         startNodes: new Map<string, string>(),
         graphs: new Map<string, Graph>()   
@@ -24,13 +24,13 @@ export const useGraphStore = defineStore({
             console.log(err);
             errorStore.raiseError(err.response?.status, err.response?.data)
         },
-        isNameOk(node: TaskNode | ExperimentNode | FilterNode, name: string) {
+        isNameOk(node: SoileNode, name: string) {
             console.log("Checking name: " + name)
             const graph = node.graph;
             this.setupGraph(graph);
             return !([... this.nodeNames.get(graph?.id).values()].some(v => v === this.refineName(name)))
         },
-        updateName(node: TaskNode | ExperimentNode | FilterNode, oldName: string, newName: string): string {
+        updateName(node: SoileNode, oldName: string, newName: string): string {
             const graphid = node.graph?.id;
             if (this.isNameOk(node, newName)) {
                 console.log("New Name is ok")
@@ -43,12 +43,12 @@ export const useGraphStore = defineStore({
             }
 
         },
-        setStartNode(node: TaskNode | ExperimentNode | FilterNode)
+        setStartNode(node: SoileNode)
         {
             const graph = node.graph;
             this.startNodes.set(graph?.id, node.id)
         },
-        isStartNode(node: TaskNode | ExperimentNode | FilterNode) : boolean
+        isStartNode(node: SoileNode) : boolean
         {
             const graph = node.graph;
             this.setupGraph(graph);
@@ -75,9 +75,9 @@ export const useGraphStore = defineStore({
             this.startNodes.delete(id);
         },
         refineName(name: string) {
-            return name.replace(" ", "_");
+            return removeDiacritics(name).replace(" ", "_").replace(/[^\w_\.]/g,'');
         },
-        getUniqueName(node: TaskNode | ExperimentNode | FilterNode) {
+        getUniqueName(node: SoileNode) {
             const graph = node.graph;
             const nodeID = node.id;
             this.setupGraph(graph)
@@ -94,11 +94,13 @@ export const useGraphStore = defineStore({
             }
             return this.refineName(node.type + " " + i);
         },        
-        setupNode(node: TaskNode | ExperimentNode | FilterNode) {
+        setupNode(node: SoileNode) {
             this.setupGraph(node.graph);
-            if (node instanceof TaskNode) {
-                if (!(node.id in this.outputInformation.get(node.graph?.id))) {
-                    this.outputInformation.get(node.graph?.id).set(node.id, node.taskOutputs);
+            if (node instanceof TaskNode  || node instanceof ExperimentNode ) {
+                if (!(node.id in this.nodeOutputInformation.get(node.graph?.id))) {
+                    this.nodeOutputInformation.get(node.graph?.id).set(node.id, node.nodeOutputs);
+                    this.nodePersistentInformation.get(node.graph?.id).set(node.id, node.nodePersistent);
+                    //TODO: Check if we need to add the nodeName here.
                 }
             }
             if(!this.startNodes.has(node.graph?.id))
@@ -106,28 +108,48 @@ export const useGraphStore = defineStore({
                 this.setStartNode(node);
             }
         },
-        removeNode(node: TaskNode | ExperimentNode | FilterNode) {
-            this.outputInformation.delete(node.id);
+        removeNode(node: SoileNode) {            
+            this.nodeOutputInformation.get(node.graph?.id).delete(node.id);            
+            this.nodePersistentInformation.get(node.graph?.id).delete(node.id);            
             this.nodeNames.get(node.graph?.id).delete(node);
         },
-        canAddTaskOutput(node: TaskNode, outputName: string) {
+        canAddTaskOutput(node: SoileNode, outputName: string) {
             // just in case this hasn't been done.
-            this.setupNode(node)
-            console.log(this.outputInformation.get(node.graph?.id).get(node.id));
-            return !(this.outputInformation.get(node.graph?.id).get(node.id).contains(outputName));
+            this.setupNode(node)            
+            return !(this.nodeOutputInformation.get(node.graph?.id).get(node.id).contains(outputName));
 
-        },
-        addOutput(node: TaskNode, outputName: string) {
+        },        
+        addOutput(node: SoileNode, outputName: string) {
             // just in case this hasn't been done.            
             if (this.canAddTaskOutput(node, outputName)) {
-                this.outputInformation.get(node.graph?.id).get(node.id).push(outputName);
+                this.nodeOutputInformation.get(node.graph?.id).get(node.id).push(outputName);
             }
         },
-        removeOutput(node: TaskNode, outputName: string) {
+        removeOutput(node: SoileNode, outputName: string) {
             this.setupNode(node)
-            const currentOutputs = this.outputInformation.get(node.graph?.id).get(node.id);
+            const currentOutputs = this.outputInformation.get(node.graph?.id);
             currentOutputs.splice(currentOutputs.indexOf(outputName), 1)
         },
+        addPersistantData(node: TaskNode | ExperimentNode, persistentData : string)
+        {
+        // just in case this hasn't been done.            
+            this.setupNode(node)
+            this.nodePersistentInformation.get(node.graph?.id).get(node.id).push(persistentData);
+        },        
+        removePersistantData(node: TaskNode | ExperimentNode, data : string)
+        {
+            this.setupNode(node)
+            const currentData = this.nodePersistentInformation.get(node.graph?.id).get(node.id);
+            currentData.splice(currentData.indexOf(data), 1)
+        },
+        addExperiment(node: ExperimentNode)
+        {
+            // needs to be handled specially (all the enclosed nodes etc pp)
+        },
+        removeExperiment(node: ExperimentNode)
+        {
+            // needs to be handled specially (all the enclosed nodes etc pp)
+        },                
         convertGraphToSOILE(name: string, graph: Graph )
         {
 

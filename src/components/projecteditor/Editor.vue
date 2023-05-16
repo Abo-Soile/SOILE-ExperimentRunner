@@ -26,7 +26,7 @@ import "@baklavajs/themes/dist/syrup-dark.css";
 import TaskNode from "./NodeTypes/TaskNode";
 import FilterNode from "./NodeTypes/FilterNode";
 import ExperimentNode from "./NodeTypes/ExperimentNode";
-import SoileNode from "./ViewComponents/SoileNode.vue";
+import SoileNode from "./ViewComponents/SoileVueNode.vue";
 
 import { BaklavaToSoileProjectJSON, loadSoileProjectToBaklava } from "../../helpers/baklavasoileConverter";
 import { checkConnection } from './events/graphEvents.ts'

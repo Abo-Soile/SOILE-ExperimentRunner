@@ -48,7 +48,7 @@ export default {
         'selectedItem.uuid': {
             async handler(newValue)
             {
-                this.availableVersions = await this.elementStore.getOptionsForElement(newValue, this.objectType)
+                this.availableVersions = await this.elementStore.getOptionsForElement(newValue, this.objectType.toLowerCase())
             }
         }
     },
@@ -56,9 +56,9 @@ export default {
         // TODO: heck whether this savely works with onMounted or whether this should be done with onDisplay
         console.log("Selector Mounted")
         this.loading = true;
-        await this.elementStore.updateAvailableOptions(this.objectType);
+        await this.elementStore.updateAvailableOptions(this.objectType.toLowerCase());
         console.log(this.objectType)
-        this.availableItems = await this.elementStore.getListForType(this.objectType) 
+        this.availableItems = await this.elementStore.getListForType(this.objectType.toLowerCase()) 
         console.log(this.availableItems);
         this.loading = false;
     }

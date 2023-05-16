@@ -18,11 +18,12 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import DropDown from "./DropDown.vue";
-import { SelectionItem } from "./DropDown.vue";
+import DropDown from "../components/DropDown.vue";
+import { SelectionItem } from "../components/DropDown.vue";
 import TaskNode from "../NodeTypes/TaskNode";
 import { ComponentInterface } from "../NodeInterfaces/ComponentInterface";
 import { useGraphStore, useElementStore, useErrorStore } from "@/stores";
+import { getOutputsFromTask } from '@/components/experimentlang/checkElang";
 
 import axios from "axios";
 export default defineComponent({
@@ -75,8 +76,14 @@ export default defineComponent({
         },
         async setTaskVersion(selected : { text: String, value: String})
         {       
+            // TODO: Check that this version is possible (i.e. no interfering outputs!)
+            const taskData = await this.elementStore.getElement(this.currentTask.value, selected.value, "task")
+            if(taskData.codeType.language === "elang")
+            {
+
+            }
             this.currentVersion = selected;
-            
+
         },
         removeOutput(output: string) {
             console.log("removing output: " + output)
@@ -118,6 +125,7 @@ export default defineComponent({
         },
         currentVersion(newValue)
         {
+
             this.currentNode.setTaskVersion(newValue.value,newValue.text);            
         }
     },

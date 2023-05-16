@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-
+import { getPersistentFromTask } from '@/javascript/experimentlang/checkElang'
 import axios from 'axios';
 import { useErrorStore } from './errors';
 
@@ -10,6 +10,7 @@ export const useElementStore = defineStore({
         availableTasks: [],
         availableExperiments: [],                
         availableProjects: [],
+        elements: {task : {}, project : {} , experiment : {}}
     }),
     actions: {
         async updateAvailableProjects() {
@@ -101,6 +102,77 @@ export const useElementStore = defineStore({
                 case "experiment": return await this.getElementOptions(uuid);
             }
         },
+        /**
+         * Get an element, either load (if not yet loaded) or take from memory.
+         * @param {*} uuid the uuid of the object
+         * @param {*} version  the version of the object
+         * @param {*} type the type (element, task or project) of the object
+         */
+        async getElement(uuid, version, type)
+        {
+            try {
+                
+                const element = this.elements[type][uuid] ? this.elements[type][uuid][version] : undefined;
+                if(element)
+                {
+                    return element
+                }
+                else{
+                    if(!this.elements[type][uuid])
+                    {
+                        this.elements[type][uuid] = {};
+                    }
+                    const response = await axios.get("/" + type.toLowerCase() + "/" + uuid + "/" + version)
+                    this.elements[type][uuid][version] = response.data;
+                    return this.elements[type][uuid][version];
+                }                
+            }
+            catch (err) {
+                this.processAxiosError(err)
+            }
+        },
+        async getPersistentDataForTask(uuid, version)
+        {
+            const element = await this.getElement(uuid, version, "task");
+            if(element.codeType.language === "elang")
+            {
+                return getPersistentFromTask(element.code);
+            }
+            else{
+                return [];
+            }
+        },     
+        async getPersistentDataForExperiment(uuid, version)
+        {
+            const experiment = await this.getElement(uuid, version, "experiment");            
+            return getPersistentDataForExperimentInstance(experiment);
+            
+        },           
+        async getPersistentDataForExperimentInstance(instance)
+        {
+            const persistentElements = new Set();
+            for(const element of instance.elements)            
+            {
+                if(element.type === "task")
+                {
+                    const codeData = await this.getPersistentDataForTask(element.data.uuid, element.data.version);
+                    const instanceData = element.data.persistent;
+                    instanceData.array.forEach(value => {
+                        persistentElements.add(value)
+                    });
+                    codeData.array.forEach(value => {
+                        persistentElements.add(value)
+                    });                
+                }
+                if( element.type === "experiment")
+                {
+                    this.getPersistentDataForExperimentInstance(element.data).forEach(value => {
+                        persistentElements.add(value)
+                    });
+                }
+            }
+            return Array.from(persistentElements);
+        },           
         async updateAvailableOptions(type)
         {
             switch(type)
@@ -115,6 +187,12 @@ export const useElementStore = defineStore({
             errorStore.processAxiosError(err)          
 
         },       
-
+        reset()
+        {
+            this.availableTasks = [];
+            this.availableExperiments = [];
+            this.availableProjects= [];
+            this.elements = {task : {}, project : {} , experiment : {}};
+        }
     }
 });
