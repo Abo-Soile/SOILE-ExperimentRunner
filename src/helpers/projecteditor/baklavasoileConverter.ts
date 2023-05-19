@@ -1,15 +1,16 @@
 import { IBaklavaViewModel } from "@baklavajs/renderer-vue";
-import TaskNode from "../components/projecteditor/NodeTypes/TaskNode";
-import FilterNode from "../components/projecteditor/NodeTypes/FilterNode";
+import TaskNode from "@/components/projecteditor/NodeTypes/TaskNode";
+import FilterNode from "@/components/projecteditor/NodeTypes/FilterNode";
 import { Graph, NodeInterface } from "@baklavajs/core";
-import ExperimentNode from "../components/projecteditor/NodeTypes/ExperimentNode";
+import ExperimentNode from "@/components/projecteditor/NodeTypes/ExperimentNode";
 import { TaskSideBarOption } from "@/components/projecteditor/NodeOptions";
 import { SOILEProject } from './SoileTypes'
+import { useGraphStore } from "@/stores/graph";
+import { instantiateExperimentInProject } from "./experimentConverter";
 
 
-
-export function loadSoileProjectToBaklava(baklava : IBaklavaViewModel, soileJson : SOILEProject) {
-
+export async function loadSoileProjectToBaklava(baklava : IBaklavaViewModel, soileJson : SOILEProject) {
+    const graphStore = useGraphStore();
 
     // this is a map of InstanceIDs to OutputInterfaces
     const nextMap = new Map<String, NodeInterface>()
@@ -18,30 +19,33 @@ export function loadSoileProjectToBaklava(baklava : IBaklavaViewModel, soileJson
     const connections = new Array<{from : String, to : String}>();
     const filterconnections = new Array<{from : NodeInterface, to : String}>();
     const graph = baklava.editor.graph;
-    var defaultX = 100
-    var defaultY = 100
-
+    var defaultX = 500
+    var defaultY = 300    
     for(const task of soileJson.tasks)
     {        
         const t = new TaskNode();
-        graph.addNode(t);        
-        t.setTaskInformation({uuid: task.UUID, name: task.name});
-        t.setTaskVersion(task.version, task.tag);
-        t.title = task.instanceID;        
         if(task.position)
         {
           t.position = task.position;        
         }
         else{
-          t.position = {x : defaultX, y: defaultY}
-          defaultX = defaultX + 100;
+          t.position = {x : defaultX, y: defaultY, width: 300, height: 300}
+          defaultX = defaultX + 300;
           defaultY = defaultY + 100;
+        }                
+        t.setElement(task.UUID, task.name);
+        await t.setElementVersion(task.version, task.tag);
+        graph.addNode(t);
+        t.title = task.instanceID;        
+        if(task.instanceID === soileJson.start)
+        {
+            graphStore.setStartNode(t);
         }
         nextMap.set(task.instanceID, t.outputs.next);
         previousMap.set(task.instanceID, t.inputs.previous);
         for(const output of task.outputs)
         {
-            t.addTaskOutput(output)
+            t.addElementOutput(output)
         }
         connections.push({from: task.instanceID, to : task.next});        
     }
@@ -49,42 +53,53 @@ export function loadSoileProjectToBaklava(baklava : IBaklavaViewModel, soileJson
     {
         
         const f = new FilterNode();
-        graph.addNode(f);
-        f.title = filter.instanceID;      
         if(filter.position)
         {
           f.position = filter.position;        
         }
         else{
-          f.position = {x : defaultX, y: defaultY}
-          defaultX = defaultX + 100;
+          f.position = {x : defaultX, y: defaultY, width: 300, height: 300}
+          defaultX = defaultX + 300;
           defaultY = defaultY + 100;
-        }  
-        for(const { i , option } of filter.options.map((value,index) => ({index,option})))
+        }
+        graph.addNode(f);
+        f.title = filter.instanceID;      
+          
+        for(const { index , value } of filter.options.map((value,index) => ({index,value})))
         {
-            f.addFilter(option.name ? option.name : "Filter " + i , option.filter)
-            filterconnections.push({ from : f.outputs[option.name], to : option.next})
+            const filterName = value.name ? value.name : "Filter " + index
+            f.addFilter(filterName , value.filter)
+            filterconnections.push({ from : f.outputs[filterName], to : value.next})
         }        
         connections.push({from: filter.instanceID, to : filter.defaultOption});
+
         nextMap.set(filter.instanceID, f.outputs.default);
+
         previousMap.set(filter.instanceID, f.inputs.previous);
     }
     for(const experiment of soileJson.experiments)
-    {
+    {        
         const e = new ExperimentNode;
-        graph.addNode(e);
-        e.title = experiment.instanceID;
-        if(experiment.position)
+        if(e.position)
         {
           e.position = experiment.position;        
         }
         else{
-          e.position = {x : defaultX, y: defaultY}
-          defaultX = defaultX + 100;
+          e.position = {x : defaultX, y: defaultY, width: 300, height: 300}
+          defaultX = defaultX + 300;
           defaultY = defaultY + 100;
         }
-        e.setExperimentInformation({uuid: experiment.UUID, name : experiment.name})
-        e.setTaskVersion(experiment.version, experiment.tag)
+        
+        e.setElement(experiment.UUID,  experiment.name)
+        await e.setElementVersion(experiment.version, experiment.tag)
+        
+        graph.addNode(e);
+        if(experiment.instanceID === soileJson.start)
+        {
+            graphStore.setStartNode(e);
+        }
+        e.title = experiment.instanceID;                
+        e.random = experiment.randomize;
         nextMap.set(experiment.instanceID, e.outputs.next);
         previousMap.set(experiment.instanceID, e.inputs.previous);
         connections.push({from: experiment.instanceID, to: experiment.next})
@@ -93,14 +108,15 @@ export function loadSoileProjectToBaklava(baklava : IBaklavaViewModel, soileJson
     {
         if(connection.to != "end")
         {
-            graph.addConnection(previousMap.get(connection.from) as NodeInterface, nextMap.get(connection.to) as NodeInterface)
+            // We need to map from the next Interface to the previous interface
+            graph.addConnection(nextMap.get(connection.from) as NodeInterface, previousMap.get(connection.to) as NodeInterface)
         }        
     }
     for(const connection of filterconnections)
     {
         if(connection.to != "end")
         {
-            graph.addConnection(connection.from, nextMap.get(connection.to) as NodeInterface)
+            graph.addConnection(connection.from, previousMap.get(connection.to) as NodeInterface)
         }        
     }
 
@@ -135,13 +151,13 @@ export function BaklavaToSoileProjectJSON(graph: Graph ) {
         {
             const cnode = node as TaskNode
             const taskData = {
-                UUID : cnode.task.uuid,
-                version: cnode.task.version,
-                tag: cnode.task.tag,
-                outputs: cnode.taskOutputs,
+                UUID : cnode.objectData.uuid,
+                version: cnode.objectData.version,
+                tag: cnode.objectData.tag,
+                outputs: cnode.nodeOutputs,
                 instanceID : cnode.title,
                 next: nextMap.get(node.outputs.next.id),
-                codeType: cnode.task.type
+                codeType: cnode.codeType
             }
             projectData.tasks.push(taskData)
         }
@@ -149,8 +165,9 @@ export function BaklavaToSoileProjectJSON(graph: Graph ) {
         {
             const cnode = node as FilterNode;
             const filters = new Array<any>;
-            for(const [name, filterData] of cnode.Filters)
+            for(const name in cnode.Filters.keys())
             {
+                const filterData = cnode.Filters.get(name);
                 const current = {
                     name: name,
                     filter: filterData.filterstring,
@@ -165,9 +182,12 @@ export function BaklavaToSoileProjectJSON(graph: Graph ) {
             }
             projectData.filter.push(filterData);
         }
+        if(node.type === "ExperimentNode")
+        {
+            const cnode = node as ExperimentNode;
+            projectData.experiments.push(instantiateExperimentInProject(cnode.objectData.uuid, cnode.objectData.version, cnode.random, cnode.title))
+        }
 
-        //TODO: Experiments.
-        
     }
     return projectData;
 

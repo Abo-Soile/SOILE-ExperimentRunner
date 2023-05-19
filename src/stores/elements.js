@@ -1,5 +1,4 @@
 import { defineStore } from 'pinia';
-import { getPersistentFromTask } from '@/javascript/experimentlang/checkElang'
 import axios from 'axios';
 import { useErrorStore } from './errors';
 
@@ -13,6 +12,9 @@ export const useElementStore = defineStore({
         elements: {task : {}, project : {} , experiment : {}}
     }),
     actions: {
+        /**
+         * Update the Projects available to the current user (i,.e where they have access to)
+         */
         async updateAvailableProjects() {
             try {
                 const response = await axios.post('/project/list');
@@ -26,7 +28,10 @@ export const useElementStore = defineStore({
                 console.log("Error" + e);                
                 this.processAxiosError(e);
             }
-        },        
+        }, 
+        /**
+         * Update the Experiments available to the current user (i,.e where they have access to)
+         */       
         async updateAvailableExperiments() {
             try {
                 const response = await axios.post('/experiment/list');
@@ -40,6 +45,9 @@ export const useElementStore = defineStore({
                 this.processAxiosError(e);
             }
         },
+        /**
+         * Update the Tasks available to the current user (i,.e where they have access to)
+         */
         async updateAvailableTasks() {
             try {
                 const response = await axios.post('/task/list');
@@ -53,6 +61,10 @@ export const useElementStore = defineStore({
                 this.processAxiosError(e);
             }
         },
+        /**
+         * Get the available versions for a specific task
+         * @param {string} uuid the UUID of the task
+         */
         async getTaskOptions(uuid) {
             try {
                 const response = await axios.post('/task/'+ uuid +'/list');
@@ -63,6 +75,10 @@ export const useElementStore = defineStore({
                 this.processAxiosError(e);
             }
         },
+        /**
+         * Get the available versions for a specific project
+         * @param {string} uuid the UUID of the project
+         */
         async getProjectOptions(uuid) {
             try {
                 const response = await axios.post('/project/'+ uuid +'/list');
@@ -73,6 +89,10 @@ export const useElementStore = defineStore({
                 this.processAxiosError(e);
             }
         },
+        /**
+         * Get the available versions for a specific experiment
+         * @param {string} uuid the UUID of the experiment
+         */
         async getExperimentOptions(uuid) {
             try {
                 const response = await axios.post('/experiment/'+ uuid +'/list');
@@ -83,7 +103,10 @@ export const useElementStore = defineStore({
                 this.processAxiosError(e);
             }
         },
-        // get the list of objects for the given type. Makes it easier to write reusable components
+        /**
+         * get the list of objects for the given type. Makes it easier to write reusable components
+         * @param {string} the type of element ('task','experiment' or 'project' )
+         */
         async getListForType(type)
         {
             switch(type)
@@ -93,6 +116,11 @@ export const useElementStore = defineStore({
                 case "experiment": return this.availableExperiments;
             }
         },
+        /**
+         * Get the list of options/versions for the given element.
+         * @param {string} uuid  the uuid of the element
+         * @param {string} type type of element ('task','experiment' or 'project' )
+         */
         async getOptionsForElement(uuid, type)
         {
             switch(type)
@@ -110,21 +138,32 @@ export const useElementStore = defineStore({
          */
         async getElement(uuid, version, type)
         {
+            const usedType = type.toLowerCase();
+            console.log(type + " / " + uuid )
             try {
                 
-                const element = this.elements[type][uuid] ? this.elements[type][uuid][version] : undefined;
+                const element = this.elements[usedType][uuid] ? this.elements[usedType][uuid][version] : undefined;
                 if(element)
                 {
                     return element
                 }
                 else{
-                    if(!this.elements[type][uuid])
+                    if(!this.elements[usedType][uuid])
                     {
-                        this.elements[type][uuid] = {};
+                        this.elements[usedType][uuid] = {};
                     }
                     const response = await axios.get("/" + type.toLowerCase() + "/" + uuid + "/" + version)
-                    this.elements[type][uuid][version] = response.data;
-                    return this.elements[type][uuid][version];
+                    this.elements[usedType][uuid][version] = response.data;
+                    console.log("Got element")
+                    console.log(response.data)
+                    if(!this.elements[usedType][uuid][version].tag)
+                    {
+                        console.log("Requesting tag")
+                        const response = await axios.get("/" + type.toLowerCase() + "/gettag/" + uuid + "/" + version)
+                        console.log(response)                        
+                        this.elements[usedType][uuid][version].tag = response.data.tag;
+                    }
+                    return this.elements[usedType][uuid][version];
                 }                
             }
             catch (err) {
@@ -133,19 +172,22 @@ export const useElementStore = defineStore({
         },
         async getPersistentDataForTask(uuid, version)
         {
-            const element = await this.getElement(uuid, version, "task");
+            console.log("Requesting Persistent data for " + uuid + "/" + version)
+            const element = await this.getElement(uuid, version, "task");        
             if(element.codeType.language === "elang")
             {
-                return getPersistentFromTask(element.code);
+                const outputRegexp = /savevariable\( *"([^"]+)"/g
+                console.log("Retrieving persistent data")
+                return [...element.code.matchAll(outputRegexp)].map((x) => x[1]);  
             }
             else{
                 return [];
             }
-        },     
+        },  
         async getPersistentDataForExperiment(uuid, version)
         {
             const experiment = await this.getElement(uuid, version, "experiment");            
-            return getPersistentDataForExperimentInstance(experiment);
+            return this.getPersistentDataForExperimentInstance(experiment);
             
         },           
         async getPersistentDataForExperimentInstance(instance)
@@ -172,7 +214,15 @@ export const useElementStore = defineStore({
                 }
             }
             return Array.from(persistentElements);
-        },           
+        },   
+        async getPersistentDataForElement(uuid, version, type)        
+        {
+            switch(type)
+            {
+                case "task": return await this.getPersistentDataForTask(uuid,version);
+                case "experiment": return await this.getPersistentDataForExperiment(uuid,version);
+            }
+        },
         async updateAvailableOptions(type)
         {
             switch(type)
@@ -186,7 +236,14 @@ export const useElementStore = defineStore({
             const errorStore = useErrorStore()
             errorStore.processAxiosError(err)          
 
-        },       
+        },   
+        async getTagForVersion(type, uuid, version)    
+        {
+            console.log(type + "/" + uuid + "/" + version)
+            const currentElement = await this.getElement(uuid, version, type)
+            console.log(currentElement);
+            return currentElement.tag;
+        },
         reset()
         {
             this.availableTasks = [];

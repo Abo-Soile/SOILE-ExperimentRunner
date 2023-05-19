@@ -1,7 +1,7 @@
 import { Graph, GraphTemplate, IGraphNode, Node } from "@baklavajs/core";
 import { useGraphStore } from "@/stores/graph";
 import { useElementStore } from "@/stores/elements";
-import { SoileNodeState } from "../Interfaces/SoileNodeProperties";
+import { SoileBaseNode, queryPropertyFunc } from "@/helpers/projecteditor/SoileTypes";
 
 interface Inputs {
     previous: any[];
@@ -15,7 +15,7 @@ interface Outputs {
  * Base class for Soile Nodes in Baklava. Contains functionality to essentially ensure uniqueness of Node Names (to generate unique Instance IDs)
  */
 
-export default abstract class SoileNode extends Node<any, any> implements SoileNodeState, IGraphNode {
+export default abstract class SoileNode extends Node<any, any> implements SoileBaseNode, IGraphNode {
     public twoColumn = true;
     public graphStore = useGraphStore();
     public elementStore = useElementStore();
@@ -25,21 +25,24 @@ export default abstract class SoileNode extends Node<any, any> implements SoileN
     public constructor() {
         super();
     }
+    public isDataNode() {
+        return false;
+    };
     template: GraphTemplate;
     subgraph: Graph;
     public set title(newTitle: string) {
-        console.log("Setting title")
+        //console.log("Setting title")
         if (this.graphStore.isNameOk(this, newTitle)) {
-            console.log("updating title to" + newTitle);
+            //console.log("updating title to" + newTitle);
             const changedTitle = this.graphStore.updateName(this, this.myTitle, newTitle);
-            console.log("The changed Title is" + changedTitle);
+            //console.log("The changed Title is" + changedTitle);
             this.myTitle = changedTitle
         }
     }
     public get title(): string {
         return this.myTitle;
     }  
-
+    
     public isStartNode() {
         return this.graphStore.isStartNode(this);
     }

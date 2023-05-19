@@ -6,14 +6,9 @@
             <label  for="experimentVersion"> Select Experiment Version </label>
             <DropDown @itemSelected="setExperimentVersion" :selected=currentVersion  id="experimentVersion" :options="availableVersions"></DropDown>
         </div>
-        <!--<label for="addOutput">Add Outputs</label>
-        <input class="baklava-input" type="text" :value=newOutput @input="event => newOutput = event.target.value" name="addOutput">
-        <button class="baklava-button " @click="createOutput()"> Create output </button>
-        <div v-for="output in currentOutputs">
-            <label :for=output> {{ output }}</label>
-            <button class="baklava-button " :name=output @click="removeOutput(output)"> Remove output </button>
+        <div>
+            <button class="baklava-button " @click="editExperiment()">Edit experiment</button>
         </div>
-        -->
         <div>
             <button class="baklava-button " @click="editExperiment()">Edit experiment</button>
         </div>
@@ -42,10 +37,6 @@ export default defineComponent({
         return {
             nodeID: "",
             newOutput: "", 
-            currentExperiment: { text: "",
-                            value: ""},
-            currentVersion: { text: "",
-                            value: ""},
             experimentVersions: [],
         }
     },
@@ -54,7 +45,8 @@ export default defineComponent({
         const elementStore = useElementStore();
         const graphStore = useGraphStore();
         const errorStore = useErrorStore();
-        return { elementStore: elementStore, errorStore, graphStore }
+        const editingStore = useEditorStore();
+        return { elementStore, errorStore, graphStore , editingStore}
     },
     methods: {
         createOutput() {
@@ -85,6 +77,10 @@ export default defineComponent({
         removeOutput(output: string) {
             console.log("removing output: " + output)
             this.currentNode.removeTaskOutput(output)
+        },
+        
+        editExperiment()
+        {            
         }
 
     },
@@ -110,20 +106,38 @@ export default defineComponent({
                 name: "Experiment Versions",
                 items: this.experimentVersions.filter((x : { tag? : string}) => x.tag).map( (x : { tag: string, version: string }) => { return {value : x.version, text: x.tag }})
             }
-        }
-    },    
-    watch:
-    {
-        async currentExperiment(newValue) 
-        {
-            this.currentNode.setExperimentInformation({uuid: newValue.value, name: newValue.text});                                    
-            this.experimentVersions = await this.elementStore.getExperimentOptions(newValue.value);            
-            this.currentVersion = Object as () => SelectionItem
         },
-        currentVersion(newValue)
-        {
-            this.currentNode.setExperimentVersion(newValue.value,newValue.text);            
+        currentExperiment: {
+            get() {
+                console.log({ text: this.intf.data.task.name, value: this.intf.data.task.uuid })                
+                return { text: this.intf.data.task.name, value: this.intf.data.task.uuid }
+            },
+            async set(newValue) {
+                console.log(newValue)
+                console.log({ text: this.intf.data.task.name, value: this.intf.data.task.uuid })
+                if(newValue.text)
+                {
+                    console.log("Setting current task")
+                    this.currentNode.setTaskInformation({ uuid: newValue.value, name: newValue.text });
+                    this.taskVersions = await this.elementStore.getTaskOptions(newValue.value);
+                    console.log({ text: this.intf.data.task.name, value: this.intf.data.task.uuid })
+                }
+            }
+        },
+        currentVersion: {
+            get() {
+                return { text: this.intf.data.task.tag, value: this.intf.data.task.version }
+            },
+            /**
+             * 
+             * @param {{text: string, value: string}} newValue The value is a tag + version (value is the version, text is the tag.)
+             */
+            set(newValue : {text: string, value: string}) {
+                this.currentNode.setTaskVersion(newValue.value, newValue.text);
+            }
+            
         }
+
     },
     mounted() {
         console.log(this)

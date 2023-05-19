@@ -1,3 +1,5 @@
+import { Graph } from "@baklavajs/core"
+
 export interface FilterInstance {
     instanceID: string,
     options: [
@@ -8,10 +10,7 @@ export interface FilterInstance {
         }
     ],
     defaultOption: string
-    position: {
-        x: number,
-        y: number
-    }
+    position: Position
 }
 
 export interface TaskInstance {
@@ -29,10 +28,7 @@ export interface TaskInstance {
         language: string,
         version: string
     }
-    position: {
-        x: number,
-        y: number
-    }
+    position: Position
 
 }
 
@@ -68,7 +64,8 @@ export interface ExperimentInstance {
     ],
     randomize: boolean,
     private: boolean,
-    next : string
+    next: string,
+    position : Position
 }
 
 export interface SOILEProject {
@@ -92,18 +89,37 @@ export interface SOILEProject {
 
 export interface Position {
     x: number,
-        y : number,
-            width : number,
-                height : number,
+    y: number,
+    width: number,
+    height: number,
 }
 
 export interface Filter {
     instanceID: string,
-        position: Position,
-            options: {
+    position: Position,
+    options: {
         name: string | undefined
         filter: string
         next: string
     },
     defaultOption: string
+}
+// Some Interfaces to make all Soile Nodes have a couple of common properties that can be used.
+export interface queryPropertyFunc {
+    (): boolean
+}
+
+export interface SoileBaseNode {
+    isStartNode: queryPropertyFunc,
+    isDataNode: queryPropertyFunc,
+    type: string,
+    id: string,
+    title: String,
+    graph: Graph | undefined
+    position: Position
+}
+
+export interface SoileDataNode extends SoileBaseNode {
+    nodeOutputs: Array<string>,
+    nodePersistent: Array<string>
 }

@@ -28,7 +28,7 @@ import FilterNode from "./NodeTypes/FilterNode";
 import ExperimentNode from "./NodeTypes/ExperimentNode";
 import SoileNode from "./ViewComponents/SoileVueNode.vue";
 
-import { BaklavaToSoileProjectJSON, loadSoileProjectToBaklava } from "../../helpers/baklavasoileConverter";
+import { BaklavaToSoileProjectJSON, loadSoileProjectToBaklava } from "@/helpers/projecteditor/baklavasoileConverter";
 import { checkConnection } from './events/graphEvents.ts'
 import { useGraphStore } from "../../stores";
 

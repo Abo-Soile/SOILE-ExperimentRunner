@@ -26,9 +26,11 @@ export const useEditorStore = defineStore({
         async loadElement(type, elementName, elementID, elementVersion) {
             console.log(type)
             const store = this.getStoreForType(type);
-            for (const [i, element] of store.elements) {
+            console.log(store);
+            for (const [i, element] of store.elements.entries()) {
                 if (element.name === elementName && element.version === elementVersion) {
                     store.active = i;
+                    this.activeElement = type;
                     return;
                 }
             }

@@ -1,20 +1,24 @@
 <template>
     <div>
-        <div class="blockdiv">
-            <label for="addFilter">Filter Name:</label>
-            <input type="text" :value=newFilterName @input="event => newFilterName = event.target.value" name="addFilter">
-        </div>
-        <div class="blockdiv">
-            <label for="addOutput">Filter expression:</label>
-            <input type="text" :value=newFilter @input="event => newFilter = event.target.value" name="addOutput">
-        </div>
-        <button @click="createFilter()"> Create Filter </button>
-        <table v-if="currentFilters.size > 0">
-            <tr v-for="(output, key) in currentFilters">
-                <td class="tooltip-source">{{ output[0] }}<div class="tooltip-text"> {{ output[1] }}</div>
-                </td>
-                <td><button :name=key @click="removeFilter(output[0])"> Remove Filter </button></td>
-            </tr>
+        <FilterSetup :node="intf.data" 
+        v-model:filterName="newFilterName" 
+        v-model:filterString="newFilter"
+        @saveFilter="createFilter()" buttonLabel="Create Filter"></FilterSetup>
+        <table class="filterTable" v-if="currentFilters.size > 0">
+            <div v-for="(output, key) in currentFilters">
+                <tr>
+                    <td class="tooltip-source">{{ output[0] }}<div class="tooltip-text"> {{ output[1].filterstring }}</div>
+                    </td>
+                    <td><button @click="removeFilter(output[0])"> Remove Filter </button></td>
+                    <td v-if="!isEditing(key)"><button  @click="editFilter(key)"> Edit Filter </button></td>
+
+                </tr>
+                <tr v-if="isEditing(key)">
+                    <td colspan="2"> 
+                        <FilterSetup :filterName="output[0]" :filterString="output[1].filterstring" :node="intf.data" buttonLabel="Update Node" @saveFilter="(event) => saveFilter(event,key)"></FilterSetup>
+                    </td>                    
+                </tr>
+            </div>
         </table>
     </div>
 </template>
@@ -23,6 +27,7 @@
 import { defineComponent } from "vue";
 import FilterNode from '../NodeTypes/FilterNode'
 import { ComponentInterface } from "../NodeInterfaces/ComponentInterface";
+import { FilterSetup } from "@/components"
 
 export default defineComponent({
 
@@ -32,10 +37,12 @@ export default defineComponent({
             required: true,
         },
     },
+    components: { FilterSetup },
     data() {
         return {
             newFilterName: "",
             newFilter: "",
+            editing: [],
         }
     },
     setup(props)
@@ -52,24 +59,42 @@ export default defineComponent({
                 console.log("Adding output");
                 this.currentNode.addFilter(this.newFilterName, this.newFilter)
             }
+            // we reset the editing, if we have 
+            this.editing = [];
             this.newFilterName = "";
             this.newFilter = "";
         },
 
         removeFilter(output: string) {
             console.log("removing output: " + output)
-            this.currentNode.removeFilter(output)
+            this.currentNode.removeFilter(output)            
+            this.editing = [];
         },
-
+        editFilter(index : number)
+        {
+            this.editing.push(index);
+        },
+        isEditing(index : number) : boolean
+        {
+            return this.editing.contains(index);
+        },
         updateNodeData() {
             
+        },
+        saveFilter(event : {oldName : string, name :string, value : string}, index : number)
+        {        
+            console.log(event);
+            this.currentNode.updateFilter(event.oldName, event.name, event.value);
+            this.editing = this.editing.filter((e :number) => e != index);
         }
+
     },
     watch:
     {
         currentNode() {
             this.updateNodeData();
-        }
+        },
+        
     },
     computed: {
         currentNode()
@@ -116,5 +141,9 @@ table {
 
 .tooltip-source:hover .tooltip-text {
     visibility: visible;
+}
+
+.filterTable {
+    width: 100%
 }
 </style>

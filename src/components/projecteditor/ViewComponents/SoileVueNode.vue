@@ -2,12 +2,12 @@
     <div
         :id="node.id"
         ref="el"
-        class="baklava-node resizableNode"
+        class="baklava-node"
         :class="classes"
         :style="styles"
         :data-node-type="node.type"        
         @pointerdown="select"        
-    >
+    >    
         <div class="__title" @pointerdown.self.stop="startDrag">
             <template v-if="!renaming">
                 <div class="__title-label">
@@ -50,7 +50,7 @@
             <div class="__options">
                 <NodeInterface v-for="option in displayedOptions" :key="option.id" :node="node" :intf="option" />
             </div>
-        </div>
+        </div>    
     </div>
 </template>
 
@@ -187,6 +187,10 @@ onUpdated(onRender);
 {
     resize: both;
     overflow: scroll;
+}
+.overflowing
+{
+    overflow: visible;
 }
 
 </style>

@@ -31,7 +31,6 @@ import { useErrorStore } from '@/stores';
 import { useUserStore } from '@/stores/users';
 import Button from 'primevue/button';
 
-console.log(useUserStore)
 
 export default {
 

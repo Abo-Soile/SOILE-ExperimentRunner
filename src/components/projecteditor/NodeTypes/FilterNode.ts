@@ -5,6 +5,7 @@ import { FilterSideBarOption, SideBarButton } from "../NodeOptions"
 import { markRaw } from "vue";
 import { displayInSideBar } from "./utilities";
 import { ComponentInterface } from '../NodeInterfaces/ComponentInterface';
+import { useErrorStore } from '@/stores/errors';
 
 import SoileNode from './SoileNode';
 
@@ -16,7 +17,6 @@ export default class FilterNode extends SoileNode{
   defaultOption = '';
   myTitle = this.type;
   Filters = new Map<string,{filterstring : string, interfaceID : string}>  
-  
   public inputs = {
     previous: new NodeInterface("Previous", []).use(allowMultipleConnections),
     edit: new NodeInterface("Edit", uuidv4()).setComponent(markRaw(SideBarButton)).setPort(false),
@@ -43,12 +43,12 @@ export default class FilterNode extends SoileNode{
     console.log(this.inputs)
     //this.Filters.set(name,filterString);
     console.log(this.inputs.edit.value)
-    const newValue = uuidv4();
+/*    const newValue = uuidv4();
     console.log(newValue)
-    this.inputs.edit.value = newValue;
+    this.inputs.edit.value = newValue;*/
     console.log(this.inputs);
     this.addOutput(name, new NodeInterface(name, "OutputConnection") );        
-    this.Filters.set(name,{ filterstring: filterString, interfaceID : this.outputs[name].id });    
+    this.Filters.set(name,{ filterstring: filterString, interfaceID : this.outputs[name].id });        
   }
   public removeFilter(name: string)
   {
@@ -58,8 +58,34 @@ export default class FilterNode extends SoileNode{
     console.log(success)
     console.log(this.outputs)
     this.Filters.delete(name);
-
   }
+
+  public updateFilter(oldName: string, newName: string, newValue : string)
+  {
+    if(!oldName)
+    {
+      const errorStore = useErrorStore()
+      errorStore.raiseError("error", "No Filter to update specified")
+      return;
+    }
+    if(newName != oldName && this.Filters.has(newName))
+    {
+      const errorStore = useErrorStore()
+      errorStore.raiseError("error", "The Filtername already exists on this FilterNode")
+      return;
+    }
+    if(newName != oldName)
+    {
+      const errorStore = useErrorStore()
+      errorStore.raiseError("warn", "Filter was changed. You have to update the connections!")
+      this.removeFilter(oldName);
+      this.addFilter(newName,newValue);
+    }
+    else{
+      this.Filters.get(newName).filterstring = newValue
+    }    
+  }
+
   public getFilters()
   {
     return this.Filters;
