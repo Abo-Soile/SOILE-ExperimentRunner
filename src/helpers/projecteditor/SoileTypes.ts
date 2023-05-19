@@ -2,12 +2,11 @@ import { Graph } from "@baklavajs/core"
 
 export interface FilterInstance {
     instanceID: string,
-    options: [
-        {
-            name: string,
-            filter: string,
-            next: string
-        }
+    options: {
+        name: string,
+        filter: string,
+        next: string
+    }[        
     ],
     defaultOption: string
     position: Position
@@ -20,9 +19,7 @@ export interface TaskInstance {
     tag: string,
     instanceID: string,
     filter?: string,
-    outputs: [
-        string
-    ],
+    outputs: string[ ],
     next: string,
     codeType: {
         language: string,
@@ -39,14 +36,12 @@ export interface Experiment {
     name: string,
     version: string,
     tag: string,
-    elements: [
-        {
+    elements: {
             elementType: string,
             data: TaskInstance | FilterInstance | ExperimentInstance
-        }
-    ],
-    randomize: true,
-    private: true
+        }[],
+    randomize: boolean,
+    private: boolean
 }
 
 export interface ExperimentInstance {
@@ -74,15 +69,9 @@ export interface SOILEProject {
     name: string,
     version: string,
     tag: string,
-    tasks: [
-        TaskInstance
-    ],
-    experiments: [
-        ExperimentInstance
-    ],
-    filters: [
-        FilterInstance
-    ],
+    tasks: TaskInstance[],
+    experiments: ExperimentInstance[],
+    filters: FilterInstance[],
     start: string,
     private: boolean
 }

@@ -23,12 +23,12 @@ export default class TaskNode extends SoileVersionedNode {
   public type = "TaskNode";
   myTitle = this.type;
   public objectType = "task";
-  public codeType = ref("");
+  public codeType = reactive({language : "", version: "string" });
   public nodePersistent = reactive(new Array<string>);
 
   public inputs = {
     previous: new InputInterface("Previous", "InputConnection").use(allowMultipleConnections),
-    type: new TextInterface("TaskType", "Type: " + this.codeType.value).setPort(false),
+    type: new TextInterface("TaskType", "Type: " + this.codeType.language + "@" + this.codeType.version).setPort(false),
     taskInformation: new TextInterface("TaskInformation", "Task: " + this.objectData.name ? this.objectData.name : "").setPort(false),
     taskVersion: new TextInterface("TaskVersion", "Version: " + this.objectData.tag ? this.objectData.tag : "").setPort(false),
     outputs: new ComponentInterface("Outputs", { items: this.nodeOutputs, title: "Outputs" }, OutputListOption).setPort(false),
@@ -55,6 +55,12 @@ export default class TaskNode extends SoileVersionedNode {
     next: new NodeInterface("Next", "OutputConnection"),
   };
 
+  public async setElementVersion(version: string, tag: string): Promise<void> {
+      await super.setElementVersion(version, tag)
+      const elementInfo = await this.elementStore.getElement(this.objectData.uuid,this.objectData.version,"task")
+      this.codeType = elementInfo.codeType;
+      this.inputs.type.value = "Type: " + this.codeType.language + "@" + this.codeType.version;
+  }
   public constructor() {
     super();
     this.id = "Task " + uuidv4();

@@ -3,7 +3,7 @@ import { TextInterface } from "@baklavajs/renderer-vue";
 import { allowMultipleConnections } from "@baklavajs/engine"
 import { v4 as uuidv4 } from 'uuid'
 import { SideBarButton, ExperimentSideBarOption} from "../NodeOptions"
-import { markRaw, reactive } from "vue";
+import { markRaw, reactive, ref } from "vue";
 import { displayInSideBar } from "./utilities";
 import OutputListOption from "../NodeOptions/OutputListOption.vue";
 import { ComponentInterface } from "../NodeInterfaces/ComponentInterface";
@@ -19,7 +19,8 @@ export default class ExperimentNode extends SoileVersionedNode  {
   myTitle = this.type;
   public nodeOutputs = new Array<string>;  
   public nodePersistent = new Array<string>;  
-  public random = false;
+  public random = ref(false);
+  public canRandom = ref(true);
   public constructor() {
     super();
     this.id = "Experiment " + uuidv4();
@@ -48,7 +49,10 @@ export default class ExperimentNode extends SoileVersionedNode  {
     console.log("Setting Tag to " + tag);
     this.inputs.ExperimentVersion.value = "Version: " + tag
   }
-
+  public async setElementVersion(version: string, tag: string): Promise<void> {
+    await super.setElementVersion(version, tag)    
+    this.canRandom = await this.elementStore.canExperimentBeRandomized(this.objectData.uuid,this.objectData.version,"experiment")    
+  }
   isValid(){
     return this.objectData.uuid != "" && this.objectData.version != "";
   }

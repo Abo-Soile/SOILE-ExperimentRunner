@@ -1,7 +1,5 @@
-import { stringifyQuery } from 'vue-router';
 import { ExperimentInstance , Experiment, TaskInstance, FilterInstance } from './SoileTypes'
 import { useElementStore } from '@/stores/elements'
-import ExperimentNode from '@/components/projecteditor/NodeTypes/ExperimentNode';
 
 
 /**
@@ -10,10 +8,9 @@ import ExperimentNode from '@/components/projecteditor/NodeTypes/ExperimentNode'
  */
 
 
-const elementStore = useElementStore();
 
 export async function instantiateExperimentInProject(UUID : string, Version : string, random: boolean, InstanceID : string) : Promise<ExperimentInstance> {
-
+    const elementStore = useElementStore();
     const experiment = JSON.parse(JSON.stringify(await elementStore.getElement(UUID, Version, "experiment"))) as Experiment; // stringyfy/destringyfy for a deep copy.
     const outputs = new Map<string,string>();
     for(const element of experiment.elements)

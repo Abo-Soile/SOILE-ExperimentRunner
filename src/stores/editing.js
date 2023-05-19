@@ -41,10 +41,11 @@ export const useEditorStore = defineStore({
             this.activeElement = type;
         },
         getStoreForType(type) {
-            switch (type) {
-                case "Task": return this.tasks;
-                case "Project": return this.projects;
-                case "Experiment": return this.experiments;
+            const currentType = type.toLowerCase();
+            switch (currentType) {
+                case "task": return this.tasks;
+                case "project": return this.projects;
+                case "experiment": return this.experiments;
             }
         },
         uniqueID(prefix, existing) {

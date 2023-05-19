@@ -28,7 +28,7 @@ import FilterNode from "./NodeTypes/FilterNode";
 import ExperimentNode from "./NodeTypes/ExperimentNode";
 import SoileNode from "./ViewComponents/SoileVueNode.vue";
 
-import { BaklavaToSoileProjectJSON, loadSoileProjectToBaklava } from "@/helpers/projecteditor/baklavasoileConverter";
+import { BaklavaToSoileProjectJSON,BaklavaToSoileExperimentJSON, loadSoileProjectToBaklava, loadSoileExperimentToBaklava } from "@/helpers/projecteditor/baklavasoileConverter";
 import { checkConnection } from './events/graphEvents.ts'
 import { useGraphStore } from "../../stores";
 
@@ -59,40 +59,30 @@ export default {
     setup(props) {
         const graphStore = useGraphStore();
         const baklava = useBaklava();
+        
         baklava.editor.registerNodeType(TaskNode)
         baklava.editor.registerNodeType(FilterNode)
-        if(props.isProjectEditor)
-        {
-            baklava.editor.registerNodeType(ExperimentNode);
-        }        
+        baklava.editor.registerNodeType(ExperimentNode);                
         baklava.editor.graphHooks.checkConnection.subscribe("soile:connectionCheck", (c) => checkConnection(c.from, c.to))                
-        /*const engine = new DependencyEngine(baklava.editor);
-        console.log(baklava.editor)
-        console.log(engine)
-        engine.start();*/
         return { baklava, graphStore }
     },
-    methods: {
-        isSoileNode(nodeType) {
-            return nodeType === "TaskNode" || nodeType === "FilterNode" || nodeType === "ExperimentNode"
-        },
-        addNodeWithCoordinates(nodeType, x, y) {
-            const n = new nodeType();
-            this.editor.addNode(n);
-            n.position.x = x;
-            n.position.y = y;
-            this.editor.addConnection
-            return n;
-        },
-        parseEvent(event) {
-            console.log(event);
-        },
+    methods: {       
         saveProject() {
             console.log(this.baklava.editor.save());
-            console.log(BaklavaToSoileProjectJSON(this.baklava.editor.save()));
+            if(this.isProjectEditor)
+            {
+            console.log(BaklavaToSoileProjectJSON(this.baklava.editor.graph));
+            }
+            else
+            {
+                console.log(BaklavaToSoileExperimentJSON(this.baklava.editor.graph))
+            }
         },
         loadProject() {
             //TODO (popup)
+        },
+        isSoileNode(nodeType) {
+            return nodeType === "TaskNode" || nodeType === "FilterNode" || nodeType === "ExperimentNode"
         },
     },
     mounted()
@@ -100,7 +90,14 @@ export default {
         // TODO: Check, if we need to clean up the graph in order not to screw things up...
         if(this.data)
         {
-            loadSoileProjectToBaklava(this.baklava, this.data)
+            if(this.isProjectEditor)
+            {
+                loadSoileProjectToBaklava(this.baklava, this.data)
+            }
+            else
+            {
+                loadSoileExperimentToBaklava(this.baklava, this.data)
+            }
         }
         console.log("Editor mounted");
         console.log(this.data);

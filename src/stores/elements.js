@@ -127,7 +127,7 @@ export const useElementStore = defineStore({
             {
                 case "task": return await this.getTaskOptions(uuid);
                 case "project": return await this.getProjectOptions(uuid);
-                case "experiment": return await this.getElementOptions(uuid);
+                case "experiment": return await this.getExperimentOptions(uuid);
             }
         },
         /**
@@ -139,7 +139,6 @@ export const useElementStore = defineStore({
         async getElement(uuid, version, type)
         {
             const usedType = type.toLowerCase();
-            console.log(type + " / " + uuid )
             try {
                 
                 const element = this.elements[usedType][uuid] ? this.elements[usedType][uuid][version] : undefined;
@@ -154,13 +153,9 @@ export const useElementStore = defineStore({
                     }
                     const response = await axios.get("/" + type.toLowerCase() + "/" + uuid + "/" + version)
                     this.elements[usedType][uuid][version] = response.data;
-                    console.log("Got element")
-                    console.log(response.data)
                     if(!this.elements[usedType][uuid][version].tag)
                     {
-                        console.log("Requesting tag")
                         const response = await axios.get("/" + type.toLowerCase() + "/gettag/" + uuid + "/" + version)
-                        console.log(response)                        
                         this.elements[usedType][uuid][version].tag = response.data.tag;
                     }
                     return this.elements[usedType][uuid][version];
@@ -172,12 +167,10 @@ export const useElementStore = defineStore({
         },
         async getPersistentDataForTask(uuid, version)
         {
-            console.log("Requesting Persistent data for " + uuid + "/" + version)
             const element = await this.getElement(uuid, version, "task");        
             if(element.codeType.language === "elang")
             {
                 const outputRegexp = /savevariable\( *"([^"]+)"/g
-                console.log("Retrieving persistent data")
                 return [...element.code.matchAll(outputRegexp)].map((x) => x[1]);  
             }
             else{
@@ -239,10 +232,21 @@ export const useElementStore = defineStore({
         },   
         async getTagForVersion(type, uuid, version)    
         {
-            console.log(type + "/" + uuid + "/" + version)
             const currentElement = await this.getElement(uuid, version, type)
-            console.log(currentElement);
             return currentElement.tag;
+        },
+        async canExperimentBeRandomized(uuid, version)
+        {
+            const currentElement = await this.getElement(uuid, version, "experiment")
+            for(const current of currentElement.elements)
+            {
+                // cannot be randomized if there are filters in the Experiment.
+                if(current.type === "filter")
+                {
+                    return false;
+                }
+            }
+            return true;
         },
         reset()
         {

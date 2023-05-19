@@ -1,32 +1,34 @@
 <template>
     <div>
-        <label for="experiment"> Select Experiment </label>
-        <DropDown :selected=currentExperiment @itemSelected="setExperiment" id="experiment" :options="availableExperiments"></DropDown>
-        <div v-if="availableVersions.items.length != 0">
-            <label  for="experimentVersion"> Select Experiment Version </label>
-            <DropDown @itemSelected="setExperimentVersion" :selected=currentVersion  id="experimentVersion" :options="availableVersions"></DropDown>
+        <ObjectAndVersionSelectorWithProps
+            :objectType=objectType
+            v-model:element=currentTask
+            v-model:version="currentVersion"
+            elementLabel="name"
+            versionLabel="tag"
+        >
+        </ObjectAndVersionSelectorWithProps>
+        <div class="flex align-items-center">
+            <label for="random" class="ml-2"> Randomize </label>
+            <Checkbox class="baklava-checkbox" :disabled="!currentNode.canRandom.value" v-model="isRandom" :binary="true" name="random"  />        
         </div>
         <div>
-            <button class="baklava-button " @click="editExperiment()">Edit experiment</button>
-        </div>
-        <div>
-            <button class="baklava-button " @click="editExperiment()">Edit experiment</button>
+            <Button class="baklava-button" :disabled=isInValid @click="editExperiment()" label="Edit Experiment"> </Button>
         </div>
     </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import DropDown from "../components/DropDown.vue";
-import { SelectionItem } from "../components/DropDown.vue";
-import ExperimentNode from "../NodeTypes/ExperimentNode";
 import { ComponentInterface } from "../NodeInterfaces/ComponentInterface";
-import { useEditorStore, useGraphStore, useElementStore, useErrorStore } from "@/stores";
-
-
+import { useGraphStore, useElementStore, useEditorStore, useErrorStore } from "@/stores";
+import ObjectAndVersionSelectorWithProps from '@/components/utils/ObjectAndVersionSelectorWithProps.vue'
+import Checkbox from 'primevue/checkbox'
+import Button from 'primevue/button'
+import ExperimentNode from "../NodeTypes/ExperimentNode";
 export default defineComponent({
 
-    components: { DropDown },
+    components: {Button, Checkbox, ObjectAndVersionSelectorWithProps},
     props: {
         intf: {
             type: Object as () => ComponentInterface<ExperimentNode>,
@@ -36,113 +38,80 @@ export default defineComponent({
     data() {
         return {
             nodeID: "",
-            newOutput: "", 
-            experimentVersions: [],
+            newOutput: "",
+            newPersistent: "",            
+            objectType: "experiment"
         }
     },
-    setup()
-    {
-        const elementStore = useElementStore();
-        const graphStore = useGraphStore();
-        const errorStore = useErrorStore();
-        const editingStore = useEditorStore();
-        return { elementStore, errorStore, graphStore , editingStore}
+    setup() {
+
+        const editorStore = useEditorStore();
+        return { editorStore }
     },
     methods: {
-        createOutput() {
-            if (this.newOutput) {
-                console.log("Adding output");
-                if(this.graphStore.canAddTaskOutput(this.currentNode, this.newOutput))
-                {
-                    console.log("Yes ")
-                    this.currentNode.addTaskOutput(this.newOutput)
-                }
-                else{
-                    console.log("No ")
-                    this.errorStore.raiseError("warn", "The output is already defined for this Node")
-                }
-            }
-            this.newOutput = "";
-        },
-        async setExperiment(selected : { text: String, value: String})
-        {
+        async setTask(selected) {
+            console.log("Setting Exeriment");
             this.currentTask = selected;
-           
+
         },
-        async setExperimentVersion(selected : { text: String, value: String})
-        {       
+        async setTaskVersion(selected) {                        
             this.currentVersion = selected;
-            
         },
-        removeOutput(output: string) {
-            console.log("removing output: " + output)
-            this.currentNode.removeTaskOutput(output)
-        },
-        
         editExperiment()
         {            
+            this.editorStore.loadElement(this.objectType, this.currentTask.name, this.currentTask.uuid, this.currentVersion.version)
         }
-
     },
     computed: {
-        currentNode() : ExperimentNode
-        {        
-           return this.intf.data;
-        },
-        currentOutputs(){
-            console.log(this.intf)
-            return this.intf.data.taskOuputs;
-        },
-        availableExperiments()
+        isInValid()
         {
-            return {
-                name: "Experiment Selection",
-                items: this.elementStore.availableExperiments.map((x : {name : string,  uuid: string}) => { return {value: x.uuid, text: x.name}} )
-            }
+            return this.currentTask.uuid == null || this.currentVersion.version == null
         },
-        availableVersions() : { items: SelectionItem[], name : string }
-        {
-            return {
-                name: "Experiment Versions",
-                items: this.experimentVersions.filter((x : { tag? : string}) => x.tag).map( (x : { tag: string, version: string }) => { return {value : x.version, text: x.tag }})
-            }
+        currentNode(): ExperimentNode {
+            return this.intf.data;
         },
-        currentExperiment: {
-            get() {
-                console.log({ text: this.intf.data.task.name, value: this.intf.data.task.uuid })                
-                return { text: this.intf.data.task.name, value: this.intf.data.task.uuid }
+        currentTask: {
+            get() {                
+                return { uuid: this.intf.data.objectData.uuid, name: this.intf.data.objectData.name }
             },
-            async set(newValue) {
-                console.log(newValue)
-                console.log({ text: this.intf.data.task.name, value: this.intf.data.task.uuid })
-                if(newValue.text)
-                {
-                    console.log("Setting current task")
-                    this.currentNode.setTaskInformation({ uuid: newValue.value, name: newValue.text });
-                    this.taskVersions = await this.elementStore.getTaskOptions(newValue.value);
-                    console.log({ text: this.intf.data.task.name, value: this.intf.data.task.uuid })
+            async set(newValue) {                
+                if(newValue.uuid)
+                {                    
+                    this.currentNode.setElement(newValue.uuid, newValue.name);
+                    console.log({ text: this.intf.data.objectData.name, value: this.intf.data.objectData.uuid })
                 }
             }
-        },
+        },        
         currentVersion: {
             get() {
-                return { text: this.intf.data.task.tag, value: this.intf.data.task.version }
+                return { tag: this.intf.data.objectData.tag, version: this.intf.data.objectData.version }
             },
             /**
              * 
              * @param {{text: string, value: string}} newValue The value is a tag + version (value is the version, text is the tag.)
              */
-            set(newValue : {text: string, value: string}) {
-                this.currentNode.setTaskVersion(newValue.value, newValue.text);
+            set(newValue : {tag: string, version: string}) {
+                if(newValue)
+                {
+                    this.currentNode.setElementVersion(newValue.version, newValue.tag);
+                }            
+            }            
+        },
+        isRandom: {
+            get() {                
+                return this.intf.data.random;
+            },
+            async set(newValue : boolean ) {                
+                this.intf.data.random = newValue;
             }
-            
-        }
-
+        },
     },
-    mounted() {
-        console.log(this)
-        this.elementStore.updateAvailableExperiments();
-        this.nodeID = this.intf.id;            
+    watch:
+    {
+    },
+    async mounted() {
+        this.nodeID = this.intf.id;
+        this.currentTask = this.intf.data.objectData
     }
 })
 </script>
@@ -150,5 +119,4 @@ export default defineComponent({
 .baklava-input {
     width: 50%;
 }
-
 </style>
