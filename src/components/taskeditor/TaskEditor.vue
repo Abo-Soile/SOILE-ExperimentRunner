@@ -22,7 +22,7 @@
             <CodeEditor v-model:inputText="currentObject.code"></CodeEditor>
         </div>
         <div class="col-4 h-full">
-            <CodePreview :code="currentObject.code" 
+            <CodePreview class="h-full" :sourceCode="currentObject.code" 
                          :codeType="currentObject.codeType.language" 
                          :codeTypeVersion="currentObject.codeType.version"
                          :taskUUID="currentObject.UUID"
@@ -39,8 +39,8 @@ import FileBrowser from '@/components/FileBrowser.vue'
 import FilePreview from '@/components/utils/FilePreview.vue'
 import CodeEditor from './CodeEditor.vue'
 import CodePreview from './CodePreview.vue'
-
 import TaskBar from './TaskBar.vue'
+
 import { useElementStore, useErrorStore } from '@/stores'
 import { reactive } from 'vue'
 export default {
@@ -172,7 +172,8 @@ export default {
     mounted() {
         this.updateFiles(this.target);
         this.updateFields(this.target);
-    }
+        console.log("Displaying task");        
+    },
 };
 </script>
 

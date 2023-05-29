@@ -8,10 +8,16 @@ const routes = [
         name: 'Welcome',
         component: WelcomeView
     },
-    {
+    {        
         path: '/management',
         name: 'ManagementView',
         component: ManagementView
+    },
+    {
+        path: '/management/:id/:version/',  
+        name: 'TaskManagementView',
+        component: ManagementView,
+        props: true
     },
     {
         path: '/preview/:taskID/:taskVersion/',
@@ -40,6 +46,8 @@ export const router = createRouter({
 
 router.beforeEach(async (to) => {
     // redirect to login page if not logged in and trying to access a restricted page
+    console.log("Changing to: ")
+    console.log(to)
     const userStore = useUserStore();
     // regardless on where we are, we are NOt currently running a task.
     userStore.setTaskNotRunning();

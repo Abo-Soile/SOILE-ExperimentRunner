@@ -38,8 +38,9 @@ export const useAuthStore = defineStore({
         isResearcher()
         {
             if(this.isAuthed())
-            {
-                return this.roles.contains("Admin") || this.roles.contains("Researcher");
+            {   
+                console.log(this.roles)
+                return this.roles.includes("Admin") || this.roles.includes("Researcher");
             }
             else
             {

@@ -6,54 +6,47 @@
     </div>
     <div class="content">
       <TabView class="pb-0" v-model:activeIndex="activeElement">
-        <TabPanel  v-if="editorStore.experiments.elements.length > 0" header="Experiments">
+        <TabPanel v-if="editorStore.experiments.elements.length > 0" header="Experiments">
           <TabView class="pb-0" v-model:activeIndex="editorStore.experiments.active">
-            <TabPanel  v-for="(experiment, index) in editorStore.experiments.elements">
+            <TabPanel v-for="(experiment, index) in editorStore.experiments.elements">
               <template #header>
                 <span> {{ experiment.name }} </span>
                 <Button icon="pi pi-times" @click="closeTab(index, editorStore.experiments)" />
               </template>
               <div style="width:100%; height:80vh">
-                <Editor type="experiment" 
-                        :newElement="experiment.newElement" 
-                        :baklava=experiment.editor 
-                        :data=experiment.data 
-                        :name="experiment.name" 
-                        :index=index 
-                        @updateElement="updateElement" 
-                        @createElement="createElement"
-                        @updateName="(event) => updateName(event, 'experiment')"></Editor>
+                <Editor type="experiment" :newElement="experiment.newElement" :baklava=experiment.editor
+                  :data=experiment.data :name="experiment.name" :index=index @updateElement="updateElement"
+                  @createElement="createElement" @updateName="(event) => updateName(event, 'experiment')"></Editor>
               </div>
             </TabPanel>
           </TabView>
         </TabPanel>
-        <TabPanel  v-if="editorStore.tasks.elements.length > 0" header="Tasks">
+        <TabPanel v-if="editorStore.tasks.elements.length > 0" header="Tasks">
           <TabView class="pb-0" v-model:activeIndex="editorStore.tasks.active">
-            <TabPanel  v-for="(task, index) in editorStore.tasks.elements">
+            <TabPanel v-for="(task, index) in editorStore.tasks.elements">
               <template #header>
                 <span> {{ task.name }} </span>
                 <Button icon="pi pi-times" @click="closeTab(index, editorStore.tasks)" />
               </template>
               <div style="width:100%; height:80vh">
-                <TaskEditor :newElement=task.newElement 
-                :target="task.data" 
-                :index="index" 
-                @updateName="(event) => updateName(event, 'task')"              
-                ></TaskEditor>
+                <TaskEditor :newElement=task.newElement :target="task.data" :index="index"
+                  @updateName="(event) => updateName(event, 'task')"></TaskEditor>
               </div>
             </TabPanel>
           </TabView>
           <!-- Content for the Tasks tab goes here -->
         </TabPanel>
-        <TabPanel  v-if="editorStore.projects.elements.length > 0" header="Projects">
+        <TabPanel v-if="editorStore.projects.elements.length > 0" header="Projects">
           <TabView class="pb-0" v-model:activeIndex="editorStore.projects.active">
-            <TabPanel  v-for="(project, index) in editorStore.projects.elements">
+            <TabPanel v-for="(project, index) in editorStore.projects.elements">
               <template #header>
                 <span> {{ project.name }} </span>
                 <Button icon="pi pi-times" @click="closeTab(index, editorStore.projects)" />
               </template>
               <div style="width:100%; height:80vh">
-                <Editor type="project" :newElement="project.newElement" :baklava=project.editor :data=project.data :name="project.name" :index="index" @updateElement="updateElement" @createElement="createElement" @updateName="(event) => updateName(event, 'project')"></Editor>
+                <Editor type="project" :newElement="project.newElement" :baklava=project.editor :data=project.data
+                  :name="project.name" :index="index" @updateElement="updateElement" @createElement="createElement"
+                  @updateName="(event) => updateName(event, 'project')"></Editor>
               </div>
               <!-- Content for Sub-Tab 1 goes here -->
             </TabPanel>
@@ -64,7 +57,8 @@
     </div>
     <ConfirmDialog :target=currentTarget message="Are you sure you want to close this? All unsaved changes will be lost"
       reject="Cancel" :isVisible=showConfirm @confirm="confirmation(true)" @reject="confirmation(false)" />
-    <ObjectSelectionDialog v-model:visible="showSelector" :object-type="elementType" @selected="openSelectionTab"></ObjectSelectionDialog>
+    <ObjectSelectionDialog v-model:visible="showSelector" :object-type="elementType" @selected="openSelectionTab">
+    </ObjectSelectionDialog>
   </div>
 </template>
   
@@ -75,7 +69,7 @@ import Button from 'primevue/button';
 import PanelMenu from 'primevue/panelmenu';
 
 import { useElementStore, useEditorStore } from "@/stores";
-
+import { router } from '@/helpers'
 import Editor from "@/components/projecteditor/Editor.vue"
 
 import TaskEditor from "@/components/taskeditor/TaskEditor.vue"
@@ -94,17 +88,79 @@ const currentTarget = ref({});
 const showConfirm = ref(false);
 const elementType = ref('');
 const showSelector = ref(false);
-const activeElement = computed (() => {
-  const expOffset = editorStore.experiments.elements.length > 0 ? 1 : 0;
-  const taskOffset = editorStore.tasks.elements.length > 0 ? 1 : 0;
-  switch(editorStore.activeElement)
-  {
-    case "": return 0;
-    case "Task": return expOffset
-    case "Project": return expOffset + taskOffset
-    case "Experiment": return 0
+const currentSelectedTask = ref(undefined);
+
+function handleTypeChange() {
+  // Indices are: Experiment 0, Task: 1, Project 2;
+  if (editorStore.activeElement === "Task") {
+    if (currentSelectedTask) {
+      const currentTask = editorStore.tasks.elements[currentSelectedTask];
+      router.push({ path: '/management/' + currentTask.UUID + "/" + currentTask.version + "/" })
+    }
+  }
+  else {
+    // remove any surplus...
+    router.push('/management');
+  }
+}
+
+
+const activeElement = computed({
+  get() {
+    const expOffset = editorStore.experiments.elements.length > 0 ? 1 : 0;
+    const taskOffset = editorStore.tasks.elements.length > 0 ? 1 : 0;
+    console.log("Updating active Element")
+    switch (editorStore.activeElement) {
+      case "": return 0;
+      case "Task": handleTaskChange({ index: editorStore.tasks.active }); return expOffset
+      case "Project": handleTypeChange(); return expOffset + taskOffset
+      case "Experiment": handleTypeChange(); return 0
+    }
+  },
+  set(newValue) {
+    const expOffset = editorStore.experiments.elements.length > 0 ? 1 : 0;
+    const taskOffset = editorStore.tasks.elements.length > 0 ? 1 : 0;
+    const currentValue = newValue - expOffset - taskOffset;
+    if (currentValue == 0) {
+      editorStore.activeElement = "Project";
+    }
+    else {
+      if (currentValue == -1) {
+        if (newValue == 1) {
+          editorStore.activeElement = "Task";
+        }
+        else {
+          if (expOffset == 1) {
+            editorStore.activeElement = "Experiment"
+          }
+          else {
+            editorStore.activeElement = "Task";
+          }
+        }
+      }
+      else {
+        if (currentValue == -2) {
+          editorStore.activeElement = "Experiment";
+        }
+      }
+    }
   }
 })
+
+function handleTaskChange(event) {
+  // Indices are: Experiment 0, Task: 1, Project 2;
+  console.log("Trying to change Tasks");
+  console.log(event);
+  const currentTask = editorStore.tasks.elements[event.index];
+  if (currentTask.data?.UUID) {
+    router.push('/management/' + currentTask.data.UUID + "/" + currentTask.data.version + "/")
+  }
+  else {
+    router.push('/management');
+  }
+}
+
+
 function closeTab(index, target) {
   console.log("Trying to close tab")
   console.log(currentTarget)
@@ -126,22 +182,19 @@ function confirmation(close) {
   showConfirm.value = false;
 }
 //const editorStore.projectsPresent = computed(() => editorStore.projects.length > 0
-function showOpenElementDialog(typeForDialog)
-{
+function showOpenElementDialog(typeForDialog) {
   elementType.value = typeForDialog;
   showSelector.value = true;
 }
 
-async function updateElement(updateEvent)
-{
+async function updateElement(updateEvent) {
   console.log(updateEvent);
-  const newVersion = await editorStore.saveObject(updateEvent.type, updateEvent.data, updateEvent.index)  
+  const newVersion = await editorStore.saveObject(updateEvent.type, updateEvent.data, updateEvent.index)
 }
 
-async function createElement(createData)
-{
+async function createElement(createData) {
   console.log(createData)
-  const newVersion = await editorStore.createObject(createData.type, createData.data, createData.index)  
+  const newVersion = await editorStore.createObject(createData.type, createData.data, createData.index)
 
 }
 
@@ -149,21 +202,18 @@ async function createElement(createData)
  * Open a tab for the selected Type of Element in the respective tabs rider. 
  * @param {} element 
  */
-function openSelectionTab(element)
-{
+function openSelectionTab(element) {
   console.log(element)
-  if(element)
-  {
+  if (element) {
     editorStore.loadElement(elementType.value, element.name, element.uuid, element.version)
     showSelector.value = false;
-  } 
-  else{
+  }
+  else {
     showSelector.value = false;
-  } 
+  }
 }
 
-function updateName(data, type)
-{
+function updateName(data, type) {
   console.log("Updating name for index " + data.index + " for type " + type + " to " + data.name)
   const elementStore = editorStore.getStoreForType(type);
   elementStore.elements[data.index].name = data.name;
@@ -222,7 +272,7 @@ const items = computed(() => [
         command: () => {
           console.log("Tring to create Project")
           editorStore.createElement("Experiment")
-          
+
         }
       },
       {
@@ -236,12 +286,8 @@ const items = computed(() => [
   }
 ]);
 
-
 </script>
 
-<script>
-
-</script>
   
 <style scoped>
 .main-container {
@@ -254,6 +300,7 @@ const items = computed(() => [
   padding: 20px;
   padding-bottom: 0px;
 }
+
 .p-tabview .p-tabview-panels {
   padding: 0px;
 }

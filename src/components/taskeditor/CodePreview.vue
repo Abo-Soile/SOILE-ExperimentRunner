@@ -1,18 +1,24 @@
 <template>
-
-    <iframe class="previewFrame" :src="'/preview/' + taskUUID + '/' + taskVersion + '/'" style="width: 100%; height:100%" ref="previewFrame"></iframe>
-    
-    <div v-if="logs.length > 0">
-        <h3> Log: </h3>
-        <div v-for="logentry in logs">
-            {{ logentry }}
-        </div>
+    <div v-if="isRunningTask">
+        <SoileExpRunner v-if="codeType == 'elang'" :code="code"
+            :outputs="currentTaskSettings.outputs" @handleSubmit="event => submitResults(event)"
+            @handleError="error => handleError(error)"
+            @handleUpload="event => uploadFile(event.file, event.fileName, event.idCallBack, event.errorCallBack)">
+        </SoileExpRunner>
+        <PsychoJsRunner v-if="codeType == 'psychopy'" 
+            :code="code"
+            :psychoJSVersion="codeTypeVersion"
+            @handleSubmit="event => submitResults(event)" @handleError="error => handleError(error)"
+            @handleUpload="event => uploadFile(event.file, event.fileName, event.idCallBack, event.errorCallBack)">
+        </PsychoJsRunner>
+        <SoileQuestionnaire v-if="codeType == 'qmarkup'" :code="code"
+            :outputs="currentTaskSettings.outputs" @handleSubmit="event => submitResults(event)"
+            @handleError="error => handleError(error)"></SoileQuestionnaire>
+        <!--<JsRunner v-if="type == 'javascript'"></JSRunner>-->
     </div>
-    <div v-if="results">
-        {{ results }}
+    <div v-else>
+        <Button @click="setTaskActive">Start Task</Button>
     </div>
-    <Button v-if="!isRunning" :disabled=!canRun label="Run" @click="start"></Button>
-    <Button v-if="isRunning" label="Stop" @click="stop"></Button>
 </template>
   
 <script>
@@ -30,100 +36,117 @@ export default {
 
     name: 'CodePreview',
     components: { SoileQuestionnaire, SoileExpRunner, PsychoJsRunner, Button },
-    props: {
-        codeType: {
+    props:
+    {
+        sourceCode: {
             type: String,
+            required: true
+        },
+        codeType: {
+            String,
             required: true
         },
         codeTypeVersion: {
-            type: String,
+            String,
             required: true
-        },
-        code: {
-            type: String,
-            required: true
-        },
-        taskUUID: {
-            type: String,
-        },
-        taskVersion:
-        {
-            type: String,
         }
-    },
-    setup() {
-        const errorStore = useErrorStore();
-        return { errorStore }
     },
     data() {
         return {
-            results: undefined,
-            isRunning: false,            
-            compiledCode: '',
-            logs: [],
-            outputs: [], // We should probably allow for this to be set by the researcher for testing.
-            previewWindow: undefined,
+            currentTaskSettings: { outputs: [], persistentData : {} },
+            code: undefined,            
+            running: false,
+            isRunningTask: false
         }
     },
-    computed: {
-        canRun()
+    methods: {
+        /**
+         * Set the task to active
+         */
+        setTaskActive()
         {
-            return true            
-        }
-    },
-    methods:
-    {
-        start() {
-            this.logs = [];
-            axios.post("/task/compile",{code : this.code, version: this.codeVersion, type: this.codeType})
-            .then(response => {
-                this.compiledCode = response.data;                
-                this.previewWindow.start()
-                this.isRunning = true;
+            this.compileTask()
+            .then(() => {
+                this.isRunningTask = true;
+            });
+        },
+        async compileTask() {           
+            try{
+                const response = await axios.post("/task/compile/",{code: this.sourceCode, type: this.codeType});
+                this.code = response?.data;
+            }
+            catch(error)
+            {
+                console.log(error)
+            }
+        },
+        /**
+         * This function assumes, that results is an object with the following fields:
+         * {
+         *  outputData* : [ {name: "someName", value: 123 }],
+         *  resultData* : [ {name: "someName", value: "xyz" or [], or {} or 123, timestamp : 12345}]
+         *  fileData* : [{fileformat: "someMimeFormat", filename: "someName", targetid: "AnIDObtainedFromUploadData"}]
+         * }
+         * All fields are optional. 
+         * @param {*} results 
+         */
+        async submitResults(results) {
+            console.log(results)
+         /*   var TaskData = {};
+            const userStore = useUserStore()
+            TaskData.taskID = userStore.currentTaskSettings.id;
+            TaskData.outputData = results.outputData ? results.outputData : [];
+            TaskData.resultData = results.resultData ? results.resultData : { resultData: [], fileData: [] };
+            // TODO: Potentially extract outputs from the jsonData of the results        
+            axios.post("/projectexec/" + this.$route.params.id + "/submit", TaskData)
+                .then(async response => {
+                    if (response.status == 200) {
+                        await userStore.updateTaskSettings(this.$route.params.id);
+                        // start the next task.
+                        this.running=false;
+                        this.$router.push("/exp/" + this.$route.params.id + "/" + userStore.currentTaskSettings.id + "/")
+                    }
+                    else {
+                        console.log(response);
+                        reportError(response.status, "Unexpected issue while submitting the results")
+                    }
+                })
+                .catch(error => {
+                    
+                    console.log(error)
+                })
+                .finally(() => {
+                    userStore.setTaskNotRunning();
+                })*/
+        },
+        uploadData(file, fileName, idCallBack, errorCallback) {
+            /*var formData = new FormData();
+            formData.append(fileName, file);
+            axios.post("/projectexec/" + this.$route.params.id + "/submit", formData, {
+                headers: {
+                    'content-type': 'multipart/form-data'
+                }
             })
-            .catch((err) => {
-                this.handleError(err)
-            })
-            
+                .then(response => {
+                    idCallBack(response.data.id)
+                })
+                .catch(error => {
+                    console.log(error)
+                    errorCallback(error)
+                })*/
         },
-        stop() {
-            this.isRunning = false;
-            this.previewWindow.stop();
-        },
-        displayResults(event) {
-            this.results = event;
-            this.isRunning = false;                       
-        },
-        handleError(err) {
-            this.errorStore.raiseError("error", err)
-        },
-        uploadFile(file, fileName, idCallback, errorCallback) {
-            this.logs.push("Uploading file with name " + fileName);
-        },
-        submitResults(event)
-        {
-            this.logs.push("Submitting results");
-            this.results = event;
-        },
-        getCodeData()
-        {
-            return { type: this.codeType,  
-                version: this.codeVersion, 
-                compiledCode : this.compiledCode, 
-                taskUUID : this.taskUUID, 
-                taskVersion : this.taskVersion}
+        handleError(error) {
+            const errorStore = useErrorStore();
+            errorStore.raiseError(undefined, error);
         }
 
     },
-    mounted()
-    {
-        this.previewWindow = this.$refs.previewFrame.contentWindow
-        this.previewWindow.displayResults = this.displayResults;
-        this.previewWindow.uploadFile = this.uploadFile;
-        this.previewWindow.submitResults = this.submitResults;
-        this.previewWindow.getCodeData = this.getCodeData;
-    }
+    mounted() {
+        console.log("ExpView Mounted")
+    },
+
 
 
 }
 </script>
+  
