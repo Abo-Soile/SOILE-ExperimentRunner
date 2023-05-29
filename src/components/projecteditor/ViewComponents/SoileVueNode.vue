@@ -8,7 +8,7 @@
         :data-node-type="node.type"        
         @pointerdown="select"        
     >    
-        <div class="__title" @pointerdown.self.stop="startDrag">
+        <div class="__title" @pointerdown.self.stop="startDrag" @contextmenu="openBaklavaContextMenu">            
             <template v-if="!renaming">
                 <div class="__title-label">
                     {{ node.title }}
@@ -96,6 +96,9 @@ const contextMenuItems = computed(() => {
     if (props.node.type.startsWith(GRAPH_NODE_TYPE_PREFIX)) {
         items.push({ value: "editSubgraph", label: "Edit Subgraph" });
     }
+    if (!props.node.type.startsWith("Filter") && ! props.node.isStartNode()) {
+        items.push({ value: "makeStart", label: "Make Start Node" });
+    }
     return items;
 });
 const classes = computed(() => ({
@@ -134,6 +137,10 @@ const stopDrag = () => {
 const openContextMenu = () => {
     showContextMenu.value = true;
 };
+const openBaklavaContextMenu = (event : MouseEvent) => {
+    event.preventDefault();
+    openContextMenu();
+}
 const onContextMenuClick = async (action: string) => {
     switch (action) {
         case "delete":
@@ -144,6 +151,9 @@ const onContextMenuClick = async (action: string) => {
             renaming.value = true;
             await nextTick();
             renameInputEl.value?.focus();
+            break;
+        case "makeStart":
+            props.node.makeStartNode();            
             break;
         case "editSubgraph":
             switchGraph((props.node as AbstractNode & IGraphNode).template);

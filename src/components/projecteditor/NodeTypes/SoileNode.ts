@@ -46,6 +46,9 @@ export default abstract class SoileNode extends Node<any, any> implements SoileB
     public isStartNode() {
         return this.graphStore.isStartNode(this);
     }
+    public makeStartNode() {
+        return this.graphStore.setStartNode(this);
+    }
     public abstract isValid() : boolean;
 
     onPlaced(): void {

@@ -20,7 +20,7 @@ function showErrorToast(severity, message)
   console.log("Adding error Toast");
   console.log(severity)
   console.log(message)
-  toastInstance.add({ severity: severity, detail: message, life: 3000 })
+  toastInstance.add({ severity: severity, detail: message, life: 10000 })
 }
 
 watch(latestError, (newError) => {

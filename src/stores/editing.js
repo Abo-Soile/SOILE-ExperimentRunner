@@ -3,6 +3,44 @@ import { defineStore } from 'pinia';
 import axios from 'axios';
 import { useErrorStore } from './errors';
 import { useElementStore } from './elements';
+import { useBaklava } from "@baklavajs/renderer-vue";
+import { reactive } from 'vue'
+const defaultData = {
+    task : {
+        code: '',
+        name: undefined,
+        UUID: undefined,
+        version: undefined,
+        tag: undefined,
+        private: false,
+        codeType: {
+            language: undefined,
+            version: undefined,
+        }
+    },
+    experiment: {
+        name: undefined,
+        UUID: undefined,
+        version: undefined,
+        tag: undefined,
+        private: false,
+        elements: []
+    },
+    project: {
+        name: undefined,
+        UUID: undefined,
+        version: undefined,
+        tag: undefined,
+        private: false,
+        start: undefined,
+        tasks: [],
+        experiments: [],
+        filters: []
+    }
+
+}
+
+
 
 export const useEditorStore = defineStore({
     id: 'editing',
@@ -18,9 +56,30 @@ export const useEditorStore = defineStore({
             const store = this.getStoreForType(type);
             const existentNames = store.elements.map((x) => x.name)
             const name = this.uniqueID(type, existentNames);
-            store.elements.push({ name: name });
+            this.createElementForType(type, name, reactive(JSON.parse(JSON.stringify(defaultData[type.toLowerCase()]))), true )
             store.active = store.elements.length - 1;
             this.activeElement = type;
+        },
+        createElementForType(type, name, data, newElement)
+        {
+            console.log("Creating element for " + type)
+            data.name = name;
+            const store = this.getStoreForType(type);
+            if(type.toLowerCase() === "experiment" || type.toLowerCase() === "project")
+            {
+                console.log("Initializing new editor for object")
+                store.elements.push(reactive({name: name, newElement: newElement, data: data, editor : useBaklava() }))
+            }
+            else
+            {
+                store.elements.push(reactive({name: name, newElement: newElement, data: data }))
+            }
+        },
+        async changeElementAtPosition(type, index, uuid, version)
+        {
+            const data = await this.loadObject(type, uuid, version)
+            const store = this.getStoreForType(type);
+            store.elements[index].data = data;
         },
         // load an element and push 
         async loadElement(type, elementName, elementID, elementVersion) {
@@ -28,7 +87,7 @@ export const useEditorStore = defineStore({
             const store = this.getStoreForType(type);
             console.log(store);
             for (const [i, element] of store.elements.entries()) {
-                if (element.name === elementName && element.version === elementVersion) {
+                if (element.name === elementName && element.data?.version === elementVersion) {
                     store.active = i;
                     this.activeElement = type;
                     return;
@@ -36,7 +95,7 @@ export const useEditorStore = defineStore({
             }
             // not present, so we need to actually load it.
             const data = await this.loadObject(type, elementID, elementVersion)
-            store.elements.push({ name: elementName, version: elementVersion, data: data })
+            this.createElementForType(type,elementName, data, false)            
             store.active = store.elements.length - 1;
             this.activeElement = type;
         },
@@ -65,6 +124,22 @@ export const useEditorStore = defineStore({
             errorStore.processAxiosError(err)
 
         },
+        async saveObject(type, data, index)
+        {            
+            const elementStore = useElementStore();
+            const newVersion = await elementStore.updateElement(data.UUID, data.version, data, type);            
+            const store = this.getStoreForType(type);
+            data.version = newVersion;
+            store.elements[index].data = reactive(data);
 
+        },
+        async createObject(type, data, index)
+        {            
+            const elementStore = useElementStore();
+            const newObject = await elementStore.createElement(data.name, data, type);
+            const store = this.getStoreForType(type);            
+            store.elements[index].data = reactive(newObject);
+            store.elements[index].newElement = false;
+        }   
     }
 });

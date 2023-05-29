@@ -30,7 +30,7 @@ export async function instantiateExperimentInProject(UUID : string, Version : st
             }
             else{
                 // if the next task is "end or nothing, we return to the experiment", otherwise we replace the instanceID with the new one.
-                currentTask.next = (currentTask.next || currentTask.next === "end" ) ? InstanceID + "." + currentTask.next : InstanceID;
+                currentTask.next = (currentTask.next && currentTask.next != "end" ) ? InstanceID + "." + currentTask.next : InstanceID;
             }
         }
         if(element.elementType === "filter")

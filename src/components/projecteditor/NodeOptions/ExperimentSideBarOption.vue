@@ -10,7 +10,7 @@
         </ObjectAndVersionSelectorWithProps>
         <div class="flex align-items-center">
             <label for="random" class="ml-2"> Randomize </label>
-            <Checkbox class="baklava-checkbox" :disabled="!currentNode.canRandom.value" v-model="isRandom" :binary="true" name="random"  />        
+            <Checkbox class="baklava-checkbox" :disabled="!currentNode.canRandom" v-model="isRandom" :binary="true" name="random"  />        
         </div>
         <div>
             <Button class="baklava-button" :disabled=isInValid @click="editExperiment()" label="Edit Experiment"> </Button>
@@ -104,6 +104,9 @@ export default defineComponent({
             async set(newValue : boolean ) {                
                 this.intf.data.random = newValue;
             }
+        },
+        canRandom() {
+                return this.intf.data.canRandom;            
         },
     },
     watch:

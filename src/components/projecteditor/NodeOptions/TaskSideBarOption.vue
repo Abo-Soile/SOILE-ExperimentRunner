@@ -6,6 +6,7 @@
             v-model:version="currentVersion"
             elementLabel="name"
             versionLabel="tag"
+            dropDownClasses="baklava-dropdown"
         >
         </ObjectAndVersionSelectorWithProps>
         <div>
@@ -34,15 +35,13 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import DropDown from "../components/DropDown.vue";
-import { SelectionItem } from "../components/DropDown.vue";
 import TaskNode from "../NodeTypes/TaskNode";
 import { ComponentInterface } from "../NodeInterfaces/ComponentInterface";
 import { useGraphStore, useElementStore, useErrorStore } from "@/stores";
 import ObjectAndVersionSelectorWithProps from '@/components/utils/ObjectAndVersionSelectorWithProps.vue'
 export default defineComponent({
 
-    components: { DropDown, ObjectAndVersionSelectorWithProps},
+    components: { ObjectAndVersionSelectorWithProps},
     props: {
         intf: {
             type: Object as () => ComponentInterface<TaskNode>,
@@ -86,12 +85,12 @@ export default defineComponent({
             }
             this.newPersistent = "";
         },
-        async setTask(selected: { text: String, value: String }) {
+        async setTask(selected) {
             console.log("Setting task");
             this.currentTask = selected;
 
         },
-        async setTaskVersion(selected: { text: String, value: String }) {                        
+        async setTaskVersion(selected) {                        
             this.currentVersion = selected;
         },
         removeOutput(output: string) {

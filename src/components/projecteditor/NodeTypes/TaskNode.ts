@@ -24,7 +24,6 @@ export default class TaskNode extends SoileVersionedNode {
   myTitle = this.type;
   public objectType = "task";
   public codeType = reactive({language : "", version: "string" });
-  public nodePersistent = reactive(new Array<string>);
 
   public inputs = {
     previous: new InputInterface("Previous", "InputConnection").use(allowMultipleConnections),

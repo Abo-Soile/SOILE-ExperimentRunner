@@ -1,8 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import { ExperimentView } from '@/views';
-import { WelcomeView } from '@/views';
-import { SignupView }  from '@/views';
-import { ManagementView } from '@/views';
+import { ManagementView, SignupView, ExperimentView, ExperimentPreviewView, WelcomeView } from '@/views';
 import { useUserStore } from '@/stores/users';
 
 const routes = [
@@ -15,6 +12,11 @@ const routes = [
         path: '/management',
         name: 'ManagementView',
         component: ManagementView
+    },
+    {
+        path: '/preview/:taskID/:taskVersion/',
+        name: 'Preview',
+        component: ExperimentPreviewView
     },
     {
         path: '/exp/:id/:taskID/',        

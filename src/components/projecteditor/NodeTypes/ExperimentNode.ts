@@ -1,5 +1,5 @@
 import { NodeInterface } from "@baklavajs/core";
-import { TextInterface } from "@baklavajs/renderer-vue";
+import { CheckboxInterface, TextInterface } from "@baklavajs/renderer-vue";
 import { allowMultipleConnections } from "@baklavajs/engine"
 import { v4 as uuidv4 } from 'uuid'
 import { SideBarButton, ExperimentSideBarOption} from "../NodeOptions"
@@ -17,8 +17,6 @@ export default class ExperimentNode extends SoileVersionedNode  {
   public type = "ExperimentNode";
   public objectType = "experiment";
   myTitle = this.type;
-  public nodeOutputs = new Array<string>;  
-  public nodePersistent = new Array<string>;  
   public random = ref(false);
   public canRandom = ref(true);
   public constructor() {
@@ -31,15 +29,16 @@ export default class ExperimentNode extends SoileVersionedNode  {
     previous: new InputInterface("Previous", "InputConnection").use(allowMultipleConnections),    
     ExperimentName: new TextInterface("ExperimentName", "Experiment: " + (this.objectData.name != "" ? this.objectData.name : "" ) ).setPort(false),
     ExperimentVersion: new TextInterface("ExperimenVersion", "Version: " + this.objectData.tag ).setPort(false),
+    outputs: new ComponentInterface("Outputs", { items: this.nodeOutputs, title: "Outputs" }, OutputListOption).setPort(false),
     // Potentially we don't need this, but it might be necessary.
     persistent: new ComponentInterface("Persistent", { items: this.nodePersistent, title: "Persistent Data" }, OutputListOption).setPort(false),
     edit: new NodeInterface("Edit", undefined).setComponent(markRaw(SideBarButton)).setPort(false),
     sideBarOption1: new ComponentInterface("SideBar", this, ExperimentSideBarOption).setHidden(true).use(displayInSideBar, true).setPort(false)
-  };
+  }
   
   public outputs = {
     next: new NodeInterface("Next", "OutputConnection"),
-  };
+  }
   public setName(name : string) : void
   {
     this.inputs.ExperimentName.value = "Experiment: " + name
@@ -58,6 +57,6 @@ export default class ExperimentNode extends SoileVersionedNode  {
   }
   public isDataNode() {
     return true;
-  };
- 
+  }
+
 }

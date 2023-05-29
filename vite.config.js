@@ -19,10 +19,16 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/exp/, '/run'),
         secure: false
       },
-      "/api/*" :{
+      "^/api/.*" :{
         target: 'https://localhost:8081',
-        rewrite: (path) => path.replace(/^\/api/, '')
-      }
+        rewrite: (path) => path.replace(/^\/api/, ''),
+        secure: false,        
+      },
+      "^/preview/.*/.*/.*" :{
+        target: 'https://localhost:8081',
+        rewrite: (path) => path.replace(/^\/preview(\/\d+\/\d+)(\/.*)$/, "/task$1/execute$2"),
+        secure: false
+      },
     }
   }
 })

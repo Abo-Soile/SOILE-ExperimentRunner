@@ -15,6 +15,8 @@ import 'primevue/resources/primevue.min.css'
 import 'primeicons/primeicons.css'
 import ToastService from 'primevue/toastservice';
 
+// primeflex for layouting
+import 'primeflex/primeflex.css' 
 
 console.log(router.getRoutes())
 

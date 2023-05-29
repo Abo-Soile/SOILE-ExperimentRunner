@@ -1,5 +1,6 @@
 <template>
-    <div style="height:100%" @oncontextmenu="parseEvent()">
+    <div style="height:100%" class="editor" @oncontextmenu="parseEvent()">
+        <hint-overlay></hint-overlay>
         <baklava-editor :view-model="baklava">
             <template #node="nodeProps">
                 <SoileNode v-if="isSoileNode(nodeProps.node.type)" v-bind="nodeProps" />
@@ -8,97 +9,186 @@
             <template #toolbar="toolbarProps">
                 <div class="baklava-toolbar">
                     <button class="baklava-button" @click="saveProject()">
-                        <saveIcon />
+                        <i class="pi pi-save" />
+                    </button>
+                    <button class="baklava-button" @click="editSettings = true">
+                        <i class="pi pi-cog" />
                     </button>
                 </div>
             </template>
         </baklava-editor>
     </div>
+    <ElementSettings v-model:visible="editSettings" :newElement="newElement" :initialValues="objectOptions" @submit="updateOptions" />
+    <ElementSaveDialog v-model:visible="showSave" :name="name" :currentTags="currentTags" @submit="saveElement" />
+
 </template>
 
 <script>
 
-import { EditorComponent, useBaklava, Components, Icons } from "@baklavajs/renderer-vue";
+import { EditorComponent, Components, Icons } from "@baklavajs/renderer-vue";
 import { DependencyEngine } from "@baklavajs/engine";
 import "@baklavajs/themes/dist/syrup-dark.css";
+
 
 
 import TaskNode from "./NodeTypes/TaskNode";
 import FilterNode from "./NodeTypes/FilterNode";
 import ExperimentNode from "./NodeTypes/ExperimentNode";
 import SoileNode from "./ViewComponents/SoileVueNode.vue";
+import HintOverlay from "./HintOverlay.vue";
+import ElementSettings from '@/components/utils/ElementSettings.vue'
+import ElementSaveDialog from '@/components/utils/ElementSaveDialog.vue'
 
 import { BaklavaToSoileProjectJSON,BaklavaToSoileExperimentJSON, loadSoileProjectToBaklava, loadSoileExperimentToBaklava } from "@/helpers/projecteditor/baklavasoileConverter";
 import { checkConnection } from './events/graphEvents.ts'
-import { useGraphStore } from "../../stores";
+import { useGraphStore, useElementStore, useErrorStore } from "@/stores";
+
+
+import { reactive } from "vue";
 
 const BaklavaNode = Components.Node;
 const saveIcon = Icons.DeviceFloppy;
 
 export default {
-    components: { "baklava-editor": EditorComponent, BaklavaNode, SoileNode, saveIcon },
+    components: { "baklava-editor": EditorComponent, ElementSaveDialog, BaklavaNode, SoileNode, saveIcon, ElementSettings, HintOverlay },
+    emits: ['updateName','updateElement', 'createElement'],
     props: {
         name: {
             type: String,
             required: true
         },
-        isProjectEditor: {
-            type: Boolean
+        type: {
+            type: String
         },
         data: {
             type: Object            
+        },
+        index: {
+            type: Number
+        },
+        baklava: {
+            type: Object
+        },
+        newElement: {
+            type: Boolean
         }
     },
     data() {
         return {
+            editSettings : false,
+            showSave: false,
+            currentTags : []
         };
-    },
-
-    created() {
     },
     setup(props) {
         const graphStore = useGraphStore();
-        const baklava = useBaklava();
-        
-        baklava.editor.registerNodeType(TaskNode)
-        baklava.editor.registerNodeType(FilterNode)
-        baklava.editor.registerNodeType(ExperimentNode);                
-        baklava.editor.graphHooks.checkConnection.subscribe("soile:connectionCheck", (c) => checkConnection(c.from, c.to))                
-        return { baklava, graphStore }
+        const elementStore = useElementStore();
+        const errorStore = useErrorStore();
+        //const baklava = useBaklava();
+        const objectOptions = reactive({name: undefined, private: undefined})
+        props.baklava.editor.registerNodeType(TaskNode)
+        props.baklava.editor.registerNodeType(FilterNode)
+        props.baklava.editor.registerNodeType(ExperimentNode);                
+        props.baklava.editor.graphHooks.checkConnection.subscribe("soile:connectionCheck", (c) => checkConnection(c.from, c.to))                
+        if(props.data)
+        {
+            if(props.type === "project")
+            {
+                loadSoileProjectToBaklava(props.baklava, props.data)
+            }
+            if(props.type === "experiment")
+            {
+                loadSoileExperimentToBaklava(props.baklava, props.data)
+            }
+            objectOptions.name = props.data.name
+            objectOptions.private = props.data.private                        
+        }
+        else
+        {
+            objectOptions.name = props.name            
+            objectOptions.private = false
+        }
+        return { graphStore, objectOptions, elementStore, errorStore }
     },
     methods: {       
-        saveProject() {
-            console.log(this.baklava.editor.save());
-            if(this.isProjectEditor)
-            {
-            console.log(BaklavaToSoileProjectJSON(this.baklava.editor.graph));
+        async saveProject() {    
+            try{        
+                if(this.type === "project")
+                {
+                    await BaklavaToSoileProjectJSON(this.baklava.editor.graph);            
+                }
+                if(this.type === "experiment")
+                {
+                    await BaklavaToSoileExperimentJSON(this.baklava.editor.graph)                
+                }
             }
-            else
+            catch(err)
             {
-                console.log(BaklavaToSoileExperimentJSON(this.baklava.editor.graph))
+                this.errorStore.raiseError('error', err.message)
+                return;
             }
-        },
-        loadProject() {
-            //TODO (popup)
+            await this.updateTags();
+            this.showSave = true;            
         },
         isSoileNode(nodeType) {
             return nodeType === "TaskNode" || nodeType === "FilterNode" || nodeType === "ExperimentNode"
         },
+        updateOptions(newProps)
+        {
+            this.objectOptions = newProps;
+            if(this.newElement)
+            {
+                this.$emit("updateName",{name : newProps.name, index: this.index})
+            }                       
+            this.editSettings = false;
+        },
+        async updateTags()
+        {
+            console.log("Updating Tags")
+            if(this.data && this.data.UUID != null && this.data.UUID != "")
+            {
+                console.log("Retrieving tags")
+                const tags = await this.elementStore.getTagsForElement(this.data.UUID, this.type)
+                this.currentTags = tags.map((x) => x.tag);
+            }
+            else
+            {
+                console.log("No Tags available for unversioned element")
+                this.currentTags = [];
+            }
+        },
+        async saveElement(tag)
+        {
+            this.showSave = false;
+            console.log(this.baklava.editor.save());
+            var data;
+            if(this.type === "project")
+            {
+                data = await BaklavaToSoileProjectJSON(this.baklava.editor.graph);            
+            }
+            if(this.type === "experiment")
+            {
+                data = await BaklavaToSoileExperimentJSON(this.baklava.editor.graph)                
+            }
+            data.name = this.objectOptions.name;
+            data.private = this.objectOptions.private;
+            console.log(data)            
+            if(this.newElement)
+            {
+                this.$emit('createElement', {data : data, index: this.index, type: this.type})                
+            }
+            else{
+                data.UUID = this.data.UUID;
+                data.version = this.data.version;
+                data.tag = tag;                
+                this.$emit('updateElement', {data : data, index: this.index, type: this.type})
+            }
+        }
     },
     mounted()
     {
         // TODO: Check, if we need to clean up the graph in order not to screw things up...
-        if(this.data)
-        {
-            if(this.isProjectEditor)
-            {
-                loadSoileProjectToBaklava(this.baklava, this.data)
-            }
-            else
-            {
-                loadSoileExperimentToBaklava(this.baklava, this.data)
-            }
-        }
+       
         console.log("Editor mounted");
         console.log(this.data);
     }
@@ -108,6 +198,9 @@ export default {
 .node-editor .minimap {
     left: 0px;
     top: 85%;
+}
+.editor {
+    position: relative;
 }
 </style>
 

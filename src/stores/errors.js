@@ -38,6 +38,10 @@ export const useErrorStore = defineStore({
             {
                 this.raiseError("warn", "No Authorization or Authentication unsuccessful (code " + err.response?.status + ")")
             }
+            else if(err.response?.status === 409)
+            {
+                this.raiseError("error", "Conflict: " + err.response?.data)
+            }
             else
             {
                 this.raiseError("error", err.message + "/" + this.getReason(err.status))
