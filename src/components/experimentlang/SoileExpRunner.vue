@@ -8,21 +8,20 @@
 
 <script>
 
-import SOILE2 from '../../javascript/soile2.js'
+import SOILE2 from '@/helpers/experimentlang/soile2.js'
 
 
 export default {
   name: 'SoileExpRunner',
   props: {
-    msg: String,
-    completed: {
-      type: Number,
-      default: 50
+    code: {
+      type: String,
+      required: true
     },
-    phasesLeft: {
-      type: Number,
-      default: 2
-    }
+    outputs: {
+      required: true,
+      type: Array
+    }   
   },
   data()
   {
@@ -54,10 +53,86 @@ export default {
           // Do whatever else you want with the keydown event (i.e. your navigation).
         }
       }
+    },
+    startSoile(data) {
+      console.log("Starting soile");
+      SOILE2.util.enableLoadScreen();
+      SOILE2.util.setPersistantData(this.persistantData);
+      SOILE2.util.setDebug((event) => { console.log(event)})
+      /* This can most likely be completely ignored, as it's effect is almost irrelevant.
+      if (typeof window.testConfig !== "undefined") {
+        SOILE2.util.setPilotMode(window.testConfig.pilotMode);
+      }*/
+
+      SOILE2.util.setStartFunction(this.startFunc);
+      SOILE2.util.eval(data);
+      SOILE2.util.setEndFunction(this.end);
+
+      try{
+        SOILE2.start();
+      }
+      catch(e)
+      {
+        console.log(e)
+        this.$emit("handleError", e)
+      }
+    },
+    end(expdata, duration, score, persistantData) {
+      console.log("Test over");
+      console.log(expdata);
+
+      var d = {};
+      d = {};
+      d.exp = expdata;
+      d.exp.duration = duration;
+      d.exp.score = score;
+      d.persistantData = persistantData;
+      this.persistentData = persistantData;
+      //Showing loadingscreen at the end when sending data.
+      SOILE2.util.enableLoadScreen();
+
+      this.sendData(d);
+    },
+    startFunc() {
+      console.log("Starting!!!");
+    },
+
+    sendData(d) {
+      // Placeholder till we ge this right.
+      console.log(d);
+      const outputData = [];
+      for(const output of this.outputs)
+      {
+        if(output in d.exp.single)
+        {
+          const outValue = d.exp.single[output]
+          if(isNaN(outValue))
+          {
+            throw new Error("Output values have to be numbers! Received " + outValue + " for output " + output)
+          }
+          outputData.push({name : output, value: parseFloat(outValue)})
+        }
+        else{
+          throw new Error("Missing required output " + output + " cannot submit this questionnaire");
+        }
+      }
+      const jsonData = []
+      for(const field in d.exp)
+      {
+        // exclude stuff that is null or undefined.
+        if(d.exp[field] != null && d.exp[field] != undefined)
+        {
+          jsonData.push({name: field, value : d.exp[field]})
+        }
+      }
+      this.$emit('handleSubmit', {outputData: outputData, resultData: { fileData: [], jsonData : jsonData}})
     }
   },
-
   mounted() {
+    console.log("Mounting soile with code: ")
+    if(typeof this.code === 'string')
+    {
+    console.log(this.code);    
     window.SOILE2 = SOILE2;
     this.active = true;
     if(this.needToSetHandeler)
@@ -65,85 +140,10 @@ export default {
       //Preventing scroll on arrowkeys 37-40 and navigation on backspace 8
       document.addEventListener("keydown",this.suppressKeys, false);
     }
-    //console.log(window.testJS);
-
-    function startFunc() {
-      console.log("Starting!!!");
+    this.startSoile(this.code);
+    //console.log(window.testJS)        
     }
 
-    function sendData(d) {
-      // Placeholder till we ge this right.
-      console.log(d);
-      //Send data xhr,
-      /*xhr.post(document.URL, {timeout:10000,data:JSON.stringify(d)}).then(
-        function(response) {
-
-          if (typeof response !== 'undefined') {
-            response = JSON.parse(response);
-          }
-
-          if(response.redirect) {
-            console.log("JSON_REDIRECTING");
-            window.location.replace(response.redirect);
-          }
-
-          else {
-            //Navigate to next phase
-            var url = document.URL;
-            var currentPhase = parseInt(url.substr(url.lastIndexOf("/")+1));
-            url = url.slice(0, url.lastIndexOf("/")+1);
-
-            if(!isNaN(currentPhase)) {
-              console.log("Redirecting " + isNaN(currentPhase));
-              window.location.href = url+(currentPhase+1);
-            }else {
-              location.reload();
-            }
-          }
-        },function(error) {
-          console.log("Sending data failed, retrying...");
-          setTimeout(function() {
-            console.log("...resending");
-            sendData(d);
-          }, 1000);
-        });
-        */
-    }
-
-    function end(expdata, duration, score, persistantData) {
-      console.log("Test over");
-      console.log(expdata);
-
-      var d = {};
-      d = {};
-      d.exp = expdata;
-      d.duration = duration;
-      d.score = score;
-      d.persistantData = persistantData;
-
-      //Showing loadingscreen at the end when sending data.
-      SOILE2.util.enableLoadScreen();
-
-      sendData(d);
-    }
-
-    function startSoile(data) {
-      console.log("Starting soile");
-      SOILE2.util.enableLoadScreen();
-      SOILE2.util.setPersistantData(this.persistantData);
-     
-      /* This can most likely be completely ignored, as it's effect is almost irrelevant.
-      if (typeof window.testConfig !== "undefined") {
-        SOILE2.util.setPilotMode(window.testConfig.pilotMode);
-      }*/
-
-      SOILE2.util.setStartFunction(startFunc);
-      SOILE2.util.eval(data);
-      SOILE2.util.setEndFunction(end);
-
-      SOILE2.start();
-    }
-    startSoile(test.testData)
   }
 }
 </script>

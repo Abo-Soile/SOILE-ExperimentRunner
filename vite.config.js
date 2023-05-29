@@ -1,36 +1,34 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { fileURLToPath, URL } from 'url';
-
 // https://vitejs.dev/config/
 export default defineConfig({  
   resolve: {
-    alias: {
-      vue: '@vue/compat',
-      '@': fileURLToPath(new URL('./src', import.meta.url))
-    }
+    alias: [      
+        { find: '@/', replacement : fileURLToPath(new URL('./src/', import.meta.url))}
+      
+    ]
   },
   plugins: [
-    vue({
-      template: {
-        compilerOptions: {
-          compatConfig: {
-            MODE: 2
-          }
-        }
-      }
-    })
+    vue()
   ],
   server: {
     proxy: {
-      "/exp/:id/*" :{
-        target: 'localhost:8081',
-        rewrite: (path) => path.replace(/^\/exp/, '/run')
+      "^/exp/.*/.*/.*" :{
+        target: 'https://localhost:8081',
+        rewrite: (path) => path.replace(/^\/exp/, '/run'),
+        secure: false
       },
-      "/api/*" :{
-        target: 'localhost:8081',
-        rewrite: (path) => path.replace(/^\/api/, '')
-      }
+      "^/api/.*" :{
+        target: 'https://localhost:8081',
+        rewrite: (path) => path.replace(/^\/api/, ''),
+        secure: false,        
+      },
+      "^/preview/.*/.*/.*" :{
+        target: 'https://localhost:8081',
+        rewrite: (path) => path.replace(/^\/preview(\/\d+\/\d+)(\/.*)$/, "/task$1/execute$2"),
+        secure: false
+      },
     }
   }
 })

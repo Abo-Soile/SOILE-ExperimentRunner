@@ -10,16 +10,61 @@ import { useErrorStore } from './errors';
 export const useAuthStore = defineStore({
     id: 'auth',
     state: () => ({
-        // initialize state from local storage to enable user to stay logged in
-        user: JSON.parse(localStorage.getItem('user')),
-        jwtToken: localStorage.getItem('jwtToken'),
-        projectToken: localStorage.getItem('projectToken'),
-        returnUrl: null
-    }),
+        // initialize state from session storage to enable user to stay logged in for the session (not using local store)
+        user: JSON.parse(sessionStorage.getItem('soile-user')),
+        roles: JSON.parse(sessionStorage.getItem('soile-userroles')),
+        jwtToken: JSON.parse(sessionStorage.getItem('soile-jwtToken')),
+        projectToken: JSON.parse(sessionStorage.getItem('soile-projectToken')),
+        isAnonymous: JSON.parse(sessionStorage.getItem('soile-anonymous')),
+        returnUrl: null,
+        authed: false
+        }),
     actions: {
-        async refreshSession() {
-
+        isAuthed()
+        {
+            return this.authed;
         },
+        isAdmin()
+        {
+            if(this.isAuthed())
+            {
+                return this.roles.contains("Admin");
+            }
+            else
+            {
+                return false;
+            }
+        },
+        isResearcher()
+        {
+            if(this.isAuthed())
+            {
+                return this.roles.contains("Admin") || this.roles.contains("Researcher");
+            }
+            else
+            {
+                return false;
+            }
+        },
+        async refreshSession() {
+            if (this.jwtToken) {
+                this.setAccessToken(this.jwtToken);
+            }
+            if (this.projectToken) {
+                this.setProjectToken(this.projectToken);
+            }
+            try {
+                console.log("Checking auth status")
+                // refresh the session cookie.
+                await this.updateLoginStatus()
+            }
+            catch (error) {
+                if (error.response?.status != 401) {
+                    console.log(error)
+                    this.processAxiosError(error);
+                }
+            }        
+        },        
         async login(username, password, remember) {
 
             var loginData = {
@@ -34,17 +79,13 @@ export const useAuthStore = defineStore({
                     {
                         headers: { "Content-Type": "application/json" }
                     })
-                console.log(response?.data);
-                const response2 = await axios.get('/test/auth')
-                console.log(response2?.data);
-
+                console.log(response?.data);                
                 // update pinia state
-                this.user = response2?.data.user;
+                await this.updateLoginStatus();
                 this.setAccessToken(response?.data.token)
                 // store user details and jwt in local storage to keep user logged in between page refreshes
-                localStorage.setItem('user', JSON.stringify(this.user));
-                const listStore = useProjectStore();
-                await listStore.updateAvailableProjects();
+                sessionStorage.setItem('soile-user', JSON.stringify(this.user));
+                await this.updateUserData();
                 // redirect to previous url or default to home page
                 router.push(this.returnUrl || '/');
             }
@@ -58,11 +99,14 @@ export const useAuthStore = defineStore({
                 const response = await axios.post('/logout')
                 // reset user and update available projects.
                 this.user = null;
-                localStorage.removeItem('user');
+                this.roles = [];       
+                this.authed = false;        
+                sessionStorage.removeItem('soile-user');
                 this.setAccessToken(null);
                 this.setProjectToken(null);
                 const listStore = useProjectStore();
-                listStore.clearProject();
+                listStore.clearData();
+                await this.updateLoginStatus();
                 await listStore.updateAvailableProjects();
                 console.log("Logged Out");
             }
@@ -71,48 +115,98 @@ export const useAuthStore = defineStore({
             }
 
         },
+
+        async updateUserData() {
+            const listStore = useProjectStore();
+            await this.updateLoginStatus();
+            await listStore.updateAvailableProjects();
+            await listStore.fetchSignedUpProjects();
+        },
         async signUp(projectID, accessToken) {
             const params = accessToken ? { params: { token: accessToken } } : {}
             try {
                 const response = await axios.post('/projectexec/' + projectID + '/signup', params)
                 this.setProjectToken(response?.data.token)
+                console.log("Signup was successful")
+                return true;
             }
             catch (failed) {
+                console.log("Caught error")
+                console.log(failed);
                 this.processAxiosError(failed)
+                return false;
             }
+
+        },
+        async updateTaskSettings(projectID)        
+        {
+            axios.post("/projectexec/" + projectID + "/getcurrenttaskinfo")
+            .then(response => {
+                this.currentTaskSettings = response.data;                
+            })
+            .catch(error => {
+                this.processAxiosError(error)
+            })
         },
         setAccessToken(token) {
             this.jwtToken = token;
             if (token) {
-                localStorage.setItem('jwtToken', JSON.stringify(this.jwtToken));
+                sessionStorage.setItem('soile-jwtToken', JSON.stringify(this.jwtToken));
+                axios.defaults.headers.common['Authorization'] = "Bearer " + token;
+                this.isAnonymous = false;
             }
             else {
-                localStorage.removeItem('jwtToken');
+                sessionStorage.removeItem('soile-jwtToken');
+                // if the header is a jwt header, reset it, f we no longer have a token.
+                if (axios.defaults.headers.common['Authorization']) {
+                    if (axios.defaults.headers.common['Authorization'].startsWith('Bearer ')) {
+                        axios.defaults.headers.common['Authorization'] = "";
+                    }
+                }
+            }
+
+        },
+        async updateLoginStatus() {
+            try{
+                console.log("Testing auth")
+                const response = await axios.post('/test/auth')
+                console.log("Auth succeeded")
+                console.log(response?.data);
+                this.authed = true;
+                this.user = response?.data.user
+                this.roles = response?.data.roles                
+            }
+            catch(error)
+            {
+                if (error.response?.status == 401) {
+                    // We are no longer authorized
+                    this.authed = false;
+                }
+                else{
+                    throw(error);
+                }
             }
         },
-        async setProjectToken(token) {
-            this.projectToken = token;
-            if (token) {
-                localStorage.setItem('projectToken', JSON.stringify(this.projectToken));
-            }
-            else {
-                localStorage.removeItem('projectToken');
-            }
-            try{
-                //refresh the session cookie.
-                const response2 = await axios.get('/test/auth')
-                
-                console.log(response2?.data);
-            }
-            catch(e)
-            {
-                this.processAxiosError(e)
+        setProjectToken(token) {
+            console.log("Setting Project token");
+            if (!this.user) {
+                this.projectToken = token;
+                if (token) {
+                    sessionStorage.setItem('soile-projectToken', JSON.stringify(this.projectToken));
+                }
+                else {
+                    sessionStorage.removeItem('soile-projectToken');
+                }
+                axios.defaults.headers.common['Authorization'] = token;
+                // 
+                console.log("This is an anonymous use for token:" + token);
+                this.isAnonymous = true;
             }
 
         },
         processAxiosError(err) {
             const errorStore = useErrorStore()
-            errorStore.raiseError(err.response?.status, err.response?.data)
+            errorStore.processAxiosError(err)                   
         }
     }
 });

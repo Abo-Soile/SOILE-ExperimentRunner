@@ -1,8 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
-
-import { useAuthStore } from '@/stores';
-import { ExperimentView, WelcomeView, SignupView } from '@/views';
-
+import { ManagementView, SignupView, ExperimentView, ExperimentPreviewView, WelcomeView } from '@/views';
+import { useUserStore } from '@/stores/users';
 
 const routes = [
     {
@@ -11,7 +9,17 @@ const routes = [
         component: WelcomeView
     },
     {
-        path: '/exp/:id',
+        path: '/management',
+        name: 'ManagementView',
+        component: ManagementView
+    },
+    {
+        path: '/preview/:taskID/:taskVersion/',
+        name: 'Preview',
+        component: ExperimentPreviewView
+    },
+    {
+        path: '/exp/:id/:taskID/',        
         name: 'Experiment Runner',
         component: ExperimentView,
         props: true
@@ -24,7 +32,6 @@ const routes = [
     }
 ]
 
-
 export const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     linkActiveClass: 'active',
@@ -33,13 +40,7 @@ export const router = createRouter({
 
 router.beforeEach(async (to) => {
     // redirect to login page if not logged in and trying to access a restricted page
-    const publicPages = ['/login', '/'];    
-    // signup is special.
-    const authRequired = !publicPages.includes(to.path) && ! to.path.startsWith('/signup');
-    const auth = useAuthStore();
-
-    if (authRequired && !auth.user) {
-        auth.returnUrl = to.fullPath;
-        return '/login';
-    }
+    const userStore = useUserStore();
+    // regardless on where we are, we are NOt currently running a task.
+    userStore.setTaskNotRunning();
 });

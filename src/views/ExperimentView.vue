@@ -1,32 +1,66 @@
 <template>
-    <SoileExpRunner v-if="type == 'elang'"></SoileExpRunner>
-    <PsychoJsRunner v-if="type == 'psychojs'"></PsychoJsRunner>
-    <SoileQuestionnaire v-if="type == 'qlang'"></SoileQuestionnaire>
-    <!--<JsRunner v-if="type == 'javascript'"></JSRunner>-->
+    <div v-if="isRunningTask">
+        <SoileExpRunner v-if="currentTaskSettings.codeType.language == 'elang'" :code="code"
+            :outputs="currentTaskSettings.outputs" @handleSubmit="event => submitResults(event)"
+            @handleError="error => handleError(error)"
+            @handleUpload="event => uploadFile(event.file, event.fileName, event.idCallBack, event.errorCallBack)">
+        </SoileExpRunner>
+        <PsychoJsRunner v-if="currentTaskSettings.codeType.language == 'psychopy'" 
+            :code="code"
+            :psychoJSVersion="currentTaskSettings.codeType.version"
+            @handleSubmit="event => submitResults(event)" @handleError="error => handleError(error)"
+            @handleUpload="event => uploadFile(event.file, event.fileName, event.idCallBack, event.errorCallBack)">
+        </PsychoJsRunner>
+        <SoileQuestionnaire v-if="currentTaskSettings.codeType.language == 'qmarkup'" :code="code"
+            :outputs="currentTaskSettings.outputs" @handleSubmit="event => submitResults(event)"
+            @handleError="error => handleError(error)"></SoileQuestionnaire>
+        <!--<JsRunner v-if="type == 'javascript'"></JSRunner>-->
+    </div>
+    <div v-else>
+        <Button @click="setTaskActive">Start Task</Button>
+    </div>
 </template>
   
 <script>
+import axios from 'axios';
+import SoileQuestionnaire from '../components/questionnaire/SoileQuestionnaire.vue';
+import SoileExpRunner from '../components/experimentlang/SoileExpRunner.vue';
+import PsychoJsRunner from '../components/psychopy/PsychoJsRunner.vue';
+import { mapState } from 'pinia'
+import { useErrorStore } from '@/stores';
+import { useUserStore } from '@/stores/users';
+import Button from 'primevue/button';
+
 
 export default {
+
     name: 'ExperimentView',
+    components: { SoileQuestionnaire, SoileExpRunner, PsychoJsRunner, Button },
     data() {
         return {
-            id: undefined,
-            codeType: undefined,
-            codeVersion: undefined,
-            currentTaskID: undefined
+            code: undefined,
+            running: false
         }
     },
     methods: {
-        updateTask() {
-            this.$http.get("/api/projectexec/" + this.id + "/getcurrenttaskinfo")
+        /**
+         * Set the task to active
+         */
+        setTaskActive()
+        {
+            console.log("Activating task")
+            const userStore = useUserStore();
+            userStore.setTaskActive()
+        },
+        runTask() {
+            const userStore = useUserStore();
+            
+            axios.get("/run/" + this.$route.params.id + "/" + this.$route.params.taskID)
                 .then(response => {
-                    this.finished = response.data.finished ? response.data.finished : false;
-                    this.codeVersion = response.data.codeType.version;
-                    this.currentTaskID = response.data.id;
-                    this.codeType = response.data.codeType.language;
+                    this.code = response?.data;
                 })
                 .catch(error => {
+                    userStore.setTaskNotRunning();
                     console.log(error)
                 })
         },
@@ -41,27 +75,38 @@ export default {
          * @param {*} results 
          */
         async submitResults(results) {
+            console.log(results)
             var TaskData = {};
-            TaskData.taskID = this.currentTaskID;
-            TaskData.outputData = results.outputData ? results.outputData : [],
-                TaskData.resultData = {};
-            TaskData.resultData.jsonData = results.resultData ? results.resultData : [],
-                TaskData.resultData.fileData = results.fileData ? results.fileData : [],
-                // TODO: Potentially extract outputs from the jsonData of the results        
-                this.$http.post("/api/projectexec/" + this.id + "/submit", TaskData)
-                    .then(response => {
-                        if (response.status == 200) {
-                            this.updateTask();
-                        }
-                    })
-                    .catch(error => {
-                        console.log(error)
-                    })
+            const userStore = useUserStore()
+            TaskData.taskID = userStore.currentTaskSettings.id;
+            TaskData.outputData = results.outputData ? results.outputData : [];
+            TaskData.resultData = results.resultData ? results.resultData : { resultData: [], fileData: [] };
+            // TODO: Potentially extract outputs from the jsonData of the results        
+            axios.post("/projectexec/" + this.$route.params.id + "/submit", TaskData)
+                .then(async response => {
+                    if (response.status == 200) {
+                        await userStore.updateTaskSettings(this.$route.params.id);
+                        // start the next task.
+                        this.running=false;
+                        this.$router.push("/exp/" + this.$route.params.id + "/" + userStore.currentTaskSettings.id + "/")
+                    }
+                    else {
+                        console.log(response);
+                        reportError(response.status, "Unexpected issue while submitting the results")
+                    }
+                })
+                .catch(error => {
+                    
+                    console.log(error)
+                })
+                .finally(() => {
+                    userStore.setTaskNotRunning();
+                })
         },
         uploadData(file, fileName, idCallBack, errorCallback) {
             var formData = new FormData();
             formData.append(fileName, file);
-            this.$http.post("/api/projectexec/" + this.id + "/submit", formData, {
+            axios.post("/projectexec/" + this.$route.params.id + "/submit", formData, {
                 headers: {
                     'content-type': 'multipart/form-data'
                 }
@@ -74,51 +119,30 @@ export default {
                     errorCallback(error)
                 })
         },
-        reset() {
-            this.id = undefined
-            this.codeType = undefined
-            this.codeVersion = undefined
-            this.currentTaskID = undefined
+        handleError(error) {
+            const errorStore = useErrorStore();
+            errorStore.raiseError(undefined, error);
         }
 
     },
-    beforeMount() {
-        console.log("Current route: ");
-        console.log(this.$route)
+    async beforeMount() {
+        console.log("Before Mount")
+        this.runTask();
     },
-    async beforeRouteUpdate(to, from) {
-        console.log(from)
-        this.id = to.params.id;
-        updateTask();
+    async beforeRouteUpdate(to, from, next) {
+        console.log("before route updated")
+        this.runTask();
+        next();
     },
-
+    computed: {
+        ...mapState(useUserStore, ['currentTaskSettings','isRunningTask'])
+    },
     mounted() {
-
+        console.log("ExpView Mounted")
     },
 
 
 
 }
 </script>
-  
-  <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-h3 {
-    margin: 40px 0 0;
-}
-
-ul {
-    list-style-type: none;
-    padding: 0;
-}
-
-li {
-    display: inline-block;
-    margin: 0 10px;
-}
-
-a {
-    color: #42b983;
-}
-</style>
   
