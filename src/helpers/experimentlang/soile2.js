@@ -1,9 +1,6 @@
 /* eslint-disable */
 //const jQuery = require('jquery')
-import _ from 'underscore'
-import $ from 'jquery';
-const jQuery = $;
-import * as levenshtein from 'fast-levenshtein';
+
 var SOILE2;
 
 if (!('contains' in Array.prototype)) {
@@ -2722,5 +2719,3 @@ SOILE2 = (function(){
 
   return soile2;
 })();
-
-export default SOILE2

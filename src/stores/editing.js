@@ -72,7 +72,9 @@ export const useEditorStore = defineStore({
             }
             else
             {
-                store.elements.push(reactive({name: name, newElement: newElement, data: data }))
+                // Tasks have an additional currentVersion because they can have a changed version 
+                // from the original saved task if e.g. files have been added but the task has not been stored.
+                store.elements.push(reactive({name: name, newElement: newElement, data: data, currentVersion: data?.version }))
             }
         },
         async changeElementAtPosition(type, index, uuid, version)
@@ -126,12 +128,15 @@ export const useEditorStore = defineStore({
         },
         async saveObject(type, data, index)
         {            
+            if(!data.UUID)
+            {
+                return this.createObject(type, data, index);
+            }
             const elementStore = useElementStore();
             const newVersion = await elementStore.updateElement(data.UUID, data.version, data, type);            
             const store = this.getStoreForType(type);
             data.version = newVersion;
             store.elements[index].data = reactive(data);
-
         },
         async createObject(type, data, index)
         {            
@@ -140,6 +145,11 @@ export const useEditorStore = defineStore({
             const store = this.getStoreForType(type);            
             store.elements[index].data = reactive(newObject);
             store.elements[index].newElement = false;
-        }   
+        },
+        updateCurrentTaskVersion(version, index)
+        {
+            this.tasks.elements[index].currentVersion = version;
+        }
+
     }
 });

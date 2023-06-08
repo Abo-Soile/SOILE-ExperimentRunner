@@ -11,6 +11,9 @@
   <Dialog v-model:visible="showLoginDialog" header="Login">
     <Login @submitted="showLoginDialog = false" />
   </Dialog>
+  <StudyCreationDialog v-model:visible="creationDialogVisible" @selected="(event) => handleCreation(event)"></StudyCreationDialog>
+  <StudyLoadDialog v-model:visible="loadDialogVisible" :researchStudies="studyStore.researchStudies" @selected="(event) => handleLoad(event)"></StudyLoadDialog>
+
 </template>
 
 <script>
@@ -20,20 +23,47 @@ import Menu from 'primevue/menu'
 import Dialog from 'primevue/dialog'
 import { computed, ref } from 'vue'
 import Login from './LoginForm.vue'
-import { useAuthStore } from '@/stores/auth.js'
+import { useAuthStore, useStudyStore } from '@/stores'
+import StudyCreationDialog from '@/components/study/StudyCreationDialog.vue'
+import StudyLoadDialog from '@/components/study/StudyLoadDialog.vue'
+
 
 export default {
   name: 'TopNavbar',
-  components: { Login, Menubar, Button, Menu, Dialog },
-
+  components: { Login, Menubar, Button, Menu, Dialog, StudyCreationDialog, StudyLoadDialog },
+  data() {
+    return {
+      creationDialogVisible: false,
+      loadDialogVisible: false,  
+    }
+  },
   computed:
   {
     menuItems() {
       return [
       this.isResearcher ? {
-          label: "Project Management",
+          label: "Project Editing",
+          icon: 'pi pi-wrench',
+          to: '/editing'          
+        } : {},
+      this.isResearcher ? {
+          label: "Study Management",
           icon: 'pi pi-file-edit',
-          to: '/management'          
+          to: !this.isInManagement && this.studyStore.editingActive() ? '/management' : null,
+          items: [
+            {
+              label: "Create Study",
+              icon: 'pi pi-plus',
+              command: () => this.creationDialogVisible = true,
+              to: '/management'
+            },
+            {
+              label: "Load Study",
+              icon: 'pi pi-wrench',
+              command: () => this.loadDialogVisible = true,
+              to: '/management'
+            }    
+          ]      
         } : {},
         {
           label: this.isLoggedIn ? 'Profile' : 'Login',
@@ -55,7 +85,33 @@ export default {
         
       ]
 
+    },
+    isInManagement()
+    {
+      return this.$route.name === "Study Management"
+    }    
+  },
+  methods:
+  {
+    async handleCreation(event)
+    {
+      this.creationDialogVisible = false;
+      if(event)
+      {
+        await this.studyStore.createStudy(event);
+        await this.studyStore.selectCurrentStudy(event.UUID);
+      }
+     
+    },
+    async handleLoad(event)
+    {
+      this.loadDialogVisible = false;
+      if(event)
+      {
+        await this.studyStore.selectCurrentStudy(event.uuid);
+      }
     }
+
   },
   setup() {
     const authStore = useAuthStore()
@@ -63,12 +119,14 @@ export default {
     const isLoggedIn = computed(() => authStore.authed)
     const isAdmin = computed(() => authStore.isAdmin())
     const isResearcher = computed(() => authStore.isResearcher())
+    const studyStore = useStudyStore()
     return {
       showLoginDialog,
       isLoggedIn,
       authStore,
       isResearcher,
-      isAdmin
+      isAdmin,
+      studyStore
     }
   }
 }

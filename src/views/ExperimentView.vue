@@ -1,23 +1,23 @@
 <template>
     <div v-if="isRunningTask">
-        <SoileExpRunner v-if="currentTaskSettings.codeType.language == 'elang'" :code="code"
+        <SoileExpRunner class="experimentview" v-if="currentTaskSettings.codeType.language == 'elang'" :code="code"
             :outputs="currentTaskSettings.outputs" @handleSubmit="event => submitResults(event)"
             @handleError="error => handleError(error)"
             @handleUpload="event => uploadFile(event.file, event.fileName, event.idCallBack, event.errorCallBack)">
         </SoileExpRunner>
-        <PsychoJsRunner v-if="currentTaskSettings.codeType.language == 'psychopy'" 
+        <PsychoJsRunner class="experimentview" v-if="currentTaskSettings.codeType.language == 'psychopy'" 
             :code="code"
             :psychoJSVersion="currentTaskSettings.codeType.version"
             @handleSubmit="event => submitResults(event)" @handleError="error => handleError(error)"
             @handleUpload="event => uploadFile(event.file, event.fileName, event.idCallBack, event.errorCallBack)">
         </PsychoJsRunner>
-        <SoileQuestionnaire v-if="currentTaskSettings.codeType.language == 'qmarkup'" :code="code"
+        <SoileQuestionnaire class="experimentview" v-if="currentTaskSettings.codeType.language == 'qmarkup'" :code="code"
             :outputs="currentTaskSettings.outputs" @handleSubmit="event => submitResults(event)"
             @handleError="error => handleError(error)"></SoileQuestionnaire>
         <!--<JsRunner v-if="type == 'javascript'"></JSRunner>-->
     </div>
     <div v-else>
-        <Button @click="setTaskActive">Start Task</Button>
+        <Button @click="setTaskActive">Start Next Task</Button>
     </div>
 </template>
   
@@ -145,4 +145,13 @@ export default {
 
 }
 </script>
-  
+<style scoped>
+
+/*
+This should cover the whole area. 
+*/
+.experimentview {    
+    width: 100vw;
+    height: 100vh
+}
+</style>

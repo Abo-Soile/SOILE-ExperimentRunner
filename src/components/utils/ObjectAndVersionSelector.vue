@@ -48,7 +48,7 @@ export default {
         'selectedItem.uuid': {
             async handler(newValue)
             {
-                this.availableVersions = await this.elementStore.getOptionsForElement(newValue, this.objectType.toLowerCase())
+                this.availableVersions = await this.elementStore.getTagsForElement(newValue, this.objectType.toLowerCase())
             }
         }
     },

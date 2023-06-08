@@ -11,8 +11,8 @@ const authStore = useAuthStore();
 const projectStore = useProjectStore();
 const userStore = useUserStore();
 authStore.updateLoginStatus();
-projectStore.updateAvailableProjects();
-projectStore.fetchSignedUpProjects();
+projectStore.updateAvailableStudies();
+projectStore.fetchSignedUpStudies();
 const {errors, latestError} = storeToRefs(errorStore)
 const {isRunningTask} = storeToRefs(userStore)
 function showErrorToast(severity, message)

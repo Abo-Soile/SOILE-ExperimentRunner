@@ -1,3 +1,11 @@
+
+<template>
+    <iframe style="width: 100%; height:100%" ref="psychoJSWindow" :srcdoc="code">
+        <div id="root"></div>
+    </iframe>
+</template>
+
+
 <script>
 export default {
     props: {
@@ -58,12 +66,6 @@ export default {
     },
 };
 </script>
-
-<template>
-    <iframe style="width: 98vw; height:100vh" ref="psychoJSWindow" :srcdoc="code">
-        <div id="root"></div>
-    </iframe>
-</template>
 
 
 

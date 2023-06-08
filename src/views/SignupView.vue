@@ -27,6 +27,7 @@ import Button from 'primevue/button';
 import { useProjectStore, useAuthStore, useUserStore } from '@/stores';
 import { storeToRefs } from 'pinia';
 import { onMounted, watch } from 'vue';
+
 var justSignedUp = {};
 const projectStore = useProjectStore();
 const authStore = useAuthStore();
@@ -43,12 +44,15 @@ function startProject(uuid)
 async function signUp() {
     console.log("Signing up to project " + this.selectedProject.uuid)    
     const signedUp = await authStore.signUp(this.selectedProject.uuid)
+    console.log(signedUp)
     if(signedUp)
     {
         justSignedUp[this.selectedProject.uuid] = true;
         console.log("Signup was successful")
         await authStore.refreshSession();
-        await userStore.updateTaskSettings(this.selectedProject.uuid);
+        console.log("Updating signed up projects")
+        await projectStore.fetchSignedUpProjects();        
+        await userStore.updateTaskSettings(this.selectedProject.uuid);        
     }
     else{
         console.log("Signup was unsuccessful")
@@ -60,12 +64,10 @@ watch(projectStore.selectedProject, async (newID) => {
     await userStore.updateTaskSettings(newID.uuid);
 })
 onMounted( async () => {
-    console.log("Signup Mounted: ")
-    console.log(projectStore.selectedProject)
-    if(authStore.authed)
-    {
-        await userStore.updateTaskSettings(projectStore.selectedProject.uuid);
-    }
+    //console.log("Signup Mounted: ")
+    //console.log(projectStore.selectedProject)
+    
+    
 })
 
 

@@ -5,8 +5,8 @@
             <Column header="Start">
                 <template #body="{data, index}" let-index="index">
                     <div>
-                        <router-link :to="'/signup/' + data.uuid"
-                            @click="listStore.selectProject(index)">Start</router-link>
+                        <router-link v-if=!isSignedUp(data) :to="'/signup/' + data.uuid"
+                            @click="projectStore.selectProject(index)">Start</router-link>
                     </div>
                 </template>
             </Column>
@@ -14,7 +14,7 @@
                 <template #body="{data, index}" let-index="index">
                     <div>
                         <InputText v-if=!authStore.user v-model="continueTokens[index]"></InputText>
-                        <Button label="Continue" @click="(event) => runProject(index, event)"></Button>
+                        <Button v-if=isSignedUp(data) label="Continue" @click="(event) => runProject(index, event)"></Button>
                     </div>
                 </template>
             </Column>
@@ -31,7 +31,7 @@ import Column from 'primevue/column';
 
 import { router } from '@/helpers';
 import { useProjectStore, useUserStore, useAuthStore } from '@/stores';
-const listStore = useProjectStore();
+const projectStore = useProjectStore();
 const authStore = useAuthStore();
 const userStore = useUserStore();
 const continueTokens = {};
@@ -64,6 +64,12 @@ async function continueProject(index, event) {
     console.log("Running project")
 
     runProject(index)
+}
+
+function isSignedUp(data)
+{
+    console.log(projectStore.signedUpStudies.includes(data.uuid))
+    return projectStore.signedUpStudies.includes(data.uuid);
 }
 
 </script>

@@ -19,7 +19,10 @@
         </baklava-editor>
     </div>
     <ElementSettings v-model:visible="editSettings" :newElement="newElement" :initialValues="objectOptions" @submit="updateOptions" />
-    <ElementSaveDialog v-model:visible="showSave" :name="name" :currentTags="currentTags" @submit="saveElement" />
+    <ElementSaveDialog v-model:visible="showSave" 
+                        :name="name" 
+                        :currentTags="currentTags" 
+                        @submit="saveElement" />
 
 </template>
 
@@ -62,9 +65,6 @@ export default {
         },
         data: {
             type: Object            
-        },
-        index: {
-            type: Number
         },
         baklava: {
             type: Object
@@ -138,7 +138,7 @@ export default {
             this.objectOptions = newProps;
             if(this.newElement)
             {
-                this.$emit("updateName",{name : newProps.name, index: this.index})
+                this.$emit("updateName",newProps.name)
             }                       
             this.editSettings = false;
         },
@@ -175,13 +175,14 @@ export default {
             console.log(data)            
             if(this.newElement)
             {
-                this.$emit('createElement', {data : data, index: this.index, type: this.type})                
+                data.tag = tag;                
+                this.$emit('createElement', data)                
             }
             else{
                 data.UUID = this.data.UUID;
                 data.version = this.data.version;
                 data.tag = tag;                
-                this.$emit('updateElement', {data : data, index: this.index, type: this.type})
+                this.$emit('updateElement', data)
             }
         }
     },

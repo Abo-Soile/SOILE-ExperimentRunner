@@ -38,8 +38,9 @@ export const useAuthStore = defineStore({
         isResearcher()
         {
             if(this.isAuthed())
-            {
-                return this.roles.contains("Admin") || this.roles.contains("Researcher");
+            {   
+                console.log(this.roles)
+                return this.roles.includes("Admin") || this.roles.includes("Researcher");
             }
             else
             {
@@ -84,7 +85,6 @@ export const useAuthStore = defineStore({
                 await this.updateLoginStatus();
                 this.setAccessToken(response?.data.token)
                 // store user details and jwt in local storage to keep user logged in between page refreshes
-                sessionStorage.setItem('soile-user', JSON.stringify(this.user));
                 await this.updateUserData();
                 // redirect to previous url or default to home page
                 router.push(this.returnUrl || '/');
@@ -93,21 +93,22 @@ export const useAuthStore = defineStore({
                 this.processAxiosError(e)
             }
         },
+
         async logout() {
             try {
                 // post to logout (invalidating session)
                 const response = await axios.post('/logout')
                 // reset user and update available projects.
-                this.user = null;
-                this.roles = [];       
-                this.authed = false;        
-                sessionStorage.removeItem('soile-user');
+                this.setRoles([]);
+                this.setUser(null);
+                this.authed = false;                        
                 this.setAccessToken(null);
+                this.setProjectToken(null);
                 this.setProjectToken(null);
                 const listStore = useProjectStore();
                 listStore.clearData();
                 await this.updateLoginStatus();
-                await listStore.updateAvailableProjects();
+                await listStore.updateAvailableStudies();
                 console.log("Logged Out");
             }
             catch (e) {
@@ -119,8 +120,8 @@ export const useAuthStore = defineStore({
         async updateUserData() {
             const listStore = useProjectStore();
             await this.updateLoginStatus();
-            await listStore.updateAvailableProjects();
-            await listStore.fetchSignedUpProjects();
+            await listStore.updateAvailableStudies();
+            await listStore.fetchSignedUpStudies();
         },
         async signUp(projectID, accessToken) {
             const params = accessToken ? { params: { token: accessToken } } : {}
@@ -166,6 +167,30 @@ export const useAuthStore = defineStore({
             }
 
         },
+        setRoles(roles)
+        {
+            this.roles = roles;
+            if( roles && roles.length > 0)
+            {
+                sessionStorage.setItem('soile-userroles', JSON.stringify(roles));
+            }
+            else{
+                sessionStorage.removeItem('soile-userroles');
+            }
+            
+        },
+        setUser(user)
+        {
+            this.user = user;
+            if(user)
+            {
+                sessionStorage.setItem('soile-user', JSON.stringify(user));
+            }
+            else{   
+                sessionStorage.removeItem('soile-user');
+            }
+        },
+
         async updateLoginStatus() {
             try{
                 console.log("Testing auth")
@@ -173,8 +198,8 @@ export const useAuthStore = defineStore({
                 console.log("Auth succeeded")
                 console.log(response?.data);
                 this.authed = true;
-                this.user = response?.data.user
-                this.roles = response?.data.roles                
+                this.setUser(response?.data.user)
+                this.setRoles(response?.data.roles)
             }
             catch(error)
             {
