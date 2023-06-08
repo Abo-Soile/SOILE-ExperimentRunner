@@ -1,9 +1,6 @@
 /* eslint-disable */
 //const jQuery = require('jquery')
-import _ from 'underscore'
-import $ from 'jquery';
-const jQuery = $;
-import * as levenshtein from 'fast-levenshtein';
+
 var SOILE2;
 
 if (!('contains' in Array.prototype)) {
@@ -16,10 +13,7 @@ if (SOILE2 !== undefined){
   throw new Error('SOILE2 already defined!');
 }
 
-
-
-
-function buildSoileInstance (){
+SOILE2 = (function(){
   /*'use strict';*/
 
   var soile2 = {};
@@ -2497,10 +2491,10 @@ function buildSoileInstance (){
     $("#display").children().off();
 
 
-    soile2.testDuration = Date.now() - soile2.startTime;
+    SOILE2.testDuration = Date.now() - SOILE2.startTime;
 
     var data = soile2.rt.dataHandler.getData();
-    var duration = soile2.testDuration;
+    var duration = SOILE2.testDuration;
     var score = soile2.rt.scoreHandler.get();
     var persistantData = soile2.rt.persistantDataHandler.get();
 
@@ -2714,19 +2708,14 @@ function buildSoileInstance (){
       if(startFunc !== null) {        
         startFunc();
       }
-      soile2.startTime = Date.now();
+      SOILE2.startTime = Date.now();
       console.log("Starting to execute");
       $("#loadAnim").toggleClass("hidden", true);
 
-      soile2.rt.exec_pi();
+      SOILE2.rt.exec_pi();
     }
     console.log("started");
   };
 
   return soile2;
-};
-
-export function createSoileInstance()
-{
-  SOILE2 = buildSoileInstance();
-}
+})();

@@ -1,19 +1,18 @@
-const SOILE2 = window.SOILE2;
+var SOILE2 = window.SOILE2;
 
-
+console.log(window)
+console.log(SOILE2);
 function suppressKeys(e) {
-    if (this.active) {
-        //Preventing scroll on arrowkeys 37-40 and navigation on backspace 8
-        if ([37, 38, 39, 40, 8, 32].indexOf(e.keyCode) > -1) {
-            //console.log(e);
-            if (e.target.tagName == "INPUT" || e.target.type == "text" || e.target.tagName == "TEXTAREA") {
-                return
-            }
-
-            e.preventDefault();
-
-            // Do whatever else you want with the keydown event (i.e. your navigation).
+    //Preventing scroll on arrowkeys 37-40 and navigation on backspace 8
+    if ([37, 38, 39, 40, 8, 32].indexOf(e.keyCode) > -1) {
+        //console.log(e);
+        if (e.target.tagName == "INPUT" || e.target.type == "text" || e.target.tagName == "TEXTAREA") {
+            return
         }
+
+        e.preventDefault();
+
+        // Do whatever else you want with the keydown event (i.e. your navigation).
     }
 }
 
@@ -87,6 +86,8 @@ function startSoile(data) {
     }*/
 
     SOILE2.util.setStartFunction(startFunc);
+    console.log(data)
+    console.log(SOILE2)
     SOILE2.util.eval(data);
     SOILE2.util.setEndFunction(end);
 
@@ -95,28 +96,8 @@ function startSoile(data) {
     }
     catch (e) {
         console.log(e)
-        this.window.handleError(e)
+        window.handleError(e)
     }
-}
-
-function startSoile(data) {
-    console.log("Starting soile");
-    SOILE2.util.enableLoadScreen();
-
-    if (typeof window.persistantData !== "undefined") {
-        SOILE2.util.setPersistantData(window.persistantData);
-    }
-
-    if (typeof window.testConfig !== "undefined") {
-        SOILE2.util.setPilotMode(window.testConfig.pilotMode);
-    }
-
-    SOILE2.util.setStartFunction(startFunc);
-    SOILE2.util.eval(data);
-
-    SOILE2.util.setEndFunction(end);
-
-    SOILE2.start();
 }
 
 

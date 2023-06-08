@@ -1,5 +1,7 @@
 <template>
-    <div v-if="isRunningTask">
+    <div v-if="canRun">
+    <div v-if="isRunningTask ">
+        <div>
         <SoileExpRunner v-if="codeType == 'elang'" :code="code"
             :outputs="currentTaskSettings.outputs" @handleSubmit="event => submitResults(event)"
             @handleError="error => handleError(error)"
@@ -9,16 +11,29 @@
             :code="code"
             :psychoJSVersion="codeTypeVersion"
             @handleSubmit="event => submitResults(event)" @handleError="error => handleError(error)"
-            @handleUpload="event => uploadFile(event.file, event.fileName, event.idCallBack, event.errorCallBack)">
+            @handleUpload="event => handleUploadData(event.file, event.fileName, event.idCallBack, event.errorCallBack)">
         </PsychoJsRunner>
         <SoileQuestionnaire v-if="codeType == 'qmarkup'" :code="code"
             :outputs="currentTaskSettings.outputs" @handleSubmit="event => submitResults(event)"
             @handleError="error => handleError(error)"></SoileQuestionnaire>
+        </div>
+        <div>
         <!--<JsRunner v-if="type == 'javascript'"></JSRunner>-->
+        <Button @click="stopTask">Stop Task</Button>
+        </div>
     </div>
     <div v-else>
-        <Button @click="setTaskActive">Start Task</Button>
+        <Button @click="runTask">Start Task</Button>
     </div>
+    <div class="results">
+        <div v-if="Object.keys(outputs).length > 0" class="outputs"> Outputs: {{ outputs }}</div>
+        <div v-if="Object.keys(results).length > 0" class="results"> Results: {{ results }}</div>
+        <div v-if="uploadedFiles.length > 0" class="uploadedFiles"> Uploaded Files: {{ uploadedFiles }}</div>
+    </div>
+</div>
+<div v-else>
+    You must save the task before you can run it.
+</div>
 </template>
   
 <script>
@@ -43,42 +58,64 @@ export default {
             required: true
         },
         codeType: {
-            String,
+            type: String,
             required: true
         },
         codeTypeVersion: {
-            String,
+            type: String,
+            required: true
+        },
+        canRun: {
+            type: Boolean,
             required: true
         }
+    },
+    setup()
+    {
+        const errorStore = useErrorStore();
+        return {errorStore}
     },
     data() {
         return {
             currentTaskSettings: { outputs: [], persistentData : {} },
             code: undefined,            
             running: false,
-            isRunningTask: false
+            isRunningTask: false,
+            outputs: {},
+            uploadedFiles: [],
+            results: {}
         }
     },
     methods: {
         /**
          * Set the task to active
          */
-        setTaskActive()
+        runTask()
         {
+            this.outputs = {},
+            this.uploadedFiles = [],
+            this.results = {}
             this.compileTask()
             .then(() => {
                 this.isRunningTask = true;
+            })
+            .catch((err) => {
+                if(err.response?.data)
+                {
+                    this.errorStore.raiseError("error",err.response.data)
+                }
+                else
+                {
+                    this.errorStore.raiseError("error",err.message)
+                }
             });
         },
+        stopTask() {
+            this.isRunningTask = false;
+        },
         async compileTask() {           
-            try{
-                const response = await axios.post("/task/compile/",{code: this.sourceCode, type: this.codeType});
-                this.code = response?.data;
-            }
-            catch(error)
-            {
-                console.log(error)
-            }
+            const response = await axios.post("/task/compile/",{code: this.sourceCode, type: this.codeType});
+            this.code = response?.data;            
         },
         /**
          * This function assumes, that results is an object with the following fields:
@@ -92,48 +129,13 @@ export default {
          */
         async submitResults(results) {
             console.log(results)
-         /*   var TaskData = {};
-            const userStore = useUserStore()
-            TaskData.taskID = userStore.currentTaskSettings.id;
-            TaskData.outputData = results.outputData ? results.outputData : [];
-            TaskData.resultData = results.resultData ? results.resultData : { resultData: [], fileData: [] };
-            // TODO: Potentially extract outputs from the jsonData of the results        
-            axios.post("/projectexec/" + this.$route.params.id + "/submit", TaskData)
-                .then(async response => {
-                    if (response.status == 200) {
-                        await userStore.updateTaskSettings(this.$route.params.id);
-                        // start the next task.
-                        this.running=false;
-                        this.$router.push("/exp/" + this.$route.params.id + "/" + userStore.currentTaskSettings.id + "/")
-                    }
-                    else {
-                        console.log(response);
-                        reportError(response.status, "Unexpected issue while submitting the results")
-                    }
-                })
-                .catch(error => {
-                    
-                    console.log(error)
-                })
-                .finally(() => {
-                    userStore.setTaskNotRunning();
-                })*/
+            var TaskData = {};
+            const userStore = useUserStore()            
+            this.outputs = results.outputData ? results.outputData : [];
+            this.results = results.resultData ? results.resultData : { resultData: [], fileData: [] };            
         },
-        uploadData(file, fileName, idCallBack, errorCallback) {
-            /*var formData = new FormData();
-            formData.append(fileName, file);
-            axios.post("/projectexec/" + this.$route.params.id + "/submit", formData, {
-                headers: {
-                    'content-type': 'multipart/form-data'
-                }
-            })
-                .then(response => {
-                    idCallBack(response.data.id)
-                })
-                .catch(error => {
-                    console.log(error)
-                    errorCallback(error)
-                })*/
+        handleUploadData(file, fileName, idCallBack, errorCallback) {   
+            this.uploadedFiles.push(fileName)            
         },
         handleError(error) {
             const errorStore = useErrorStore();

@@ -9,6 +9,7 @@
                 v-model:valid="isValid"
                 :codeTypeOptions="codeOptions"
                 :newTask=newElement
+                @save="updateTagsAndShowSave"
                 >
             </TaskBar>
         </div>
@@ -22,14 +23,20 @@
             <CodeEditor v-model:inputText="currentObject.code"></CodeEditor>
         </div>
         <div class="col-4 h-full">
-            <CodePreview class="h-full" :sourceCode="currentObject.code" 
+            <CodePreview class="h-full preview" :sourceCode="currentObject.code" 
                          :codeType="currentObject.codeType.language" 
                          :codeTypeVersion="currentObject.codeType.version"
                          :taskUUID="currentObject.UUID"
-                         :taskVersion="currentObject.version">
+                         :taskVersion="currentObject.version"
+                         :canRun="canRun">
                         </CodePreview>
         </div>
     </div>    
+    <ElementSaveDialog v-model:visible="showSave" 
+                       :name="this.currentObject.name" 
+                       :currentTags="currentTags" 
+                       @submit="saveTask" />
+
 </template>
   
 <script>
@@ -40,8 +47,9 @@ import FilePreview from '@/components/utils/FilePreview.vue'
 import CodeEditor from './CodeEditor.vue'
 import CodePreview from './CodePreview.vue'
 import TaskBar from './TaskBar.vue'
+import ElementSaveDialog from '@/components/utils/ElementSaveDialog.vue'
 
-import { useElementStore, useErrorStore } from '@/stores'
+import { useElementStore, useErrorStore, useEditorStore } from '@/stores'
 import { reactive } from 'vue'
 export default {
     data() {
@@ -55,26 +63,25 @@ export default {
                 javascript: { versions: ["ES6", "ECMAScript 2020"], mimeType: "application/javascript" }
             },
             isValid: false,
+            currentTags : [],
+            showSave : false,
         }
     },
     setup(props) {
          
         const elementStore = useElementStore();
         const errorStore = useErrorStore();
+        const editorStore = useEditorStore();
         const currentObject = reactive(JSON.parse(JSON.stringify(props.target)))
         currentObject.codeType = reactive(currentObject.codeType);
-        return { errorStore, elementStore, currentObject }
+        return { errorStore, elementStore, currentObject, editorStore }
     },
-    emits: ['updateName'],
-    components: { CodePreview, FileBrowser, FilePreview, CodeEditor, TaskBar },
+    emits: ['updateName', 'updateCurrentVersion', 'saveTask' ],
+    components: { ElementSaveDialog, CodePreview, FileBrowser, FilePreview, CodeEditor, TaskBar },
     props: {
         target: {
             type: Object,
             required: false
-        },
-        index: {
-            type: Number,
-            required: true
         },
         newElement: {
             type: Boolean,
@@ -96,7 +103,7 @@ export default {
                 {
                     console.log("Emitting name update");
                     this.currentObject.name = newValue.name;
-                    this.$emit('updateName', {name: newValue.name, index: this.index})
+                    this.$emit('updateName', newValue.name)
                 }
              }
         },
@@ -107,9 +114,14 @@ export default {
              },
              set(newValue)
              {   
-                this.emit("changeVersion", this)
+                this.currentObject.version = newValue; 
+                this.$emit("updateCurrentVersion", { version: newValue});
              }
+        },
+        canRun() {
+            return this.currentObject.UUID != null;
         }
+
     },
     methods: {
         updateFiles(target) {
@@ -154,15 +166,36 @@ export default {
         {
             return {language : this.currentObject.codeType.language, version : this.currentObject.codeType.version}
         },
-
+        async updateCurrentTags()
+        {
+            if(this.currentObject.UUID)
+            {
+                this.currentTags = await this.elementStore.getTagsForElement(this.currentObject.UUID, 'task')                
+            }
+            else
+            {
+                this.currentTags = [];
+            }
+        },
+        async updateTagsAndShowSave()
+        {
+            await this.updateCurrentTags();
+            this.showSave = true;
+        },
+        async saveTask(newTag)
+        {   
+            this.showSave = false;
+            this.currentObject.tag = newTag;
+            this.$emit("saveTask", this.currentObject)                            
+        }
     },
     watch: {
         target: {
             handler(newValue) {
+                console.log("Target has been updated")
                 this.updateFiles(newValue);
                 this.updateFields(newValue);
-            },
-            deep: true
+            }
         },
         isValid(newVal)
         {
@@ -190,6 +223,11 @@ export default {
 .taskdisplay {
     min-height: 50vh;
     height: 100%;
+}
+.preview {
+    max-width: 33vw;
+    margin: 2 auto;
+    border: 1 solid;
 }
 </style>
   

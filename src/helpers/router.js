@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import { ManagementView, SignupView, ExperimentView, ExperimentPreviewView, WelcomeView } from '@/views';
+import { StudyManagementView, ProjectEditingView, SignupView, ExperimentView, ExperimentPreviewView, WelcomeView } from '@/views';
 import { useUserStore } from '@/stores/users';
 
 const routes = [
@@ -9,15 +9,20 @@ const routes = [
         component: WelcomeView
     },
     {        
-        path: '/management',
-        name: 'ManagementView',
-        component: ManagementView
+        path: '/editing',
+        name: 'ProjectEditing',
+        component: ProjectEditingView
     },
     {
-        path: '/management/:id/:version/',  
-        name: 'TaskManagementView',
-        component: ManagementView,
+        path: '/editing/:id/:version/',  
+        name: 'TaskEditingView',
+        component: ProjectEditingView,
         props: true
+    },
+    {
+        path: '/management',  
+        name: 'Study Management',
+        component: StudyManagementView,        
     },
     {
         path: '/preview/:taskID/:taskVersion/',

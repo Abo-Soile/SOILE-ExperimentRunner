@@ -3,7 +3,7 @@
         <div v-if="newTask" class="taskbarfield p-field">
             <InputText label="Task Name" v-model="currentName" placeHolder="Choose a name for the Task"></InputText>
         </div>
-        <div v-else class="taskbarfield p-field">
+        <div v-else class="flex taskbarfield p-field">
             <h2>{{ currentName }}</h2>
         </div>
         <div class="taskbarfield p-field">            
@@ -24,6 +24,7 @@
             <Button class="taskbarfield" label="Change Version" @click="showChangeVersion = true" @select="changeTaskVersion"></Button>
         </div>
         <SelectNewVersionDialog @selected=changeTaskVersion objectType="task" :element="task" v-model:visible="showChangeVersion"></SelectNewVersionDialog>       
+        
     </div>
 </template>
   
@@ -141,7 +142,7 @@ export default {
     },
     methods: {
         save() {            
-            this.$emit("save", { name: '' })
+            this.$emit("save")
         },
 
         reload() {

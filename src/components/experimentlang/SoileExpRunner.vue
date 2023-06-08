@@ -5,10 +5,11 @@
 
 <script>
 
-import { createSoileInstance }  from '@/helpers/experimentlang/soile2.js'
+import SOILE2Script from '@/helpers/experimentlang/soile2.js?raw'
 import soilehtmlpage from './soile.html?raw'
 import testPhase from './testPhase.js?raw'
-
+import testCode from './testCode.js?raw'
+import levenshtein from 'fast-levenshtein'
 export default {
   name: 'SoileExpRunner',
   props: {
@@ -49,23 +50,41 @@ export default {
   mounted() {
 
     this.soileContentWindow = this.$refs.soilehtml.contentWindow
-    console.log(this.soileContentWindow)
+    var iFrame = this.$refs.soilehtml;
+    var iFrameWindow = this.soileContentWindow;
+    var ve = this;
+    var currentCode = this.code;
     this.soileContentDocument = this.soileContentWindow.document
     this.soileContentWindow.handleSubmit = this.handleSubmit;
     this.soileContentWindow.handleError = this.handleError;
-    const soileStyle = this.soileContentDocument.createElement("link");
-    soileStyle.setAttribute("rel", "stylesheet");
-    soileStyle.setAttribute("href", "/soile.css");            
-    this.soileContentDocument.head.appendChild(soileStyle);
+    this.soileContentWindow.levenshtein = this.levenshtein;    
+    this.soileContentWindow.outputs = this.outputs;
 
-    this.soileContentWindow.SOILE2 = createSoileInstance();
-
-    const currentScript = this.soileContentDocument.createElement("script");    
-    currentScript.type = "text/javascript";
-    currentScript.id = "testPhase";
-    currentScript.innerHTML = testPhase;
-    this.soileContentDocument.body.appendChild(currentScript);    
-    this.soileContentWindow.start(this.code);
+    iFrame.onload = function () {
+  
+      var iFrameDocument = iFrame.contentDocument || iFrame.contentWindow.document;
+      // add Soile Styles
+      var soileStyle = iFrameDocument.createElement("link");        
+      soileStyle.setAttribute("rel", "stylesheet");
+      soileStyle.setAttribute("href", "/soile.css");            
+      iFrameDocument.head.appendChild(soileStyle);  
+      // Add Soile Source code
+      console.log("Iframe Loaded")      
+      const soileScript = iFrameDocument.createElement("script");    
+      soileScript.type = "text/javascript";
+      soileScript.id = "SOILE";
+      soileScript.innerHTML = SOILE2Script;
+      iFrameDocument.body.appendChild(soileScript);    
+      // Run the Soile script.
+      const currentScript = iFrameDocument.createElement("script");    
+      currentScript.type = "text/javascript";
+      currentScript.id = "testPhase";
+      currentScript.innerHTML = testPhase;
+      iFrameDocument.body.appendChild(currentScript);                    
+      iFrameWindow.start(currentCode);
+    };
+    console.log(this.soileContentWindow)  
+    
   }
 }
 </script>

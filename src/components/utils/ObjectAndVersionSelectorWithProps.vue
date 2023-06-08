@@ -1,8 +1,16 @@
 <template>
-    <Dropdown :class="dropDownClasses" v-model="selectedElement" :options="availableItems" :loading=loading
+    <div class="grid">
+        <div class="col flex flex-column">
+            <label for="element">{{elementTitle}}</label>
+    <Dropdown id="element" :class="dropDownClasses" v-model="selectedElement" :options="availableItems" :loading=loading
         :optionLabel=elementLabel :placeholder="'Select ' + objectType" />
-    <Dropdown :class="dropDownClasses" v-if="selectedElement" v-model="selectedVersion" :options="availableVersions"
+        </div>
+        <div class="col flex flex-column">
+            <label for="version">{{versionTitle}}</label>
+    <Dropdown id="version" :class="dropDownClasses" v-if="selectedElement" v-model="selectedVersion" :options="availableVersions"
         :optionLabel=versionLabel :disabled="!elementSelected" placeholder="Select Version" />
+        </div>
+    </div>
 </template>
 
 <script>
@@ -22,7 +30,7 @@ export default defineComponent({
             required: false
         },
         version: {
-            type: Object,
+            type: [ Object , String ],
             required: false
         },
         elementLabel: {
@@ -35,6 +43,14 @@ export default defineComponent({
         },
         dropDownClasses: {
             type: String
+        },
+        elementTitle: {
+            type: String,
+            default: (props) => props.objectType
+        },
+        versionTitle: {
+            type: String,
+            default: "Version"
         }
     },
     emits: ['update:element', 'update:version'],
@@ -47,7 +63,6 @@ export default defineComponent({
             availableVersions: []
         }
     },
-
     setup() {
         const elementStore = useElementStore();
         return { elementStore: elementStore }
@@ -77,8 +92,16 @@ export default defineComponent({
         },            
         selectedVersion:
         {
-            get() {                
-                return this.version ? this.version : this.currentVersion;
+            get() {         
+                console.log(this.version)
+                if(typeof this.version === 'string' )       
+                {
+                    return this.availableVersions.find((x) => x.version === this.version)
+                }
+                else
+                {
+                    return this.version ? this.version : this.currentVersion;
+                }
             },
             set(newValue) {                
                 // reset the version, since the value changed;                
@@ -122,7 +145,7 @@ export default defineComponent({
         this.availableItems = await this.elementStore.getListForType(this.objectType.toLowerCase())
         if(this.selectedItem.uuid)
         {
-            this.updateAvailableVersions(this.selectedItem.uuid)
+            await this.updateAvailableVersions(this.selectedItem.uuid)
         }
         this.loading = false;
         this.currentElement = this.element;

@@ -15,8 +15,10 @@
               </template>
               <div style="width:100%; height:80vh">
                 <Editor type="experiment" :newElement="experiment.newElement" :baklava=experiment.editor
-                  :data=experiment.data :name="experiment.name" :index=index @updateElement="updateElement"
-                  @createElement="createElement" @updateName="(event) => updateName(event, 'experiment')"></Editor>
+                  :data=experiment.data :name="experiment.name" 
+                  @updateElement="(data) => updateElement(data, index, 'project')"
+                  @createElement="(data) => updateElement(data, index, 'project')" 
+                  @updateName="(name) => updateName(name, index, 'experiment')"></Editor>
               </div>
             </TabPanel>
           </TabView>
@@ -29,8 +31,10 @@
                 <Button icon="pi pi-times" @click="closeTab(index, editorStore.tasks)" />
               </template>
               <div style="width:100%; height:80vh">
-                <TaskEditor :newElement=task.newElement :target="task.data" :index="index"
-                  @updateName="(event) => updateName(event, 'task')"></TaskEditor>
+                <TaskEditor :newElement=task.newElement :target="task.data"
+                  @updateName="(name) => updateName(name, index, 'task')"
+                  @updateCurrentVersion="(event) => updateCurrentTaskVersion(event, index, 'task')"
+                  @saveTask="(event) => updateElement({index: index, data : event, type: 'task'})"></TaskEditor>
               </div>
             </TabPanel>
           </TabView>
@@ -45,8 +49,10 @@
               </template>
               <div style="width:100%; height:80vh">
                 <Editor type="project" :newElement="project.newElement" :baklava=project.editor :data=project.data
-                  :name="project.name" :index="index" @updateElement="updateElement" @createElement="createElement"
-                  @updateName="(event) => updateName(event, 'project')"></Editor>
+                  :name="project.name"  
+                  @updateElement="(data) => updateElement(data, index, 'project')" 
+                  @createElement="(data) => updateElement(data, index, 'project')"
+                  @updateName="(name) => updateName(name, index, 'project')"></Editor>
               </div>
               <!-- Content for Sub-Tab 1 goes here -->
             </TabPanel>
@@ -89,20 +95,6 @@ const showConfirm = ref(false);
 const elementType = ref('');
 const showSelector = ref(false);
 const currentSelectedTask = ref(undefined);
-
-function handleTypeChange() {
-  // Indices are: Experiment 0, Task: 1, Project 2;
-  if (editorStore.activeElement === "Task") {
-    if (currentSelectedTask) {
-      const currentTask = editorStore.tasks.elements[currentSelectedTask];
-      router.push({ path: '/management/' + currentTask.UUID + "/" + currentTask.version + "/" })
-    }
-  }
-  else {
-    // remove any surplus...
-    router.push('/management');
-  }
-}
 
 
 const activeElement = computed({
@@ -152,12 +144,48 @@ function handleTaskChange(event) {
   console.log("Trying to change Tasks");
   console.log(event);
   const currentTask = editorStore.tasks.elements[event.index];
-  if (currentTask.data?.UUID) {
-    router.push('/management/' + currentTask.data.UUID + "/" + currentTask.data.version + "/")
+  if (currentTask?.data?.UUID) {
+    console.log(currentTask);
+    router.push('/editing/' + currentTask.data.UUID + "/" + currentTask.currentVersion + "/")
   }
   else {
-    router.push('/management');
+    router.push('/editing');
   }
+}
+
+function handleTypeChange() {
+  // Indices are: Experiment 0, Task: 1, Project 2;
+  if (editorStore.activeElement === "Task") {
+    if (currentSelectedTask) {
+      const currentTask = editorStore.tasks.elements[currentSelectedTask];
+      console.log(currentTask);
+      router.push({ path: '/editing/' + currentTask.UUID + "/" + currentTask.currentVersion + "/" })
+    }
+  }
+  else {
+    // remove any surplus...
+    router.push('/editing');
+  }
+}
+
+
+function updateCurrentTaskVersion(version, index)
+{
+  editorStore.updateCurrentTaskVersion(version, index)
+  if(editorStore.activeElement === "Task")
+  {
+    handleTaskChange({index : index});
+  }
+}
+async function updateElement(data, index, type) {
+  console.log("Changing object at position " + index +  " for type " + type + " to:");
+  console.log(data);
+  const newVersion = await editorStore.saveObject(type, data, index)
+}
+function updateName(name, index, type) {
+  console.log("Updating name for index " +index + " for type " + type + " to " + name)
+  const elementStore = editorStore.getStoreForType(type);
+  elementStore.elements[index].name = name;
 }
 
 
@@ -187,16 +215,6 @@ function showOpenElementDialog(typeForDialog) {
   showSelector.value = true;
 }
 
-async function updateElement(updateEvent) {
-  console.log(updateEvent);
-  const newVersion = await editorStore.saveObject(updateEvent.type, updateEvent.data, updateEvent.index)
-}
-
-async function createElement(createData) {
-  console.log(createData)
-  const newVersion = await editorStore.createObject(createData.type, createData.data, createData.index)
-
-}
 
 /**
  * Open a tab for the selected Type of Element in the respective tabs rider. 
@@ -213,11 +231,7 @@ function openSelectionTab(element) {
   }
 }
 
-function updateName(data, type) {
-  console.log("Updating name for index " + data.index + " for type " + type + " to " + data.name)
-  const elementStore = editorStore.getStoreForType(type);
-  elementStore.elements[data.index].name = data.name;
-}
+
 
 const items = computed(() => [
   {

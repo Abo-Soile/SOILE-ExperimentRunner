@@ -1,10 +1,11 @@
 <template>
+  <div>
   <div class="questionnaire" inline v-for="(paragraph, index) in usedCode.elements" :key='"paragraph_" + index'>
     <QuestionnaireParagraph @dataUpdate="event => updateAndCheckData(event)" :paragraph_data="paragraph">
     </QuestionnaireParagraph>
   </div>
   <Button :disabled="!canSubmit" @click="submitForm">Submit</Button>
-
+  </div>
 </template>
 
 <script>
