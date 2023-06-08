@@ -28,7 +28,7 @@
 
 <script>
 
-import { EditorComponent, Components, Icons } from "@baklavajs/renderer-vue";
+import { EditorComponent, Components} from "@baklavajs/renderer-vue";
 import { DependencyEngine } from "@baklavajs/engine";
 import "@baklavajs/themes/dist/syrup-dark.css";
 
@@ -50,10 +50,9 @@ import { useGraphStore, useElementStore, useErrorStore } from "@/stores";
 import { reactive } from "vue";
 
 const BaklavaNode = Components.Node;
-const saveIcon = Icons.DeviceFloppy;
 
 export default {
-    components: { "baklava-editor": EditorComponent, ElementSaveDialog, BaklavaNode, SoileNode, saveIcon, ElementSettings, HintOverlay },
+    components: { "baklava-editor": EditorComponent, ElementSaveDialog, BaklavaNode, SoileNode, ElementSettings, HintOverlay },
     emits: ['updateName','updateElement', 'createElement'],
     props: {
         name: {

@@ -8,7 +8,7 @@
     <label for="addOutput">Filter expression:</label>
     <input type="text" v-model=newFilter name="addOutput">
 </div>
-<button @click="updateFilter()"> {{ buttonLabel }} </button>
+<button class="baklava-button" @click="updateFilter()"> {{ buttonLabel }} </button>
 </template>
 
 <script lang="ts">

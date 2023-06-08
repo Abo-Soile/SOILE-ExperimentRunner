@@ -9,8 +9,8 @@
                 <tr>
                     <td class="tooltip-source">{{ output[0] }}<div class="tooltip-text"> {{ output[1].filterstring }}</div>
                     </td>
-                    <td><button @click="removeFilter(output[0])"> Remove Filter </button></td>
-                    <td v-if="!isEditing(key)"><button  @click="editFilter(key)"> Edit Filter </button></td>
+                    <td><button class="baklava-button " @click="removeFilter(output[0])"> Remove Filter </button></td>
+                    <td v-if="!isEditing(key)"><button  class="baklava-button " @click="editFilter(key)"> Edit Filter </button></td>
 
                 </tr>
                 <tr v-if="isEditing(key)">
@@ -76,7 +76,7 @@ export default defineComponent({
         },
         isEditing(index : number) : boolean
         {
-            return this.editing.contains(index);
+            return this.editing.includes(index);
         },
         updateNodeData() {
             

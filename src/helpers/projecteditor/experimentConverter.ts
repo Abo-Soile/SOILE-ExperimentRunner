@@ -50,13 +50,15 @@ export async function instantiateExperimentInProject(UUID : string, Version : st
         if(element.elementType === "experiment")
         {
             // Experiments are self-contained.
-            element.data = updateExperimentInstance(InstanceID, element.data as ExperimentInstance)
+            element.data = updateExperimentInstance(InstanceID, element.data as ExperimentInstance)            
         }
     }
     var stringifyedExp = JSON.stringify(experiment);
     // doing split/join since replaceAll is only available with es2021 and I'd like to stay with es6 for now
-    outputs.forEach((value, key, map) => stringifyedExp = stringifyedExp.split(key).join(value))
-    return JSON.parse(stringifyedExp) as ExperimentInstance; 
+    outputs.forEach((value, key, map) => stringifyedExp = stringifyedExp.split(key).join(value))    
+    var expInstance = JSON.parse(stringifyedExp) as ExperimentInstance; 
+    expInstance.instanceID = InstanceID;
+    return expInstance
 }
 
 function updateExperimentInstance(InstanceID : string, currentInstance : ExperimentInstance) : ExperimentInstance {

@@ -101,6 +101,7 @@ export const useGraphStore = defineStore({
                 // we know this is a data node. 
                 const datanode = node as SoileDataNode;
                 if (!(node.id in this.nodeOutputInformation.get(node.graph?.id))) {
+                    console.log("Setting up node " + node.id + " in graph " + node.graph?.id)
                     this.nodeOutputInformation.get(node.graph?.id).set(node.id, datanode.nodeOutputs);
                     this.nodePersistentInformation.get(node.graph?.id).set(node.id, datanode.nodePersistent);
                     //TODO: Check if we need to add the nodeName here.
@@ -119,7 +120,10 @@ export const useGraphStore = defineStore({
         canAddTaskOutput(node: SoileBaseNode, outputName: string) {
             // just in case this hasn't been done.
             this.setupNode(node)            
-            return !(this.nodeOutputInformation.get(node.graph?.id).get(node.id).contains(outputName));
+            console.log("Checking node " + node.id + " in graph " + node.graph?.id)
+            console.log(this.nodeOutputInformation.get(node.graph?.id));
+            console.log(this.nodeOutputInformation.get(node.graph?.id).get(node.id));
+            return !(this.nodeOutputInformation.get(node.graph?.id).get(node.id).includes(outputName));
 
         },        
         addOutput(node: SoileBaseNode, outputName: string) {

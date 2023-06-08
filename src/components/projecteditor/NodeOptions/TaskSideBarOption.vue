@@ -64,9 +64,9 @@ export default defineComponent({
     },
     methods: {
         createOutput() {
-            if (this.newOutput) {
+            if (this.newOutput) {2
                 console.log("Adding output");
-                if (this.graphStore.canAddElementOutput(this.currentNode, this.newOutput)) {
+                if (this.graphStore.canAddTaskOutput(this.currentNode, this.newOutput)) {
                     console.log("Yes ")
                     this.currentNode.addElementOutput(this.newOutput)
                 }
