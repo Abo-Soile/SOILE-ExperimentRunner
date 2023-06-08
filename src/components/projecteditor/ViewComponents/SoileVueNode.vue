@@ -14,7 +14,7 @@
                     {{ node.title }}
                 </div>
                 <div class="__menu">
-                    <vertical-dots class="--clickable" @click="openContextMenu" />
+                    <i class="pi pi-bars --clickable" @click="openContextMenu" />
                     <context-menu
                         v-model="showContextMenu"
                         :x="0"
@@ -46,11 +46,11 @@
             <!-- Inputs -->
             <div class="__inputs">
                 <NodeInterface v-for="input in displayedInputs" :key="input.id" :node="node" :intf="input" />
-            </div>
-            <div class="__options">
-                <NodeInterface v-for="option in displayedOptions" :key="option.id" :node="node" :intf="option" />
-            </div>
+            </div>            
         </div>    
+        <div class="options">
+                <NodeInterface v-for="option in displayedOptions" :key="option.id" :node="node" :intf="option" />            
+        </div>
     </div>
 </template>
 
@@ -58,17 +58,14 @@
 import { ref, computed, toRef, nextTick, onUpdated, onMounted, onBeforeUnmount } from "vue";
 import { AbstractNode, GRAPH_NODE_TYPE_PREFIX, IGraphNode } from "@baklavajs/core";
 import { useDragMove, useGraph, useViewModel } from "@baklavajs/renderer-vue";
-import { Components, Icons } from "@baklavajs/renderer-vue";
-import { Node } from "@baklavajs/renderer-vue";
-
+import { Components } from "@baklavajs/renderer-vue";
+import NodeInterface from './NodeInterface.vue'
 import { useGraphStore } from "@/stores";
 import { ResizeObserverEntry } from "@vueuse/core";
 import SoileNode from "../NodeTypes/SoileNode";
 
 const graphStore = useGraphStore();
 const contextMenu = Components.ContextMenu;
-const VerticalDots = Icons.VerticalDots;
-const NodeInterface = Node.NodeInterface;
 
 const props = withDefaults(
     defineProps<{
@@ -202,5 +199,10 @@ onUpdated(onRender);
 {
     overflow: visible;
 }
-
+.options
+{
+    display: grid;
+    grid-row: 1;
+    grid-column-end: span 2;
+}
 </style>

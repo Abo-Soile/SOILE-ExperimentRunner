@@ -217,7 +217,11 @@ export async function BaklavaToSoileProjectJSON(graph: Graph): Promise<SOILEProj
         }
         if (node.type === "ExperimentNode") {
             const cnode = node as ExperimentNode;
-            projectData.experiments.push(await instantiateExperimentInProject(cnode.objectData.uuid, cnode.objectData.version, cnode.random.value, cnode.title))
+            const instance = await instantiateExperimentInProject(cnode.objectData.uuid, cnode.objectData.version, cnode.random.value, cnode.title)
+            instance.next = nextMap.get(cnode.outputs.next.id) ? nextMap.get(cnode.outputs.next.id) : "end";
+            instance.position = cnode.position;
+            projectData.experiments.push(instance)
+
         }
     }
     return projectData;
@@ -259,14 +263,16 @@ export async function BaklavaToSoileExperimentJSON(graph: Graph): Promise<Experi
             experimentData.elements.push({ elementType: "filter", data: createFilterJson(node as FilterNode, nextMap) });
         }
         if (node.type === "ExperimentNode") {
-            const cnode = node as ExperimentNode;
-            if (!(node as TaskNode).isStartNode()) {
-
-                experimentData.elements.push({ elementType: "experiment", data: await instantiateExperimentInProject(cnode.objectData.uuid, cnode.objectData.version, cnode.random.value, cnode.title) })
+            const cnode = node as ExperimentNode;            
+            const instance = await instantiateExperimentInProject(cnode.objectData.uuid, cnode.objectData.version, cnode.random.value, cnode.title)
+            instance.next = nextMap.get(cnode.outputs.next.id) ? nextMap.get(cnode.outputs.next.id) : "end";
+            instance.position = cnode.position;
+            if (!(node as ExperimentNode).isStartNode()) {
+                experimentData.elements.push({ elementType: "experiment", data: instance})
             }
             else {
                 // start Node needs to be the very first element. (maybe we change this later...)
-                experimentData.elements.splice(0, 0, { elementType: "experiment", data: await instantiateExperimentInProject(cnode.objectData.uuid, cnode.objectData.version, cnode.random.value, cnode.title) });
+                experimentData.elements.splice(0, 0, { elementType: "experiment", data: instance });
             }
         }
     }

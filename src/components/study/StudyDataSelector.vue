@@ -11,7 +11,7 @@
         </template>    
     </Tree>
     <div v-if="!waitingForDL">
-        <Button label="Download selected Data" @click="downloadSelected"></Button>
+        <Button :disabled="!tasksSelected && !participantsSelected" label="Download selected Data" @click="downloadSelected"></Button>
         <Button label="Download all Data" @click="downloadAll"></Button>
     </div>
     <div v-else>
@@ -44,8 +44,10 @@ export default {
         return {
             selectedData: {},
             selectedElements: null,
-            selectedTasks: null
-            
+            selectedTasks: null,
+            downloadID: null,
+            waitingForDL: false,
+            downloadReady: false,
         }
     },
     computed:
@@ -105,10 +107,64 @@ export default {
             return this.selectedElements != null && "Participants" in this.selectedElements
         }
     },
-    watch: {        
+    watch: {   
+        downloadReady(newValue)     
+        {
+            if(this.downloadID && newValue)
+            {
+                
+            }
+        }
     },
     methods: {
+        downloadSelected()
+        {   
+            this.waitingForDL = true;
+            // download whatever was selected, either tasks or participants.
+            const request = {};
+            if("Tasks" in this.selectedElements)
+            {
+                const tasks = [];
+                for(const task of this.selectedElements)
+                {
+                    if(task != "Tasks")
+                    {
+                        tasks.push(task);
+                    }
+                }
+                request.tasks = tasks;
+            }
+            else
+            {
+                const participants = [];
+                for(const participant of this.selectedElements)
+                {
+                    if(task != "Participants")
+                    {
+                        participants.push(participant);
+                    }
+                }
+                request.participants = participants;
+            }   
+            this.download(request);
+        },
+        downloadAll()
+        {
+            this.waitingForDL = true;
+            this.download("all");           
+        },
+        async download(request)
+        {            
+            this.downloadID = await this.studyStore.requestDownload(this.projectID, request);
+            if(this.downloadID)
+            {
 
+            }
+            else
+            {
+                this.waitingForDL = false;
+            }
+        }
     },
     mounted() {
 

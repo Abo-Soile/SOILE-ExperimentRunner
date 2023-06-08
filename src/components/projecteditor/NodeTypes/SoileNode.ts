@@ -1,4 +1,4 @@
-import { Graph, GraphTemplate, IGraphNode, Node } from "@baklavajs/core";
+import { DynamicNode, Graph, GraphTemplate, IGraphNode, INodeState, Node } from "@baklavajs/core";
 import { useGraphStore } from "@/stores/graph";
 import { useElementStore } from "@/stores/elements";
 import { SoileBaseNode, queryPropertyFunc } from "@/helpers/projecteditor/SoileTypes";
@@ -15,7 +15,7 @@ interface Outputs {
  * Base class for Soile Nodes in Baklava. Contains functionality to essentially ensure uniqueness of Node Names (to generate unique Instance IDs)
  */
 
-export default abstract class SoileNode extends Node<any, any> implements SoileBaseNode, IGraphNode {
+export default abstract class SoileNode extends DynamicNode<any, any> implements SoileBaseNode, IGraphNode {
     public twoColumn = true;
     public graphStore = useGraphStore();
     public elementStore = useElementStore();
@@ -59,6 +59,10 @@ export default abstract class SoileNode extends Node<any, any> implements SoileB
     }
     onDestroy() {
         this.graphStore.removeNode(this);
+    }
+    load(state: INodeState<any, any>): void
+    {
+        // nothing to be done here. 
     }
 
 }

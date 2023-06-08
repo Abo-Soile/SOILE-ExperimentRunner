@@ -9,12 +9,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@baklavajs/core": "../../baklavajs/baklavajsbuild/core",
-    "@baklavajs/engine": "../../baklavajs/baklavajsbuild/engine",
-    "@baklavajs/events": "../../baklavajs/baklavajsbuild/events",
-    "@baklavajs/interface-types": "../../baklavajs/baklavajsbuild/interface-types",
-    "@baklavajs/renderer-vue": "../../baklavajs/baklavajsbuild/renderer-vue",
-    "@baklavajs/themes": "../../baklavajs/baklavajsbuild/themes",
+    "@baklavajs/core": "2.0.2-beta.4",
+    "@baklavajs/engine": "2.0.2-beta.4",
+    "@baklavajs/events": "2.0.2-beta.4",
+    "@baklavajs/interface-types": "2.0.2-beta.4",
+    "@baklavajs/renderer-vue": "2.0.2-beta.4",
+    "@baklavajs/themes": "2.0.2-beta.4",
     "@vueuse/core": "^9.9.0",
     "axios": "^1.3.4",
     "diacritics": "^1.3.0",
