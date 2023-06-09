@@ -154,7 +154,7 @@ export const useStudyStore = defineStore({
         async selectCurrentStudy(uuid)
         {
             try {
-                const response = await axios.post(`/projectexec/${uuid}`)
+                const response = await axios.post(`/projectexec/${uuid}/get`)
                 console.log(response.data);
                 console.log(response)
                 this.currentEditedStudy = response.data;                

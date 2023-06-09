@@ -159,10 +159,10 @@ export const useElementStore = defineStore({
                     if (!this.elements[usedType][uuid]) {
                         this.elements[usedType][uuid] = {};
                     }
-                    const response = await axios.get("/" + type.toLowerCase() + "/" + uuid + "/" + version)
+                    const response = await axios.get("/" + type.toLowerCase() + "/" + uuid + "/" + version + "/get")
                     this.elements[usedType][uuid][version] = response.data;
                     if (!this.elements[usedType][uuid][version].tag) {
-                        const response = await axios.get("/" + type.toLowerCase() + "/gettag/" + uuid + "/" + version)
+                        const response = await axios.get("/" + type.toLowerCase() + "/" + uuid + "/" + version + "/gettag")
                         this.elements[usedType][uuid][version].tag = response.data.tag;
                     }
                     return this.elements[usedType][uuid][version];
@@ -182,7 +182,7 @@ export const useElementStore = defineStore({
          */
         async updateElement(uuid, version, data, type) {            
             try {
-                const response = await axios.post("/" + type.toLowerCase() + "/" + uuid + "/" + version, data)
+                const response = await axios.post("/" + type.toLowerCase() + "/" + uuid + "/" + version + "/post", data)
                 data.version = response.data.version;
                 if (!this.elements[type.toLowerCase()][uuid]) {
                     this.elements[type.toLowerCase()][uuid] = {};
@@ -297,7 +297,7 @@ export const useElementStore = defineStore({
         async getFilesForTask(uuid, version)
         {
             try {
-                const response = await axios.get('/task/filelist/' + uuid + "/" + version );
+                const response = await axios.get('/task/' + uuid + "/" + version + "/filelist");
                 console.log(response?.data);
                 return response.data;
             }

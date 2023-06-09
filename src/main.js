@@ -1,6 +1,8 @@
 import { createApp } from 'vue'
 import './style.css'
 import App from './App.vue'
+console.log(import.meta.env)
+
 import './axios'
 // use pinia for state management
 import { createPinia } from 'pinia'
@@ -17,8 +19,6 @@ import ToastService from 'primevue/toastservice';
 
 // primeflex for layouting
 import 'primeflex/primeflex.css' 
-
-console.log(router.getRoutes())
 
 const app = createApp(App);
 app.use(createPinia())
