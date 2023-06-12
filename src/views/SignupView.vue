@@ -3,7 +3,7 @@
         <h2> {{ selectedProject.name }}</h2>
         <p> {{ selectedProject.description }}</p>
         <!-- TODO: check whether already signed up if user is logged in or authed in a different way-->        
-        <div v-if="signedUpProjects.includes(selectedProject.uuid)">
+        <div v-if="signedUpStudies.includes(selectedProject.uuid)">
             <div v-if="authStore.isAnonymous"> 
                 <h2>Your token for this Project is: </h2>
                 <p style="color:red">{{ authStore.projectToken }}</p>
@@ -33,8 +33,9 @@ const projectStore = useProjectStore();
 const authStore = useAuthStore();
 const userStore = useUserStore();
 
-const { signedUpProjects:signedUpProjects, selectedProject: selectedProject } = storeToRefs(projectStore);
+const { signedUpStudies:signedUpStudies, selectedProject: selectedProject } = storeToRefs(projectStore);
 console.log(selectedProject);
+console.log(selectedProject.value);
 
 function startProject(uuid)
 {
@@ -42,17 +43,17 @@ function startProject(uuid)
 }
 
 async function signUp() {
-    console.log("Signing up to project " + this.selectedProject.uuid)    
-    const signedUp = await authStore.signUp(this.selectedProject.uuid)
+    console.log("Signing up to project " + selectedProject.value.uuid)    
+    const signedUp = await authStore.signUp(selectedProject.value.uuid)
     console.log(signedUp)
     if(signedUp)
     {
-        justSignedUp[this.selectedProject.uuid] = true;
+        justSignedUp[selectedProject.value.uuid] = true;
         console.log("Signup was successful")
         await authStore.refreshSession();
         console.log("Updating signed up projects")
-        await projectStore.fetchSignedUpProjects();        
-        await userStore.updateTaskSettings(this.selectedProject.uuid);        
+        await projectStore.fetchSignedUpStudies();        
+        await userStore.updateTaskSettings(selectedProject.value.uuid);        
     }
     else{
         console.log("Signup was unsuccessful")
