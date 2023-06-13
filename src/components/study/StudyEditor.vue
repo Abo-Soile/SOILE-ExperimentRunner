@@ -1,7 +1,8 @@
 <template>
-    <h2> Project Properties </h2>
+    <h2>{{ currentStudy.name }}</h2>
     <div class="grid studydisplay">
         <div class="displaypart col-4 h-full">
+            <h3> Project Properties </h3>
             <ObjectAndVersionSelectorWithProps :dropDownClasses="isProjectEditable ? '' : 'p-disabled'"
                 v-model:element=sourceProject v-model:version=sourceVersion objectType="project"
                 versionTitle="at Version" elementTitle="Project Name" />
@@ -13,7 +14,7 @@
                 @update:valid="(event) => dataValid = event" />
 
         </div>
-        <div class="col-3">
+        <div class="displaypart col-3">
             <StudyActivity 
             v-model:active="currentStudy.active"
             :accessTokens="accessTokens"
@@ -24,7 +25,7 @@
             ></StudyActivity>
         <!-- Study properties-->    
     </div>
-    <div class="col-5 h-full">
+    <div class="displaypart col-5">
         Avaiable Data 
         <StudyDataSelector :projectID=selectedStudy.UUID :availableData="availableData"></StudyDataSelector>
     </div>
@@ -173,9 +174,9 @@ export default {
 
 <style scoped>
 
-.displaypart {
-    margin: 2 auto;
-    border: 1 solid;
+.displaypart {    
+    margin: 2px auto;    
+    border: 1px solid
 }
 .studydisplay {
     min-height: 50vh;

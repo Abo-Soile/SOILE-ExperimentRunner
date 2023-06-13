@@ -16,7 +16,7 @@ export const useUserStore = defineStore({
             console.log(projectID)
             if (projectID) {
                 try {
-                    const response = await axios.post("/projectexec/" + projectID + "/getcurrenttaskinfo")
+                    const response = await axios.post("/study/" + projectID + "/getcurrenttaskinfo")
                     this.currentTaskSettings = response.data;
                 }
                 catch (error) {

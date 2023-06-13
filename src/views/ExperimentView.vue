@@ -82,7 +82,7 @@ export default {
             TaskData.outputData = results.outputData ? results.outputData : [];
             TaskData.resultData = results.resultData ? results.resultData : { resultData: [], fileData: [] };
             // TODO: Potentially extract outputs from the jsonData of the results        
-            axios.post("/projectexec/" + this.$route.params.id + "/submit", TaskData)
+            axios.post("/study/" + this.$route.params.id + "/submit", TaskData)
                 .then(async response => {
                     if (response.status == 200) {
                         await userStore.updateTaskSettings(this.$route.params.id);
@@ -106,7 +106,7 @@ export default {
         uploadData(file, fileName, idCallBack, errorCallback) {
             var formData = new FormData();
             formData.append(fileName, file);
-            axios.post("/projectexec/" + this.$route.params.id + "/submit", formData, {
+            axios.post("/study/" + this.$route.params.id + "/submit", formData, {
                 headers: {
                     'content-type': 'multipart/form-data'
                 }

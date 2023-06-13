@@ -14,7 +14,7 @@ export const useProjectStore = defineStore({
     actions: {
         async updateAvailableStudies() {
             try {
-                const response = await axios.post('/projectexec/list');
+                const response = await axios.post('/study/list');
                 console.log(response?.data);
                 // update pinia state
                 this.availableProjectInstances = response?.data;

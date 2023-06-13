@@ -126,7 +126,7 @@ export const useAuthStore = defineStore({
         async signUp(projectID, accessToken) {
             const params = accessToken ? { params: { token: accessToken } } : {}
             try {
-                const response = await axios.post('/projectexec/' + projectID + '/signup', params)
+                const response = await axios.post('/study/' + projectID + '/signup', params)
                 this.setProjectToken(response?.data.token)
                 console.log("Signup was successful")
                 return true;
@@ -138,16 +138,6 @@ export const useAuthStore = defineStore({
                 return false;
             }
 
-        },
-        async updateTaskSettings(projectID)        
-        {
-            axios.post("/projectexec/" + projectID + "/getcurrenttaskinfo")
-            .then(response => {
-                this.currentTaskSettings = response.data;                
-            })
-            .catch(error => {
-                this.processAxiosError(error)
-            })
         },
         setAccessToken(token) {
             this.jwtToken = token;

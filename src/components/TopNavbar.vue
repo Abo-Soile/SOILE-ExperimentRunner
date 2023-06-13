@@ -96,10 +96,11 @@ export default {
     async handleCreation(event)
     {
       this.creationDialogVisible = false;
+      console.log(event)
       if(event)
       {
-        await this.studyStore.createStudy(event);
-        await this.studyStore.selectCurrentStudy(event.UUID);
+        const studyID = await this.studyStore.createStudy(event);
+        await this.studyStore.selectCurrentStudy(studyID);
       }
      
     },
