@@ -1,12 +1,16 @@
 <template>
-    <Button v-if="generalToken === ''" label="Create Token for access" @click="generateMasterToken"></Button>
-    <div v-else> The master token for this project is: 
-        <div>
-            {{ generalToken }}
-        </div>
+  <Button
+    v-if="generalToken === ''"
+    label="Create Token for access"
+    @click="generateMasterToken"
+  ></Button>
+  <div v-else>
+    The master token for this project is:
+    <div>
+      {{ generalToken }}
     </div>
-    <Button label="Create Tokens" @click=""></Button>
-    
+  </div>
+  <Button label="Create Tokens" @click=""></Button>
 </template>
 
 <script setup>
@@ -14,28 +18,24 @@
 import Button from 'primevue/button'
 import { useProjectStore } from '@/stores'
 import { ref } from 'vue'
-const projectStore = useProjectStore();
+const projectStore = useProjectStore()
 
 const generalToken = ref('')
 const accessTokens = ref([])
 
 const props = defineProps({
-    active: { 
-        type: Boolean,
-        required: true
-    },
-    projectID: {
-        type: String,
-        required: true
-    }
+  active: {
+    type: Boolean,
+    required: true
+  },
+  projectID: {
+    type: String,
+    required: true
+  }
 })
 
 // generate a master token for the project.
-async function generateMasterToken()
-{
-    generalToken.value = await projectStore.generateMasterToken(props.projectID);
+async function generateMasterToken() {
+  generalToken.value = await projectStore.generateMasterToken(props.projectID)
 }
-
-
-
 </script>

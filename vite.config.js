@@ -14,7 +14,7 @@ export default defineConfig({
   ],
   server: {
     proxy: {
-      "^/exp/.*/.*/.*" :{
+      "^/exp/.*/.*/.+" :{
         target: 'https://localhost:8081',
         rewrite: (path) => path.replace(/^\/exp/, '/run'),
         secure: false

@@ -1,5 +1,5 @@
-import { NodeInterface } from "@baklavajs/core";
+import { NodeInterface } from '@baklavajs/core'
 
 export const displayInSideBar = (intf: NodeInterface, displayInSidebar: boolean) => {
-    intf.displayInSidebar = displayInSidebar;
+  intf.displayInSidebar = displayInSidebar
 }

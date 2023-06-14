@@ -1,22 +1,22 @@
 <template>
-    This is a slider
+  This is a slider
   <b-form-group>
-    <b-row><b-col>
-        <b-form-input 
+    <b-row
+      ><b-col>
+        <b-form-input
           type="range"
           :step="source_data.increment"
           :id="source_data.id"
           :min="source_data.minimum"
           :max="source_data.maximum"
           v-model="value"
-        />  
-    </b-col>
+        />
+      </b-col>
     </b-row>
     <b-row>
-        <b-col v-for="(label,key) in source_Data.labels" :key="key">
-            {{ label }}
-        </b-col>
-    
+      <b-col v-for="(label, key) in source_Data.labels" :key="key">
+        {{ label }}
+      </b-col>
     </b-row>
   </b-form-group>
 </template>
@@ -26,49 +26,46 @@ export default {
   props: {
     source_data: {
       type: Object,
-      required: true,
-    },
+      required: true
+    }
   },
   data() {
     return {
-      value: undefined,
-    };
+      value: undefined
+    }
   },
   methods: {},
   watch: {
     value() {
       if (this.isValid) {
-        console.log("Emitting update");
-        this.$emit("dataUpdate", {
+        console.log('Emitting update')
+        this.$emit('dataUpdate', {
           isValid: true,
           target: this.source_data.id,
-          value: this.value,
-        });
+          value: this.value
+        })
       } else {
-        this.$emit("dataUpdate", {
+        this.$emit('dataUpdate', {
           isValid: false,
-          target: this.source_data.id,
-        });
+          target: this.source_data.id
+        })
       }
-    },
+    }
   },
   computed: {
     isValid() {
-      return (
-        this.value >= this.source_data.minimum &&
-        this.value <= this.source_data.maximum
-      );
+      return this.value >= this.source_data.minimum && this.value <= this.source_data.maximum
     },
     getComputedStyle() {
-      return "width: " + (this.source_data.width+2) + "em";
-    },
+      return 'width: ' + (this.source_data.width + 2) + 'em'
+    }
   },
   mounted() {
     if (this.source_data.value) {
-      this.value = this.source_data.value;
+      this.value = this.source_data.value
     }
-  },
-};
+  }
+}
 </script>
 
 <style scoped>

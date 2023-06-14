@@ -1,4 +1,1 @@
-export function buildResults(jsonResults, fileResults)
-{
-
-}
+export function buildResults(jsonResults, fileResults) {}

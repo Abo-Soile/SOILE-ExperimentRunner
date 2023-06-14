@@ -1,7 +1,13 @@
 <template>
   <div>
-    <Slider type="range" :step="source_data.increment" :id="source_data.id" :min="source_data.minimum"
-      :max="source_data.maximum" v-model="value" />
+    <Slider
+      type="range"
+      :step="source_data.increment"
+      :id="source_data.id"
+      :min="source_data.minimum"
+      :max="source_data.maximum"
+      v-model="value"
+    />
     <div class="sliderticks">
       <p v-for="(label, key) in source_data.labels" :key="key">
         {{ label }}
@@ -16,42 +22,42 @@ export default {
   props: {
     source_data: {
       type: Object,
-      required: true,
-    },
+      required: true
+    }
   },
   emits: ['dataUpdate'],
   components: { Slider },
   data() {
     return {
-      value: undefined,
-    };
+      value: undefined
+    }
   },
   methods: {},
   watch: {
     value() {
-      this.$emit("dataUpdate", {
+      this.$emit('dataUpdate', {
         isValid: true,
         target: this.source_data.id,
-        value: this.value,
-      });
+        value: this.value
+      })
     },
     source_data() {
       if (this.source_data.select != null && this.source_data.select != undefined) {
-        this.value = this.source_data.select;
+        this.value = this.source_data.select
       }
     }
   },
   mounted() {
     // nitially select the value (updated in watcher)
-    this.value = this.source_data.select;
-  },
-};
+    this.value = this.source_data.select
+  }
+}
 </script>
 
 <style scoped>
 .sliderticks {
   display: flex;
-  justify-content: space-between;  
+  justify-content: space-between;
 }
 
 .sliderticks p {

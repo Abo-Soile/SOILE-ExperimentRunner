@@ -1,94 +1,102 @@
 <template>
-    <Dropdown :class="dropDownClasses" v-model="selectedVersion" :options="availableVersions"
-        :optionLabel=versionLabel :loading="loading" :disabled="!element" placeholder="Select Version" />
+  <Dropdown
+    :class="dropDownClasses"
+    v-model="selectedVersion"
+    :options="availableVersions"
+    :optionLabel="versionLabel"
+    :loading="loading"
+    :disabled="!element"
+    placeholder="Select Version"
+  />
 </template>
 
 <script>
-
 import Dropdown from 'primevue/dropdown'
-import { useElementStore } from '@/stores';
+import { useElementStore } from '@/stores'
 import { defineComponent } from 'vue'
 export default defineComponent({
-    components: { Dropdown },
-    props: {
-        objectType: {
-            type: String,
-            required: true
-        },
-        element: {
-            type: Object,
-            required: false
-        },
-        version: {
-            type: Object,
-            required: false
-        },
-        elementLabel: {
-            type: String,
-            default: "name"
-        },
-        versionLabel: {
-            type: String,
-            default: "tag"
-        },
-        dropDownClasses: {
-            type: String
-        }
+  components: { Dropdown },
+  props: {
+    objectType: {
+      type: String,
+      required: true
     },
-    emits: ['update:element', 'update:version'],
-    data() {
-        return {
-            currentVersion: undefined,
-            loading : false,
-            availableVersions: []
-        }
+    element: {
+      type: Object,
+      required: false
     },
-
-    setup() {
-        const elementStore = useElementStore();
-        return { elementStore: elementStore }
+    version: {
+      type: Object,
+      required: false
     },
-    computed:
-    {
-        selectedVersion:
-        {
-            get() {
-                return this.version ? this.version : this.currentVersion;
-            },
-            set(newValue) {
-                // reset the version, since the value changed;                
-                console.log("setting version");
-                this.currentVersion = newValue;
-                this.$emit('update:version', newValue)
-            }
-        }
+    elementLabel: {
+      type: String,
+      default: 'name'
     },
-    methods: {
-        async updateAvailableVersions(uuid) {
-            this.loading = true;
-            const versions = await this.elementStore.getOptionsForElement(uuid, this.objectType.toLowerCase())
-            this.availableVersions = versions.filter((x) => x.tag)
-                .map(((x) => { return { tag: x.tag, version: x.version } }))
-            this.loading = false;
-        }
+    versionLabel: {
+      type: String,
+      default: 'tag'
     },
-    watch:
-    {
-        'element.uuid': {
-            async handler(newValue) {
-                console.log("SelectedItem uuid changed")
-                if (newValue) {
-                    this.updateAvailableVersions(newValue)
-                }
-            }
-        }
-    },
-    async mounted() {
-
-        // TODO: heck whether this savely works with onMounted or whether this should be done with onDisplay        
-        if (this.element.uuid) {
-            this.updateAvailableVersions(this.element.uuid)
-        }
+    dropDownClasses: {
+      type: String
     }
+  },
+  emits: ['update:element', 'update:version'],
+  data() {
+    return {
+      currentVersion: undefined,
+      loading: false,
+      availableVersions: []
+    }
+  },
+
+  setup() {
+    const elementStore = useElementStore()
+    return { elementStore: elementStore }
+  },
+  computed: {
+    selectedVersion: {
+      get() {
+        return this.version ? this.version : this.currentVersion
+      },
+      set(newValue) {
+        // reset the version, since the value changed;
+        console.log('setting version')
+        this.currentVersion = newValue
+        this.$emit('update:version', newValue)
+      }
+    }
+  },
+  methods: {
+    async updateAvailableVersions(uuid) {
+      this.loading = true
+      const versions = await this.elementStore.getOptionsForElement(
+        uuid,
+        this.objectType.toLowerCase()
+      )
+      this.availableVersions = versions
+        .filter((x) => x.tag)
+        .map((x) => {
+          return { tag: x.tag, version: x.version }
+        })
+      this.loading = false
+    }
+  },
+  watch: {
+    'element.uuid': {
+      async handler(newValue) {
+        console.log('SelectedItem uuid changed')
+        if (newValue) {
+          this.updateAvailableVersions(newValue)
+        }
+      }
+    }
+  },
+  async mounted() {
+    // TODO: heck whether this savely works with onMounted or whether this should be done with onDisplay
+    if (this.element.uuid) {
+      this.updateAvailableVersions(this.element.uuid)
+    }
+  }
 })
 </script>

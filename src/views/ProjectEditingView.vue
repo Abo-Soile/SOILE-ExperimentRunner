@@ -13,12 +13,17 @@
                 <span> {{ experiment.name }} </span>
                 <Button icon="pi pi-times" @click="closeTab(index, editorStore.experiments)" />
               </template>
-              <div style="width:100%; height:80vh">
-                <Editor type="experiment" :newElement="experiment.newElement" :baklava=experiment.editor
-                  :data=experiment.data :name="experiment.name" 
+              <div style="width: 100%; height: 80vh">
+                <Editor
+                  type="experiment"
+                  :newElement="experiment.newElement"
+                  :baklava="experiment.editor"
+                  :data="experiment.data"
+                  :name="experiment.name"
                   @updateElement="(data) => updateElement(data, index, 'project')"
-                  @createElement="(data) => updateElement(data, index, 'project')" 
-                  @updateName="(name) => updateName(name, index, 'experiment')"></Editor>
+                  @createElement="(data) => updateElement(data, index, 'project')"
+                  @updateName="(name) => updateName(name, index, 'experiment')"
+                ></Editor>
               </div>
             </TabPanel>
           </TabView>
@@ -30,11 +35,14 @@
                 <span> {{ task.name }} </span>
                 <Button icon="pi pi-times" @click="closeTab(index, editorStore.tasks)" />
               </template>
-              <div style="width:100%; height:80vh">
-                <TaskEditor :newElement=task.newElement :target="task.data"
+              <div style="width: 100%; height: 80vh">
+                <TaskEditor
+                  :newElement="task.newElement"
+                  :target="task.data"
                   @updateName="(name) => updateName(name, index, 'task')"
                   @updateCurrentVersion="(event) => updateCurrentTaskVersion(event, index, 'task')"
-                  @saveTask="(event) => updateElement({index: index, data : event, type: 'task'})"></TaskEditor>
+                  @saveTask="(event) => updateElement({ index: index, data: event, type: 'task' })"
+                ></TaskEditor>
               </div>
             </TabPanel>
           </TabView>
@@ -47,12 +55,17 @@
                 <span> {{ project.name }} </span>
                 <Button icon="pi pi-times" @click="closeTab(index, editorStore.projects)" />
               </template>
-              <div style="width:100%; height:80vh">
-                <Editor type="project" :newElement="project.newElement" :baklava=project.editor :data=project.data
-                  :name="project.name"  
-                  @updateElement="(data) => updateElement(data, index, 'project')" 
+              <div style="width: 100%; height: 80vh">
+                <Editor
+                  type="project"
+                  :newElement="project.newElement"
+                  :baklava="project.editor"
+                  :data="project.data"
+                  :name="project.name"
+                  @updateElement="(data) => updateElement(data, index, 'project')"
                   @createElement="(data) => updateElement(data, index, 'project')"
-                  @updateName="(name) => updateName(name, index, 'project')"></Editor>
+                  @updateName="(name) => updateName(name, index, 'project')"
+                ></Editor>
               </div>
               <!-- Content for Sub-Tab 1 goes here -->
             </TabPanel>
@@ -61,78 +74,89 @@
         </TabPanel>
       </TabView>
     </div>
-    <ConfirmDialog :target=currentTarget message="Are you sure you want to close this? All unsaved changes will be lost"
-      reject="Cancel" :isVisible=showConfirm @confirm="confirmation(true)" @reject="confirmation(false)" />
-    <ObjectSelectionDialog v-model:visible="showSelector" :object-type="elementType" @selected="openSelectionTab">
+    <ConfirmDialog
+      :target="currentTarget"
+      message="Are you sure you want to close this? All unsaved changes will be lost"
+      reject="Cancel"
+      :isVisible="showConfirm"
+      @confirm="confirmation(true)"
+      @reject="confirmation(false)"
+    />
+    <ObjectSelectionDialog
+      v-model:visible="showSelector"
+      :object-type="elementType"
+      @selected="openSelectionTab"
+    >
     </ObjectSelectionDialog>
   </div>
 </template>
-  
-<script setup >
-import TabView from 'primevue/tabview';
-import TabPanel from 'primevue/tabpanel';
-import Button from 'primevue/button';
-import PanelMenu from 'primevue/panelmenu';
 
-import { useElementStore, useEditorStore } from "@/stores";
+<script setup>
+import TabView from 'primevue/tabview'
+import TabPanel from 'primevue/tabpanel'
+import Button from 'primevue/button'
+import PanelMenu from 'primevue/panelmenu'
+
+import { useElementStore, useEditorStore } from '@/stores'
 import { router } from '@/helpers'
-import Editor from "@/components/projecteditor/Editor.vue"
+import Editor from '@/components/projecteditor/Editor.vue'
 
-import TaskEditor from "@/components/taskeditor/TaskEditor.vue"
+import TaskEditor from '@/components/taskeditor/TaskEditor.vue'
 
-import { ref, computed, reactive } from "vue";
-import ConfirmDialog from '@/components/dialogs/ConfirmDialog.vue';
-import ObjectSelectionDialog from '../components/utils/ObjectSelectionDialog.vue';
+import { ref, computed, reactive } from 'vue'
+import ConfirmDialog from '@/components/dialogs/ConfirmDialog.vue'
+import ObjectSelectionDialog from '../components/utils/ObjectSelectionDialog.vue'
 
-
-const elementStore = useElementStore();
-const editorStore = useEditorStore();
+const elementStore = useElementStore()
+const editorStore = useEditorStore()
 //const experiments = reactive({ active: 0, elements: [] });
 //const projects = reactive({ active: 0, elements: [] });
 //const editorStore.tasks = reactive({ active: 0, elements: [] });
-const currentTarget = ref({});
-const showConfirm = ref(false);
-const elementType = ref('');
-const showSelector = ref(false);
-const currentSelectedTask = ref(undefined);
-
+const currentTarget = ref({})
+const showConfirm = ref(false)
+const elementType = ref('')
+const showSelector = ref(false)
+const currentSelectedTask = ref(undefined)
 
 const activeElement = computed({
   get() {
-    const expOffset = editorStore.experiments.elements.length > 0 ? 1 : 0;
-    const taskOffset = editorStore.tasks.elements.length > 0 ? 1 : 0;
-    console.log("Updating active Element")
+    const expOffset = editorStore.experiments.elements.length > 0 ? 1 : 0
+    const taskOffset = editorStore.tasks.elements.length > 0 ? 1 : 0
+    console.log('Updating active Element')
     switch (editorStore.activeElement) {
-      case "": return 0;
-      case "Task": handleTaskChange({ index: editorStore.tasks.active }); return expOffset
-      case "Project": handleTypeChange(); return expOffset + taskOffset
-      case "Experiment": handleTypeChange(); return 0
+      case '':
+        return 0
+      case 'Task':
+        handleTaskChange({ index: editorStore.tasks.active })
+        return expOffset
+      case 'Project':
+        handleTypeChange()
+        return expOffset + taskOffset
+      case 'Experiment':
+        handleTypeChange()
+        return 0
     }
   },
   set(newValue) {
-    const expOffset = editorStore.experiments.elements.length > 0 ? 1 : 0;
-    const taskOffset = editorStore.tasks.elements.length > 0 ? 1 : 0;
-    const currentValue = newValue - expOffset - taskOffset;
+    const expOffset = editorStore.experiments.elements.length > 0 ? 1 : 0
+    const taskOffset = editorStore.tasks.elements.length > 0 ? 1 : 0
+    const currentValue = newValue - expOffset - taskOffset
     if (currentValue == 0) {
-      editorStore.activeElement = "Project";
-    }
-    else {
+      editorStore.activeElement = 'Project'
+    } else {
       if (currentValue == -1) {
         if (newValue == 1) {
-          editorStore.activeElement = "Task";
-        }
-        else {
+          editorStore.activeElement = 'Task'
+        } else {
           if (expOffset == 1) {
-            editorStore.activeElement = "Experiment"
-          }
-          else {
-            editorStore.activeElement = "Task";
+            editorStore.activeElement = 'Experiment'
+          } else {
+            editorStore.activeElement = 'Task'
           }
         }
-      }
-      else {
+      } else {
         if (currentValue == -2) {
-          editorStore.activeElement = "Experiment";
+          editorStore.activeElement = 'Experiment'
         }
       }
     }
@@ -141,97 +165,87 @@ const activeElement = computed({
 
 function handleTaskChange(event) {
   // Indices are: Experiment 0, Task: 1, Project 2;
-  console.log("Trying to change Tasks");
-  console.log(event);
-  const currentTask = editorStore.tasks.elements[event.index];
+  console.log('Trying to change Tasks')
+  console.log(event)
+  const currentTask = editorStore.tasks.elements[event.index]
   if (currentTask?.data?.UUID) {
-    console.log(currentTask);
-    router.push('/editing/' + currentTask.data.UUID + "/" + currentTask.currentVersion + "/")
-  }
-  else {
-    router.push('/editing');
+    console.log(currentTask)
+    router.push('/editing/' + currentTask.data.UUID + '/' + currentTask.currentVersion + '/')
+  } else {
+    router.push('/editing')
   }
 }
 
 function handleTypeChange() {
   // Indices are: Experiment 0, Task: 1, Project 2;
-  if (editorStore.activeElement === "Task") {
-    if (currentSelectedTask) {
-      const currentTask = editorStore.tasks.elements[currentSelectedTask];
-      console.log(currentTask);
-      router.push({ path: '/editing/' + currentTask.UUID + "/" + currentTask.currentVersion + "/" })
+  if (editorStore.activeElement === 'Task') {
+    if (currentSelectedTask.value) {
+      const currentTask = editorStore.tasks.elements[currentSelectedTask]
+      console.log(currentTask)
+      router.push({ path: '/editing/' + currentTask.UUID + '/' + currentTask.currentVersion + '/' })
     }
-  }
-  else {
+  } else {
     // remove any surplus...
-    router.push('/editing');
+    router.push('/editing')
   }
 }
 
-
-function updateCurrentTaskVersion(version, index)
-{
+function updateCurrentTaskVersion(version, index) {
   editorStore.updateCurrentTaskVersion(version, index)
-  if(editorStore.activeElement === "Task")
-  {
-    handleTaskChange({index : index});
+  if (editorStore.activeElement === 'Task') {
+    handleTaskChange({ index: index })
   }
 }
 async function updateElement(data, index, type) {
-  console.log("Changing object at position " + index +  " for type " + type + " to:");
-  console.log(data);
+  console.log('Changing object at position ' + index + ' for type ' + type + ' to:')
+  console.log(data)
   const newVersion = await editorStore.saveObject(type, data, index)
 }
 function updateName(name, index, type) {
-  console.log("Updating name for index " +index + " for type " + type + " to " + name)
-  const elementStore = editorStore.getStoreForType(type);
-  elementStore.elements[index].name = name;
+  console.log('Updating name for index ' + index + ' for type ' + type + ' to ' + name)
+  const elementStore = editorStore.getStoreForType(type)
+  elementStore.elements[index].name = name
 }
-
 
 function closeTab(index, target) {
-  console.log("Trying to close tab")
+  console.log('Trying to close tab')
   console.log(currentTarget)
-  console.log("Could set target")
-  currentTarget.value = { index: index, target: target };
-  showConfirm.value = true;
+  console.log('Could set target')
+  currentTarget.value = { index: index, target: target }
+  showConfirm.value = true
 }
 function tabSelected(index, target) {
-  console.log("Selected tab " + index)
+  console.log('Selected tab ' + index)
 }
 function confirmation(close) {
-  console.log("Getting confirmation with value " + close)
+  console.log('Getting confirmation with value ' + close)
   console.log(currentTarget)
   if (close) {
-    currentTarget.value.target.elements.splice(currentTarget.value.index, 1);
-    currentTarget.value.active = currentTarget.value.index - 1;
+    currentTarget.value.target.elements.splice(currentTarget.value.index, 1)
+    currentTarget.value.active = currentTarget.value.index - 1
   }
-  currentTarget.value = {};
-  showConfirm.value = false;
+  currentTarget.value = {}
+  showConfirm.value = false
 }
 //const editorStore.projectsPresent = computed(() => editorStore.projects.length > 0
 function showOpenElementDialog(typeForDialog) {
-  elementType.value = typeForDialog;
-  showSelector.value = true;
+  elementType.value = typeForDialog
+  showSelector.value = true
 }
 
-
 /**
- * Open a tab for the selected Type of Element in the respective tabs rider. 
- * @param {} element 
+ * Open a tab for the selected Type of Element in the respective tabs rider.
+ * @param {} element
  */
 function openSelectionTab(element) {
   console.log(element)
   if (element) {
     editorStore.loadElement(elementType.value, element.name, element.uuid, element.version)
-    showSelector.value = false;
-  }
-  else {
-    showSelector.value = false;
+    showSelector.value = false
+  } else {
+    showSelector.value = false
   }
 }
-
-
 
 const items = computed(() => [
   {
@@ -242,17 +256,17 @@ const items = computed(() => [
         label: 'New',
         icon: 'pi pi-fw pi-plus',
         command: () => {
-          console.log("Tring to create Project")
-          editorStore.createElement("Project")
+          console.log('Tring to create Project')
+          editorStore.createElement('Project')
         }
       },
       {
         label: 'Open',
         icon: 'pi pi-fw pi-folder-open',
         command: () => {
-          showOpenElementDialog("Project");
+          showOpenElementDialog('Project')
         }
-      },
+      }
     ]
   },
   {
@@ -263,17 +277,17 @@ const items = computed(() => [
         label: 'New',
         icon: 'pi pi-fw pi-plus',
         command: () => {
-          console.log("Tring to create Project")
-          editorStore.createElement("Task")
+          console.log('Tring to create Project')
+          editorStore.createElement('Task')
         }
       },
       {
         label: 'Open',
         icon: 'pi pi-fw pi-folder-open',
         command: () => {
-          showOpenElementDialog("Task");
+          showOpenElementDialog('Task')
         }
-      },
+      }
     ]
   },
   {
@@ -284,25 +298,22 @@ const items = computed(() => [
         label: 'New',
         icon: 'pi pi-fw pi-plus',
         command: () => {
-          console.log("Tring to create Project")
-          editorStore.createElement("Experiment")
-
+          console.log('Tring to create Project')
+          editorStore.createElement('Experiment')
         }
       },
       {
         label: 'Open',
         icon: 'pi pi-fw pi-folder-open',
         command: () => {
-          showOpenElementDialog("Experiment");
+          showOpenElementDialog('Experiment')
         }
-      },
+      }
     ]
   }
-]);
-
+])
 </script>
 
-  
 <style scoped>
 .main-container {
   display: flex;
@@ -319,4 +330,3 @@ const items = computed(() => [
   padding: 0px;
 }
 </style>
-  

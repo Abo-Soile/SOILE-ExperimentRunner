@@ -3,7 +3,8 @@
     <template #start>
       <div class="p-mr-2">
         <router-link to="/">
-          Soile <!--<img src="path/to/your/logo.png" alt="Logo" />-->
+          Soile
+          <!--<img src="path/to/your/logo.png" alt="Logo" />-->
         </router-link>
       </div>
     </template>
@@ -11,9 +12,15 @@
   <Dialog v-model:visible="showLoginDialog" header="Login">
     <Login @submitted="showLoginDialog = false" />
   </Dialog>
-  <StudyCreationDialog v-model:visible="creationDialogVisible" @selected="(event) => handleCreation(event)"></StudyCreationDialog>
-  <StudyLoadDialog v-model:visible="loadDialogVisible" :researchStudies="studyStore.researchStudies" @selected="(event) => handleLoad(event)"></StudyLoadDialog>
-
+  <StudyCreationDialog
+    v-model:visible="creationDialogVisible"
+    @selected="(event) => handleCreation(event)"
+  ></StudyCreationDialog>
+  <StudyLoadDialog
+    v-model:visible="loadDialogVisible"
+    :researchStudies="studyStore.researchStudies"
+    @selected="(event) => handleLoad(event)"
+  ></StudyLoadDialog>
 </template>
 
 <script>
@@ -27,92 +34,86 @@ import { useAuthStore, useStudyStore } from '@/stores'
 import StudyCreationDialog from '@/components/study/StudyCreationDialog.vue'
 import StudyLoadDialog from '@/components/study/StudyLoadDialog.vue'
 
-
 export default {
   name: 'TopNavbar',
   components: { Login, Menubar, Button, Menu, Dialog, StudyCreationDialog, StudyLoadDialog },
   data() {
     return {
       creationDialogVisible: false,
-      loadDialogVisible: false,  
+      loadDialogVisible: false
     }
   },
-  computed:
-  {
+  computed: {
     menuItems() {
       return [
-      this.isResearcher ? {
-          label: "Project Editing",
-          icon: 'pi pi-wrench',
-          to: '/editing'          
-        } : {},
-      this.isResearcher ? {
-          label: "Study Management",
-          icon: 'pi pi-file-edit',
-          to: !this.isInManagement && this.studyStore.editingActive() ? '/management' : null,
-          items: [
-            {
-              label: "Create Study",
-              icon: 'pi pi-plus',
-              command: () => this.creationDialogVisible = true,
-              to: '/management'
-            },
-            {
-              label: "Load Study",
+        this.isResearcher
+          ? {
+              label: 'Project Editing',
               icon: 'pi pi-wrench',
-              command: () => this.loadDialogVisible = true,
-              to: '/management'
-            }    
-          ]      
-        } : {},
+              to: '/editing'
+            }
+          : {},
+        this.isResearcher
+          ? {
+              label: 'Study Management',
+              icon: 'pi pi-file-edit',
+              to: !this.isInManagement && this.studyStore.editingActive() ? '/management' : null,
+              items: [
+                {
+                  label: 'Create Study',
+                  icon: 'pi pi-plus',
+                  command: () => (this.creationDialogVisible = true),
+                  to: '/management'
+                },
+                {
+                  label: 'Load Study',
+                  icon: 'pi pi-wrench',
+                  command: () => (this.loadDialogVisible = true),
+                  to: '/management'
+                }
+              ]
+            }
+          : {},
         {
           label: this.isLoggedIn ? 'Profile' : 'Login',
           icon: this.isLoggedIn ? 'pi pi-user' : 'pi pi-sign-in',
-          items: this.isLoggedIn ? [
-            {
-              label: "Profile",
-              icon: 'pi pi-user',
-              routerLink: '/user'
-            },
-            {
-              label: "Logout",
-              icon: 'pi pi-fw pi-power-off',
-              command: async () => await this.authStore.logout()
-            }
-          ] : undefined,
-          command: this.isLoggedIn ? undefined : () => this.showLoginDialog = true
+          items: this.isLoggedIn
+            ? [
+                {
+                  label: 'Profile',
+                  icon: 'pi pi-user',
+                  routerLink: '/user'
+                },
+                {
+                  label: 'Logout',
+                  icon: 'pi pi-fw pi-power-off',
+                  command: async () => await this.authStore.logout()
+                }
+              ]
+            : undefined,
+          command: this.isLoggedIn ? undefined : () => (this.showLoginDialog = true)
         }
-        
       ]
-
     },
-    isInManagement()
-    {
-      return this.$route.name === "Study Management"
-    }    
+    isInManagement() {
+      return this.$route.name === 'Study Management'
+    }
   },
-  methods:
-  {
-    async handleCreation(event)
-    {
-      this.creationDialogVisible = false;
+  methods: {
+    async handleCreation(event) {
+      this.creationDialogVisible = false
       console.log(event)
-      if(event)
-      {
-        const studyID = await this.studyStore.createStudy(event);
-        await this.studyStore.selectCurrentStudy(studyID);
+      if (event) {
+        const studyID = await this.studyStore.createStudy(event)
+        await this.studyStore.selectCurrentStudy(studyID)
       }
-     
     },
-    async handleLoad(event)
-    {
-      this.loadDialogVisible = false;
-      if(event)
-      {
-        await this.studyStore.selectCurrentStudy(event.uuid);
+    async handleLoad(event) {
+      this.loadDialogVisible = false
+      if (event) {
+        await this.studyStore.selectCurrentStudy(event.uuid)
       }
     }
-
   },
   setup() {
     const authStore = useAuthStore()
