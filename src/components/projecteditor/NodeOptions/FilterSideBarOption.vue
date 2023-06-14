@@ -15,10 +15,14 @@
             <div class="tooltip-text">{{ output[1].filterstring }}</div>
           </td>
           <td>
-            <button class="baklava-button" @click="removeFilter(output[0])">Remove Filter</button>
+            <button class="baklava-button" @click="removeFilter(output[0])">
+              Remove Filter
+            </button>
           </td>
           <td v-if="!isEditing(key)">
-            <button class="baklava-button" @click="editFilter(key)">Edit Filter</button>
+            <button class="baklava-button" @click="editFilter(key)">
+              Edit Filter
+            </button>
           </td>
         </tr>
         <tr v-if="isEditing(key)">
@@ -38,79 +42,82 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import FilterNode from '../NodeTypes/FilterNode'
-import { ComponentInterface } from '../NodeInterfaces/ComponentInterface'
-import { FilterSetup } from '@/components'
+import { defineComponent } from "vue";
+import FilterNode from "../NodeTypes/FilterNode";
+import { ComponentInterface } from "../NodeInterfaces/ComponentInterface";
+import { FilterSetup } from "@/components";
 
 export default defineComponent({
   props: {
     intf: {
       type: Object as () => ComponentInterface<FilterNode>,
-      required: true
-    }
+      required: true,
+    },
   },
   components: { FilterSetup },
   data() {
     return {
-      newFilterName: '',
-      newFilter: '',
-      editing: []
-    }
+      newFilterName: "",
+      newFilter: "",
+      editing: [],
+    };
   },
   setup(props) {
-    const currentNode = props.intf.data
-    const nodeID = currentNode?.id
-    const currentFilters = currentNode.Filters
-    return { currentNode, nodeID, currentFilters }
+    const currentNode = props.intf.data;
+    const nodeID = currentNode?.id;
+    const currentFilters = currentNode.Filters;
+    return { currentNode, nodeID, currentFilters };
   },
   methods: {
     createFilter() {
       if (this.newFilterName) {
-        console.log('Adding output')
-        this.currentNode.addFilter(this.newFilterName, this.newFilter)
+        console.log("Adding output");
+        this.currentNode.addFilter(this.newFilterName, this.newFilter);
       }
       // we reset the editing, if we have
-      this.editing = []
-      this.newFilterName = ''
-      this.newFilter = ''
+      this.editing = [];
+      this.newFilterName = "";
+      this.newFilter = "";
     },
 
     removeFilter(output: string) {
-      console.log('removing output: ' + output)
-      this.currentNode.removeFilter(output)
-      this.editing = []
+      console.log("removing output: " + output);
+      this.currentNode.removeFilter(output);
+      this.editing = [];
     },
     editFilter(index: number) {
-      this.editing.push(index)
+      this.editing.push(index);
     },
     isEditing(index: number): boolean {
-      return this.editing.includes(index)
+      return this.editing.includes(index);
     },
     updateNodeData() {},
-    saveFilter(event: { oldName: string; name: string; value: string }, index: number) {
-      console.log(event)
-      this.currentNode.updateFilter(event.oldName, event.name, event.value)
-      this.editing = this.editing.filter((e: number) => e != index)
-    }
+    saveFilter(
+      event: { oldName: string; name: string; value: string },
+      index: number
+    ) {
+      console.log(event);
+      this.currentNode.updateFilter(event.oldName, event.name, event.value);
+      this.editing = this.editing.filter((e: number) => e != index);
+    },
   },
   watch: {
     currentNode() {
-      this.updateNodeData()
-    }
+      this.updateNodeData();
+    },
   },
   computed: {
     currentNode() {
-      return this.intf.data
+      return this.intf.data;
     },
     nodeID() {
-      this.updateNodeData.id
-    }
+      this.updateNodeData.id;
+    },
   },
   mounted() {
-    this.updateNodeData()
-  }
-})
+    this.updateNodeData();
+  },
+});
 </script>
 
 <style scoped>

@@ -17,41 +17,44 @@
 </template>
 
 <script>
-import Slider from 'primevue/slider'
+import Slider from "primevue/slider";
 export default {
   props: {
     source_data: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
-  emits: ['dataUpdate'],
+  emits: ["dataUpdate"],
   components: { Slider },
   data() {
     return {
-      value: undefined
-    }
+      value: undefined,
+    };
   },
   methods: {},
   watch: {
     value() {
-      this.$emit('dataUpdate', {
+      this.$emit("dataUpdate", {
         isValid: true,
         target: this.source_data.id,
-        value: this.value
-      })
+        value: this.value,
+      });
     },
     source_data() {
-      if (this.source_data.select != null && this.source_data.select != undefined) {
-        this.value = this.source_data.select
+      if (
+        this.source_data.select != null &&
+        this.source_data.select != undefined
+      ) {
+        this.value = this.source_data.select;
       }
-    }
+    },
   },
   mounted() {
     // nitially select the value (updated in watcher)
-    this.value = this.source_data.select
-  }
-}
+    this.value = this.source_data.select;
+  },
+};
 </script>
 
 <style scoped>

@@ -7,22 +7,22 @@
 </template>
 <script>
 export default {
-  name: 'OAuthButton',
+  name: "OAuthButton",
   props: {
     oAuthURL: {
       type: String,
-      required: true
+      required: true,
     },
     Welcome: {
       type: String,
-      required: true
+      required: true,
     },
     image: {
       type: String,
-      required: true
-    }
-  }
-}
+      required: true,
+    },
+  },
+};
 </script>
 <style scoped>
 .oAuthButton {

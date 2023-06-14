@@ -1,6 +1,8 @@
 <template>
   <span>
-    <label class="questionnaire-label" :for="source_data.id">{{ source_data.label }}</label>
+    <label class="questionnaire-label" :for="source_data.id">{{
+      source_data.label
+    }}</label>
     <InputText
       class="mb-2 mr-sm-2 mb-sm-0"
       :step="source_data.increment"
@@ -14,56 +16,65 @@
 </template>
 
 <script>
-import InputText from 'primevue/inputtext'
+import InputText from "primevue/inputtext";
 export default {
   components: { InputText },
   props: {
     source_data: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
-  emits: ['dataUpdate'],
+  emits: ["dataUpdate"],
   data() {
     return {
-      value: undefined
-    }
+      value: undefined,
+    };
   },
   methods: {
     emitUpdate(valid, id, value) {
-      this.$emit('dataUpdate', {
+      this.$emit("dataUpdate", {
         isValid: valid,
         target: id,
-        value: value
-      })
-    }
+        value: value,
+      });
+    },
   },
   watch: {
     value() {
-      console.log('Emitting update')
-      this.emitUpdate(this.isValid, this.source_data.id, this.value)
+      console.log("Emitting update");
+      this.emitUpdate(this.isValid, this.source_data.id, this.value);
     },
     source_data(newValue) {
-      this.emitUpdate(this.isValid, this.source_data.id, this.value ? this.value : '')
-    }
+      this.emitUpdate(
+        this.isValid,
+        this.source_data.id,
+        this.value ? this.value : ""
+      );
+    },
   },
   computed: {
     isValid() {
-      if (!this.source_data.required || (this.value && this.value != '')) {
-        return true
+      if (!this.source_data.required || (this.value && this.value != "")) {
+        return true;
       } else {
-        return false
+        return false;
       }
     },
     getComputedStyle() {
-      return 'width: ' + (this.source_data.length + 4) + 'em'
+      return "width: " + (this.source_data.length + 4) + "em";
     },
     tooltip() {
-      return 'Value must be between' + this.source_data.minimum + ' and ' + this.source_data.maximum
-    }
+      return (
+        "Value must be between" +
+        this.source_data.minimum +
+        " and " +
+        this.source_data.maximum
+      );
+    },
   },
-  mounted() {}
-}
+  mounted() {},
+};
 </script>
 
 <style scoped></style>

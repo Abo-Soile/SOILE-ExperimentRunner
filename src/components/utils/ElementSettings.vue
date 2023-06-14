@@ -33,7 +33,12 @@
       </div>
     </div>
     <template #footer>
-      <Button label="Cancel" icon="pi pi-times" @click="isVisible = false" text></Button>
+      <Button
+        label="Cancel"
+        icon="pi pi-times"
+        @click="isVisible = false"
+        text
+      ></Button>
       <Button
         label="Update Settings"
         :disabled="!canSubmit"
@@ -45,102 +50,102 @@
 </template>
 
 <script>
-import Dropdown from 'primevue/dropdown'
-import InputText from 'primevue/inputtext'
-import Checkbox from 'primevue/checkbox'
-import Dialog from 'primevue/dialog'
-import Button from 'primevue/button'
+import Dropdown from "primevue/dropdown";
+import InputText from "primevue/inputtext";
+import Checkbox from "primevue/checkbox";
+import Dialog from "primevue/dialog";
+import Button from "primevue/button";
 
-import { defineComponent } from 'vue'
+import { defineComponent } from "vue";
 export default defineComponent({
   components: { Dropdown, InputText, Button, Dialog, Checkbox },
   props: {
     visible: {
       type: Boolean,
-      required: true
+      required: true,
     },
     initialValues: {
       type: Object,
-      required: false
+      required: false,
     },
     availableCodeTypes: {
-      type: Object
+      type: Object,
     },
     newElement: {
       type: Boolean,
-      required: true
-    }
+      required: true,
+    },
   },
-  emits: ['update:visible', 'submit'],
+  emits: ["update:visible", "submit"],
   data() {
     return {
       codeType: undefined,
       codeVersion: undefined,
       private: false,
-      name: false
-    }
+      name: false,
+    };
   },
   methods: {
     submit() {
       if (this.availableCodeTypes) {
-        this.$emit('submit', {
+        this.$emit("submit", {
           codeType: this.codeType,
           codeVersion: this.codeVersion,
           name: this.name,
-          private: this.private
-        })
+          private: this.private,
+        });
       } else {
-        this.$emit('submit', { name: this.name, private: this.private })
+        this.$emit("submit", { name: this.name, private: this.private });
       }
-    }
+    },
   },
   computed: {
     codeVersionOptions() {
       if (this.availableCodeTypes && this.codeType) {
-        return this.availableCodeTypes[this.codeType].versions
+        return this.availableCodeTypes[this.codeType].versions;
       } else {
-        return []
+        return [];
       }
     },
     codeTypeOptions() {
       if (this.availableCodeTypes) {
-        return Object.getOwnPropertyNames(this.availableCodeTypes)
+        return Object.getOwnPropertyNames(this.availableCodeTypes);
       }
-      return []
+      return [];
     },
     isVisible: {
       get() {
-        return this.visible
+        return this.visible;
       },
       set(newValue) {
-        this.$emit('update:visible', newValue)
-      }
+        this.$emit("update:visible", newValue);
+      },
     },
     canSubmit() {
-      if (this.name === '') {
-        return false
+      if (this.name === "") {
+        return false;
       } else {
         if (this.availableCodeTypes) {
           if (this.codeType == null || this.codeVersion == null) {
-            return false
+            return false;
           }
         }
       }
-      return true
+      return true;
     },
     hasCodeType() {
-      return this.availableCodeTypes != null
-    }
+      return this.availableCodeTypes != null;
+    },
   },
 
   async mounted() {
     // TODO: heck whether this savely works with onMounted or whether this should be done with onDisplay
     if (this.availableCodeTypes) {
-      this.codeType = this.initialValues.codeType
-      this.codeVersion = this.initialValues.codeVersion
+      this.codeType = this.initialValues.codeType;
+      this.codeVersion = this.initialValues.codeVersion;
     }
-    this.name = this.initialValues.name
-    this.private = this.initialValues.private
-  }
-})
+    this.name = this.initialValues.name;
+    this.private = this.initialValues.private;
+  },
+});
 </script>

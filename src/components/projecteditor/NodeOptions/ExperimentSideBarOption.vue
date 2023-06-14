@@ -31,40 +31,45 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { ComponentInterface } from '../NodeInterfaces/ComponentInterface'
-import { useGraphStore, useElementStore, useEditorStore, useErrorStore } from '@/stores'
-import ObjectAndVersionSelectorWithProps from '@/components/utils/ObjectAndVersionSelectorWithProps.vue'
-import Checkbox from 'primevue/checkbox'
-import Button from 'primevue/button'
-import ExperimentNode from '../NodeTypes/ExperimentNode'
+import { defineComponent } from "vue";
+import { ComponentInterface } from "../NodeInterfaces/ComponentInterface";
+import {
+  useGraphStore,
+  useElementStore,
+  useEditorStore,
+  useErrorStore,
+} from "@/stores";
+import ObjectAndVersionSelectorWithProps from "@/components/utils/ObjectAndVersionSelectorWithProps.vue";
+import Checkbox from "primevue/checkbox";
+import Button from "primevue/button";
+import ExperimentNode from "../NodeTypes/ExperimentNode";
 export default defineComponent({
   components: { Button, Checkbox, ObjectAndVersionSelectorWithProps },
   props: {
     intf: {
       type: Object as () => ComponentInterface<ExperimentNode>,
-      required: true
-    }
+      required: true,
+    },
   },
   data() {
     return {
-      nodeID: '',
-      newOutput: '',
-      newPersistent: '',
-      objectType: 'experiment'
-    }
+      nodeID: "",
+      newOutput: "",
+      newPersistent: "",
+      objectType: "experiment",
+    };
   },
   setup() {
-    const editorStore = useEditorStore()
-    return { editorStore }
+    const editorStore = useEditorStore();
+    return { editorStore };
   },
   methods: {
     async setTask(selected) {
-      console.log('Setting Exeriment')
-      this.currentTask = selected
+      console.log("Setting Exeriment");
+      this.currentTask = selected;
     },
     async setTaskVersion(selected) {
-      this.currentVersion = selected
+      this.currentVersion = selected;
     },
     editExperiment() {
       this.editorStore.loadElement(
@@ -72,33 +77,41 @@ export default defineComponent({
         this.currentTask.name,
         this.currentTask.uuid,
         this.currentVersion.version
-      )
-    }
+      );
+    },
   },
   computed: {
     isInValid() {
-      return this.currentTask.uuid == null || this.currentVersion.version == null
+      return (
+        this.currentTask.uuid == null || this.currentVersion.version == null
+      );
     },
     currentNode(): ExperimentNode {
-      return this.intf.data
+      return this.intf.data;
     },
     currentTask: {
       get() {
-        return { uuid: this.intf.data.objectData.uuid, name: this.intf.data.objectData.name }
+        return {
+          uuid: this.intf.data.objectData.uuid,
+          name: this.intf.data.objectData.name,
+        };
       },
       async set(newValue) {
         if (newValue.uuid) {
-          this.currentNode.setElement(newValue.uuid, newValue.name)
+          this.currentNode.setElement(newValue.uuid, newValue.name);
           console.log({
             text: this.intf.data.objectData.name,
-            value: this.intf.data.objectData.uuid
-          })
+            value: this.intf.data.objectData.uuid,
+          });
         }
-      }
+      },
     },
     currentVersion: {
       get() {
-        return { tag: this.intf.data.objectData.tag, version: this.intf.data.objectData.version }
+        return {
+          tag: this.intf.data.objectData.tag,
+          version: this.intf.data.objectData.version,
+        };
       },
       /**
        *
@@ -106,28 +119,28 @@ export default defineComponent({
        */
       set(newValue: { tag: string; version: string }) {
         if (newValue) {
-          this.currentNode.setElementVersion(newValue.version, newValue.tag)
+          this.currentNode.setElementVersion(newValue.version, newValue.tag);
         }
-      }
+      },
     },
     isRandom: {
       get() {
-        return this.intf.data.random
+        return this.intf.data.random;
       },
       async set(newValue: boolean) {
-        this.intf.data.random = newValue
-      }
+        this.intf.data.random = newValue;
+      },
     },
     canRandom() {
-      return this.intf.data.canRandom
-    }
+      return this.intf.data.canRandom;
+    },
   },
   watch: {},
   async mounted() {
-    this.nodeID = this.intf.id
-    this.currentTask = this.intf.data.objectData
-  }
-})
+    this.nodeID = this.intf.id;
+    this.currentTask = this.intf.data.objectData;
+  },
+});
 </script>
 <style scoped>
 .baklava-input {

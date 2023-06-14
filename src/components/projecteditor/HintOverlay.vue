@@ -14,16 +14,16 @@
 </template>
 
 <script>
-import Button from 'primevue/button'
-import { defineComponent } from 'vue'
+import Button from "primevue/button";
+import { defineComponent } from "vue";
 
 export default defineComponent({
   data() {
     return {
-      showHints: true
-    }
-  }
-})
+      showHints: true,
+    };
+  },
+});
 </script>
 <style>
 .hint {

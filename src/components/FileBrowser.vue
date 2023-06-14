@@ -13,83 +13,91 @@
       />
       <FileAndDirectoryCreationItems
         @createDirectory="
-          (event) => createDirectory({ folder: '', file: fileStructure, folderName: event })
+          (event) =>
+            createDirectory({
+              folder: '',
+              file: fileStructure,
+              folderName: event,
+            })
         "
-        @createFile="(event) => createFile({ folder: '', file: fileStructure, addedFile: event })"
+        @createFile="
+          (event) =>
+            createFile({ folder: '', file: fileStructure, addedFile: event })
+        "
       />
     </ul>
   </div>
 </template>
 
 <script>
-import FileItem from './FileItem.vue'
-import Inputtext from 'primevue/inputtext'
-import FileAndDirectoryCreationItems from '@/components/utils/FileAndDirectoryCreationItems.vue'
+import FileItem from "./FileItem.vue";
+import Inputtext from "primevue/inputtext";
+import FileAndDirectoryCreationItems from "@/components/utils/FileAndDirectoryCreationItems.vue";
 
 export default {
   props: {
     fileStructure: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
   components: {
     FileItem,
-    FileAndDirectoryCreationItems
+    FileAndDirectoryCreationItems,
   },
   data() {
     return {
       isCreatingDirectory: false,
       files: [],
-      currentTree: []
-    }
+      currentTree: [],
+    };
   },
   mounted() {
     // Populate initial file structure
-    this.updateTree(this.fileStructure)
+    this.updateTree(this.fileStructure);
   },
   methods: {
     handleFileClick(element) {
-      const file = element.file
-      const folder = element.folder
-      console.log(element)
+      const file = element.file;
+      const folder = element.folder;
+      console.log(element);
       if (file.children) {
-        file.open = !file.open // Toggle directory open state
+        file.open = !file.open; // Toggle directory open state
       } else {
-        this.$emit('fileSelected', element.folder + element.file.label)
+        this.$emit("fileSelected", element.folder + element.file.label);
       }
     },
     handleDoubleClick(file) {
       if (file.isDirectory) {
-        file.open = true // Open the directory
+        file.open = true; // Open the directory
       } else {
         // Handle file double-click
-        console.log('File double-clicked:', file)
+        console.log("File double-clicked:", file);
       }
     },
     updateTree(newTree) {
-      this.files = newTree
-      this.currentTree = newTree
+      this.files = newTree;
+      this.currentTree = newTree;
     },
     createFile(source) {
-      this.$emit('createFile', {
+      this.$emit("createFile", {
         targetName: source.folder + source.addedFile.name,
-        file: source.addedFile
-      })
-      console.log(source)
+        file: source.addedFile,
+      });
+      console.log(source);
     },
     createDirectory(source) {
-      source.file.children.push({ label: source.folderName, children: [] })
-      console.log(source)
-    }
+      source.file.children.push({ label: source.folderName, children: [] });
+      console.log(source);
+    },
   },
   watch: {
     // update the structure if it changes.
     fileStructure(newValue) {
-      this.updateTree(newValue)
-    }
-  }
-}
+      this.updateTree(newValue);
+    },
+  },
+};
 </script>
 
 <style scoped>

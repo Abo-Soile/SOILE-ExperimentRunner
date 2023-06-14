@@ -3,18 +3,18 @@
 </template>
 
 <script>
-import Editor from '@/components/projecteditor/Editor.vue'
+import Editor from "@/components/projecteditor/Editor.vue";
 
 export default {
-  name: 'ResearcherView',
+  name: "ResearcherView",
   components: { Editor },
   data() {
     return {
       code: undefined,
       running: false,
-      currentTabs: []
-    }
+      currentTabs: [],
+    };
   },
-  mounted() {}
-}
+  mounted() {},
+};
 </script>

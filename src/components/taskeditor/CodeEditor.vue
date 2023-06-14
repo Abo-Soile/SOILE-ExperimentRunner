@@ -9,30 +9,30 @@
 </template>
 
 <script>
-import Textarea from 'primevue/textarea'
+import Textarea from "primevue/textarea";
 
 export default {
   components: {
-    Textarea
+    Textarea,
   },
   props: {
     inputText: {
       type: String,
-      required: true
-    }
+      required: true,
+    },
   },
   methods: {},
   computed: {
     text: {
       set(newValue) {
-        this.$emit('update:inputText', newValue)
+        this.$emit("update:inputText", newValue);
       },
       get(newValue) {
-        return this.inputText
-      }
-    }
-  }
-}
+        return this.inputText;
+      },
+    },
+  },
+};
 </script>
 
 <style scoped>

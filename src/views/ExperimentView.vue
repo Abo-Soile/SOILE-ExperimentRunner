@@ -8,7 +8,13 @@
       @handleSubmit="(event) => submitResults(event)"
       @handleError="(error) => handleError(error)"
       @handleUpload="
-        (event) => uploadFile(event.file, event.fileName, event.idCallBack, event.errorCallBack)
+        (event) =>
+          uploadFile(
+            event.file,
+            event.fileName,
+            event.idCallBack,
+            event.errorCallBack
+          )
       "
     >
     </SoileExpRunner>
@@ -20,7 +26,13 @@
       @handleSubmit="(event) => submitResults(event)"
       @handleError="(error) => handleError(error)"
       @handleUpload="
-        (event) => uploadFile(event.file, event.fileName, event.idCallBack, event.errorCallBack)
+        (event) =>
+          uploadFile(
+            event.file,
+            event.fileName,
+            event.idCallBack,
+            event.errorCallBack
+          )
       "
     >
     </PsychoJsRunner>
@@ -40,45 +52,45 @@
 </template>
 
 <script>
-import axios from 'axios'
-import SoileQuestionnaire from '../components/questionnaire/SoileQuestionnaire.vue'
-import SoileExpRunner from '../components/experimentlang/SoileExpRunner.vue'
-import PsychoJsRunner from '../components/psychopy/PsychoJsRunner.vue'
-import { mapState } from 'pinia'
-import { useErrorStore } from '@/stores'
-import { useUserStore } from '@/stores/users'
-import Button from 'primevue/button'
+import axios from "axios";
+import SoileQuestionnaire from "../components/questionnaire/SoileQuestionnaire.vue";
+import SoileExpRunner from "../components/experimentlang/SoileExpRunner.vue";
+import PsychoJsRunner from "../components/psychopy/PsychoJsRunner.vue";
+import { mapState } from "pinia";
+import { useErrorStore } from "@/stores";
+import { useUserStore } from "@/stores/users";
+import Button from "primevue/button";
 
 export default {
-  name: 'ExperimentView',
+  name: "ExperimentView",
   components: { SoileQuestionnaire, SoileExpRunner, PsychoJsRunner, Button },
   data() {
     return {
       code: undefined,
-      running: false
-    }
+      running: false,
+    };
   },
   methods: {
     /**
      * Set the task to active
      */
     setTaskActive() {
-      console.log('Activating task')
-      const userStore = useUserStore()
-      userStore.setTaskActive()
+      console.log("Activating task");
+      const userStore = useUserStore();
+      userStore.setTaskActive();
     },
     runTask() {
-      const userStore = useUserStore()
+      const userStore = useUserStore();
 
       axios
-        .get('/run/' + this.$route.params.id + '/' + this.$route.params.taskID)
+        .get("/run/" + this.$route.params.id + "/" + this.$route.params.taskID)
         .then((response) => {
-          this.code = response?.data
+          this.code = response?.data;
         })
         .catch((error) => {
-          userStore.setTaskNotRunning()
-          console.log(error)
-        })
+          userStore.setTaskNotRunning();
+          console.log(error);
+        });
     },
     /**
      * This function assumes, that results is an object with the following fields:
@@ -91,75 +103,82 @@ export default {
      * @param {*} results
      */
     async submitResults(results) {
-      console.log(results)
-      var TaskData = {}
-      const userStore = useUserStore()
-      TaskData.taskID = userStore.currentTaskSettings.id
-      TaskData.outputData = results.outputData ? results.outputData : []
+      console.log(results);
+      var TaskData = {};
+      const userStore = useUserStore();
+      TaskData.taskID = userStore.currentTaskSettings.id;
+      TaskData.outputData = results.outputData ? results.outputData : [];
       TaskData.resultData = results.resultData
         ? results.resultData
-        : { resultData: [], fileData: [] }
+        : { resultData: [], fileData: [] };
       // TODO: Potentially extract outputs from the jsonData of the results
       axios
-        .post('/study/' + this.$route.params.id + '/submit', TaskData)
+        .post("/study/" + this.$route.params.id + "/submit", TaskData)
         .then(async (response) => {
           if (response.status == 200) {
-            await userStore.updateTaskSettings(this.$route.params.id)
+            await userStore.updateTaskSettings(this.$route.params.id);
             // start the next task.
-            this.running = false
+            this.running = false;
             this.$router.push(
-              '/exp/' + this.$route.params.id + '/' + userStore.currentTaskSettings.id + '/'
-            )
+              "/exp/" +
+                this.$route.params.id +
+                "/" +
+                userStore.currentTaskSettings.id +
+                "/"
+            );
           } else {
-            console.log(response)
-            reportError(response.status, 'Unexpected issue while submitting the results')
+            console.log(response);
+            reportError(
+              response.status,
+              "Unexpected issue while submitting the results"
+            );
           }
         })
         .catch((error) => {
-          console.log(error)
+          console.log(error);
         })
         .finally(() => {
-          userStore.setTaskNotRunning()
-        })
+          userStore.setTaskNotRunning();
+        });
     },
     uploadData(file, fileName, idCallBack, errorCallback) {
-      var formData = new FormData()
-      formData.append(fileName, file)
+      var formData = new FormData();
+      formData.append(fileName, file);
       axios
-        .post('/study/' + this.$route.params.id + '/submit', formData, {
+        .post("/study/" + this.$route.params.id + "/submit", formData, {
           headers: {
-            'content-type': 'multipart/form-data'
-          }
+            "content-type": "multipart/form-data",
+          },
         })
         .then((response) => {
-          idCallBack(response.data.id)
+          idCallBack(response.data.id);
         })
         .catch((error) => {
-          console.log(error)
-          errorCallback(error)
-        })
+          console.log(error);
+          errorCallback(error);
+        });
     },
     handleError(error) {
-      const errorStore = useErrorStore()
-      errorStore.raiseError(undefined, error)
-    }
+      const errorStore = useErrorStore();
+      errorStore.raiseError(undefined, error);
+    },
   },
   async beforeMount() {
-    console.log('Before Mount')
-    this.runTask()
+    console.log("Before Mount");
+    this.runTask();
   },
   async beforeRouteUpdate(to, from, next) {
-    console.log('before route updated')
-    this.runTask()
-    next()
+    console.log("before route updated");
+    this.runTask();
+    next();
   },
   computed: {
-    ...mapState(useUserStore, ['currentTaskSettings', 'isRunningTask'])
+    ...mapState(useUserStore, ["currentTaskSettings", "isRunningTask"]),
   },
   mounted() {
-    console.log('ExpView Mounted')
-  }
-}
+    console.log("ExpView Mounted");
+  },
+};
 </script>
 <style scoped>
 /*

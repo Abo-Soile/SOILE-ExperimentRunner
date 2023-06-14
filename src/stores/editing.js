@@ -1,13 +1,13 @@
-import { defineStore } from 'pinia'
+import { defineStore } from "pinia";
 
-import axios from 'axios'
-import { useErrorStore } from './errors'
-import { useElementStore } from './elements'
-import { useBaklava } from '@baklavajs/renderer-vue'
-import { reactive } from 'vue'
+import axios from "axios";
+import { useErrorStore } from "./errors";
+import { useElementStore } from "./elements";
+import { useBaklava } from "@baklavajs/renderer-vue";
+import { reactive } from "vue";
 const defaultData = {
   task: {
-    code: '',
+    code: "",
     name: undefined,
     UUID: undefined,
     version: undefined,
@@ -15,8 +15,8 @@ const defaultData = {
     private: false,
     codeType: {
       language: undefined,
-      version: undefined
-    }
+      version: undefined,
+    },
   },
   experiment: {
     name: undefined,
@@ -24,7 +24,7 @@ const defaultData = {
     version: undefined,
     tag: undefined,
     private: false,
-    elements: []
+    elements: [],
   },
   project: {
     name: undefined,
@@ -35,42 +35,50 @@ const defaultData = {
     start: undefined,
     tasks: [],
     experiments: [],
-    filters: []
-  }
-}
+    filters: [],
+  },
+};
 
 export const useEditorStore = defineStore({
-  id: 'editing',
+  id: "editing",
   state: () => ({
     // initialize the state. We don't update from the local storage, because this could contain privilegded data
     experiments: { active: 0, elements: [] },
     projects: { active: 0, elements: [] },
     tasks: { active: 0, elements: [] },
-    activeElement: ''
+    activeElement: "",
   }),
   actions: {
     createElement(type) {
-      const store = this.getStoreForType(type)
-      const existentNames = store.elements.map((x) => x.name)
-      const name = this.uniqueID(type, existentNames)
+      const store = this.getStoreForType(type);
+      const existentNames = store.elements.map((x) => x.name);
+      const name = this.uniqueID(type, existentNames);
       this.createElementForType(
         type,
         name,
         reactive(JSON.parse(JSON.stringify(defaultData[type.toLowerCase()]))),
         true
-      )
-      store.active = store.elements.length - 1
-      this.activeElement = type
+      );
+      store.active = store.elements.length - 1;
+      this.activeElement = type;
     },
     createElementForType(type, name, data, newElement) {
-      console.log('Creating element for ' + type)
-      data.name = name
-      const store = this.getStoreForType(type)
-      if (type.toLowerCase() === 'experiment' || type.toLowerCase() === 'project') {
-        console.log('Initializing new editor for object')
+      console.log("Creating element for " + type);
+      data.name = name;
+      const store = this.getStoreForType(type);
+      if (
+        type.toLowerCase() === "experiment" ||
+        type.toLowerCase() === "project"
+      ) {
+        console.log("Initializing new editor for object");
         store.elements.push(
-          reactive({ name: name, newElement: newElement, data: data, editor: useBaklava() })
-        )
+          reactive({
+            name: name,
+            newElement: newElement,
+            data: data,
+            editor: useBaklava(),
+          })
+        );
       } else {
         // Tasks have an additional currentVersion because they can have a changed version
         // from the original saved task if e.g. files have been added but the task has not been stored.
@@ -79,80 +87,88 @@ export const useEditorStore = defineStore({
             name: name,
             newElement: newElement,
             data: data,
-            currentVersion: data?.version
+            currentVersion: data?.version,
           })
-        )
+        );
       }
     },
     async changeElementAtPosition(type, index, uuid, version) {
-      const data = await this.loadObject(type, uuid, version)
-      const store = this.getStoreForType(type)
-      store.elements[index].data = data
+      const data = await this.loadObject(type, uuid, version);
+      const store = this.getStoreForType(type);
+      store.elements[index].data = data;
     },
     // load an element and push
     async loadElement(type, elementName, elementID, elementVersion) {
-      console.log(type)
-      const store = this.getStoreForType(type)
-      console.log(store)
+      console.log(type);
+      const store = this.getStoreForType(type);
+      console.log(store);
       for (const [i, element] of store.elements.entries()) {
-        if (element.name === elementName && element.data?.version === elementVersion) {
-          store.active = i
-          this.activeElement = type
-          return
+        if (
+          element.name === elementName &&
+          element.data?.version === elementVersion
+        ) {
+          store.active = i;
+          this.activeElement = type;
+          return;
         }
       }
       // not present, so we need to actually load it.
-      const data = await this.loadObject(type, elementID, elementVersion)
-      this.createElementForType(type, elementName, data, false)
-      store.active = store.elements.length - 1
-      this.activeElement = type
+      const data = await this.loadObject(type, elementID, elementVersion);
+      this.createElementForType(type, elementName, data, false);
+      store.active = store.elements.length - 1;
+      this.activeElement = type;
     },
     getStoreForType(type) {
-      const currentType = type.toLowerCase()
+      const currentType = type.toLowerCase();
       switch (currentType) {
-        case 'task':
-          return this.tasks
-        case 'project':
-          return this.projects
-        case 'experiment':
-          return this.experiments
+        case "task":
+          return this.tasks;
+        case "project":
+          return this.projects;
+        case "experiment":
+          return this.experiments;
       }
     },
     uniqueID(prefix, existing) {
-      var i = 1
+      var i = 1;
       // ugly but we need unique names.
-      while ([...existing.values()].some((v) => v === prefix + ' ' + i)) {
-        i = i + 1
+      while ([...existing.values()].some((v) => v === prefix + " " + i)) {
+        i = i + 1;
       }
-      return prefix + ' ' + i
+      return prefix + " " + i;
     },
     async loadObject(type, id, version) {
-      const elementStore = useElementStore()
-      return await elementStore.getElement(id, version, type)
+      const elementStore = useElementStore();
+      return await elementStore.getElement(id, version, type);
     },
     processAxiosError(err) {
-      const errorStore = useErrorStore()
-      errorStore.processAxiosError(err)
+      const errorStore = useErrorStore();
+      errorStore.processAxiosError(err);
     },
     async saveObject(type, data, index) {
       if (!data.UUID) {
-        return this.createObject(type, data, index)
+        return this.createObject(type, data, index);
       }
-      const elementStore = useElementStore()
-      const newVersion = await elementStore.updateElement(data.UUID, data.version, data, type)
-      const store = this.getStoreForType(type)
-      data.version = newVersion
-      store.elements[index].data = reactive(data)
+      const elementStore = useElementStore();
+      const newVersion = await elementStore.updateElement(
+        data.UUID,
+        data.version,
+        data,
+        type
+      );
+      const store = this.getStoreForType(type);
+      data.version = newVersion;
+      store.elements[index].data = reactive(data);
     },
     async createObject(type, data, index) {
-      const elementStore = useElementStore()
-      const newObject = await elementStore.createElement(data.name, data, type)
-      const store = this.getStoreForType(type)
-      store.elements[index].data = reactive(newObject)
-      store.elements[index].newElement = false
+      const elementStore = useElementStore();
+      const newObject = await elementStore.createElement(data.name, data, type);
+      const store = this.getStoreForType(type);
+      store.elements[index].data = reactive(newObject);
+      store.elements[index].newElement = false;
     },
     updateCurrentTaskVersion(version, index) {
-      this.tasks.elements[index].currentVersion = version
-    }
-  }
-})
+      this.tasks.elements[index].currentVersion = version;
+    },
+  },
+});

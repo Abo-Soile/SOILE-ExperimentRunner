@@ -1,15 +1,15 @@
-import { defineStore } from 'pinia'
-import axios from 'axios'
-import { useErrorStore } from './errors'
+import { defineStore } from "pinia";
+import axios from "axios";
+import { useErrorStore } from "./errors";
 
 export const useElementStore = defineStore({
-  id: 'elements',
+  id: "elements",
   state: () => ({
     // initialize the state. We don't update from the local storage, because this could contain privilegded data
     availableTasks: [],
     availableExperiments: [],
     availableProjects: [],
-    elements: { task: {}, project: {}, experiment: {} }
+    elements: { task: {}, project: {}, experiment: {} },
   }),
   actions: {
     /**
@@ -17,15 +17,15 @@ export const useElementStore = defineStore({
      */
     async updateAvailableProjects() {
       try {
-        const response = await axios.post('/project/list')
-        console.log(response?.data)
+        const response = await axios.post("/project/list");
+        console.log(response?.data);
 
         // update pinia state
-        this.availableProjects = response?.data
-        console.log(this.availableProjects)
+        this.availableProjects = response?.data;
+        console.log(this.availableProjects);
       } catch (e) {
-        console.log('Error' + e)
-        this.processAxiosError(e)
+        console.log("Error" + e);
+        this.processAxiosError(e);
       }
     },
     /**
@@ -33,14 +33,14 @@ export const useElementStore = defineStore({
      */
     async updateAvailableExperiments() {
       try {
-        const response = await axios.post('/experiment/list')
-        console.log(response?.data)
+        const response = await axios.post("/experiment/list");
+        console.log(response?.data);
 
         // update pinia state
-        this.availableExperiments = response?.data
+        this.availableExperiments = response?.data;
       } catch (e) {
-        console.log('Error' + e)
-        this.processAxiosError(e)
+        console.log("Error" + e);
+        this.processAxiosError(e);
       }
     },
     /**
@@ -48,14 +48,14 @@ export const useElementStore = defineStore({
      */
     async updateAvailableTasks() {
       try {
-        const response = await axios.post('/task/list')
-        console.log(response?.data)
+        const response = await axios.post("/task/list");
+        console.log(response?.data);
 
         // update pinia state
-        this.availableTasks = response?.data
+        this.availableTasks = response?.data;
       } catch (e) {
-        console.log('Error' + e)
-        this.processAxiosError(e)
+        console.log("Error" + e);
+        this.processAxiosError(e);
       }
     },
     /**
@@ -64,11 +64,11 @@ export const useElementStore = defineStore({
      */
     async getTaskOptions(uuid) {
       try {
-        const response = await axios.post('/task/' + uuid + '/list')
-        return response?.data
+        const response = await axios.post("/task/" + uuid + "/list");
+        return response?.data;
       } catch (e) {
-        console.log('Error' + e)
-        this.processAxiosError(e)
+        console.log("Error" + e);
+        this.processAxiosError(e);
       }
     },
     /**
@@ -77,11 +77,11 @@ export const useElementStore = defineStore({
      */
     async getProjectOptions(uuid) {
       try {
-        const response = await axios.post('/project/' + uuid + '/list')
-        return response?.data
+        const response = await axios.post("/project/" + uuid + "/list");
+        return response?.data;
       } catch (e) {
-        console.log('Error' + e)
-        this.processAxiosError(e)
+        console.log("Error" + e);
+        this.processAxiosError(e);
       }
     },
     /**
@@ -90,11 +90,11 @@ export const useElementStore = defineStore({
      */
     async getExperimentOptions(uuid) {
       try {
-        const response = await axios.post('/experiment/' + uuid + '/list')
-        return response?.data
+        const response = await axios.post("/experiment/" + uuid + "/list");
+        return response?.data;
       } catch (e) {
-        console.log('Error' + e)
-        this.processAxiosError(e)
+        console.log("Error" + e);
+        this.processAxiosError(e);
       }
     },
     /**
@@ -103,12 +103,12 @@ export const useElementStore = defineStore({
      */
     async getListForType(type) {
       switch (type) {
-        case 'task':
-          return this.availableTasks
-        case 'project':
-          return this.availableProjects
-        case 'experiment':
-          return this.availableExperiments
+        case "task":
+          return this.availableTasks;
+        case "project":
+          return this.availableProjects;
+        case "experiment":
+          return this.availableExperiments;
       }
     },
     /**
@@ -118,12 +118,12 @@ export const useElementStore = defineStore({
      */
     async getOptionsForElement(uuid, type) {
       switch (type) {
-        case 'task':
-          return await this.getTaskOptions(uuid)
-        case 'project':
-          return await this.getProjectOptions(uuid)
-        case 'experiment':
-          return await this.getExperimentOptions(uuid)
+        case "task":
+          return await this.getTaskOptions(uuid);
+        case "project":
+          return await this.getProjectOptions(uuid);
+        case "experiment":
+          return await this.getExperimentOptions(uuid);
       }
     },
     /**
@@ -132,24 +132,24 @@ export const useElementStore = defineStore({
      * @param {string} type type of element ('task','experiment' or 'project' )
      */
     async getTagsForElement(uuid, type) {
-      var options
-      const usedType = type.toLowerCase()
+      var options;
+      const usedType = type.toLowerCase();
       switch (usedType) {
-        case 'task':
-          options = await this.getTaskOptions(uuid)
-          break
-        case 'project':
-          options = await this.getProjectOptions(uuid)
-          break
-        case 'experiment':
-          options = await this.getExperimentOptions(uuid)
-          break
+        case "task":
+          options = await this.getTaskOptions(uuid);
+          break;
+        case "project":
+          options = await this.getProjectOptions(uuid);
+          break;
+        case "experiment":
+          options = await this.getExperimentOptions(uuid);
+          break;
       }
       return options
         .filter((x) => x.tag)
         .map((x) => {
-          return { tag: x.tag, version: x.version }
-        })
+          return { tag: x.tag, version: x.version };
+        });
     },
     /**
      * Get an element, either load (if not yet loaded) or take from memory.
@@ -158,31 +158,31 @@ export const useElementStore = defineStore({
      * @param {*} type the type (element, task or project) of the object
      */
     async getElement(uuid, version, type) {
-      const usedType = type.toLowerCase()
+      const usedType = type.toLowerCase();
       try {
         const element = this.elements[usedType][uuid]
           ? this.elements[usedType][uuid][version]
-          : undefined
+          : undefined;
         if (element) {
-          return element
+          return element;
         } else {
           if (!this.elements[usedType][uuid]) {
-            this.elements[usedType][uuid] = {}
+            this.elements[usedType][uuid] = {};
           }
           const response = await axios.get(
-            '/' + type.toLowerCase() + '/' + uuid + '/' + version + '/get'
-          )
-          this.elements[usedType][uuid][version] = response.data
+            "/" + type.toLowerCase() + "/" + uuid + "/" + version + "/get"
+          );
+          this.elements[usedType][uuid][version] = response.data;
           if (!this.elements[usedType][uuid][version].tag) {
             const response = await axios.get(
-              '/' + type.toLowerCase() + '/' + uuid + '/' + version + '/gettag'
-            )
-            this.elements[usedType][uuid][version].tag = response.data.tag
+              "/" + type.toLowerCase() + "/" + uuid + "/" + version + "/gettag"
+            );
+            this.elements[usedType][uuid][version].tag = response.data.tag;
           }
-          return this.elements[usedType][uuid][version]
+          return this.elements[usedType][uuid][version];
         }
       } catch (err) {
-        this.processAxiosError(err)
+        this.processAxiosError(err);
       }
     },
     /**
@@ -196,17 +196,17 @@ export const useElementStore = defineStore({
     async updateElement(uuid, version, data, type) {
       try {
         const response = await axios.post(
-          '/' + type.toLowerCase() + '/' + uuid + '/' + version + '/post',
+          "/" + type.toLowerCase() + "/" + uuid + "/" + version + "/post",
           data
-        )
-        data.version = response.data.version
+        );
+        data.version = response.data.version;
         if (!this.elements[type.toLowerCase()][uuid]) {
-          this.elements[type.toLowerCase()][uuid] = {}
+          this.elements[type.toLowerCase()][uuid] = {};
         }
-        this.elements[type.toLowerCase()][uuid][data.version] = data
-        return response.data.version
+        this.elements[type.toLowerCase()][uuid][data.version] = data;
+        return response.data.version;
       } catch (err) {
-        this.processAxiosError(err)
+        this.processAxiosError(err);
       }
     },
     /**
@@ -219,16 +219,25 @@ export const useElementStore = defineStore({
      */
     async createElement(name, data, type) {
       try {
-        const response = await axios.post('/' + type.toLowerCase() + '/create', null, {
-          params: { name: name }
-        })
-        data.UUID = response.data.UUID
-        data.version = response.data.version
-        const newVersion = await this.updateElement(data.UUID, data.version, data, type)
-        data.version = newVersion
-        return data
+        const response = await axios.post(
+          "/" + type.toLowerCase() + "/create",
+          null,
+          {
+            params: { name: name },
+          }
+        );
+        data.UUID = response.data.UUID;
+        data.version = response.data.version;
+        const newVersion = await this.updateElement(
+          data.UUID,
+          data.version,
+          data,
+          type
+        );
+        data.version = newVersion;
+        return data;
       } catch (err) {
-        this.processAxiosError(err)
+        this.processAxiosError(err);
       }
     },
     /**
@@ -237,120 +246,128 @@ export const useElementStore = defineStore({
      * @param {*} version
      */
     async getPersistentDataForTask(uuid, version) {
-      const element = await this.getElement(uuid, version, 'task')
-      if (element.codeType.language === 'elang') {
-        const outputRegexp = /savevariable\( *"([^"]+)"/g
-        return [...element.code.matchAll(outputRegexp)].map((x) => x[1])
+      const element = await this.getElement(uuid, version, "task");
+      if (element.codeType.language === "elang") {
+        const outputRegexp = /savevariable\( *"([^"]+)"/g;
+        return [...element.code.matchAll(outputRegexp)].map((x) => x[1]);
       } else {
-        return []
+        return [];
       }
     },
     async getPersistentDataForExperiment(uuid, version) {
-      const experiment = await this.getElement(uuid, version, 'experiment')
-      return this.getPersistentDataForExperimentInstance(experiment)
+      const experiment = await this.getElement(uuid, version, "experiment");
+      return this.getPersistentDataForExperimentInstance(experiment);
     },
     async getPersistentDataForExperimentInstance(instance) {
-      const persistentElements = new Set()
+      const persistentElements = new Set();
       for (const element of instance.elements) {
-        if (element.type === 'task') {
+        if (element.type === "task") {
           const codeData = await this.getPersistentDataForTask(
             element.data.uuid,
             element.data.version
-          )
-          const instanceData = element.data.persistent
+          );
+          const instanceData = element.data.persistent;
           instanceData.array.forEach((value) => {
-            persistentElements.add(value)
-          })
+            persistentElements.add(value);
+          });
           codeData.array.forEach((value) => {
-            persistentElements.add(value)
-          })
+            persistentElements.add(value);
+          });
         }
-        if (element.type === 'experiment') {
-          this.getPersistentDataForExperimentInstance(element.data).forEach((value) => {
-            persistentElements.add(value)
-          })
+        if (element.type === "experiment") {
+          this.getPersistentDataForExperimentInstance(element.data).forEach(
+            (value) => {
+              persistentElements.add(value);
+            }
+          );
         }
       }
-      return Array.from(persistentElements)
+      return Array.from(persistentElements);
     },
     async getPersistentDataForElement(uuid, version, type) {
       switch (type) {
-        case 'task':
-          return await this.getPersistentDataForTask(uuid, version)
-        case 'experiment':
-          return await this.getPersistentDataForExperiment(uuid, version)
+        case "task":
+          return await this.getPersistentDataForTask(uuid, version);
+        case "experiment":
+          return await this.getPersistentDataForExperiment(uuid, version);
       }
     },
     async updateAvailableOptions(type) {
       switch (type) {
-        case 'task':
-          await this.updateAvailableTasks()
-        case 'project':
-          await this.updateAvailableProjects()
-        case 'experiment':
-          await this.updateAvailableExperiments()
+        case "task":
+          await this.updateAvailableTasks();
+        case "project":
+          await this.updateAvailableProjects();
+        case "experiment":
+          await this.updateAvailableExperiments();
       }
     },
     processAxiosError(err) {
-      const errorStore = useErrorStore()
-      errorStore.processAxiosError(err)
+      const errorStore = useErrorStore();
+      errorStore.processAxiosError(err);
     },
     async getTagForVersion(type, uuid, version) {
-      const currentElement = await this.getElement(uuid, version, type)
-      return currentElement.tag
+      const currentElement = await this.getElement(uuid, version, type);
+      return currentElement.tag;
     },
     async canExperimentBeRandomized(uuid, version) {
-      const currentElement = await this.getElement(uuid, version, 'experiment')
+      const currentElement = await this.getElement(uuid, version, "experiment");
       for (const current of currentElement.elements) {
         // cannot be randomized if there are filters in the Experiment.
-        if (current.type === 'filter') {
-          return false
+        if (current.type === "filter") {
+          return false;
         }
       }
-      return true
+      return true;
     },
     reset() {
-      this.availableTasks = []
-      this.availableExperiments = []
-      this.availableProjects = []
-      this.elements = { task: {}, project: {}, experiment: {} }
+      this.availableTasks = [];
+      this.availableExperiments = [];
+      this.availableProjects = [];
+      this.elements = { task: {}, project: {}, experiment: {} };
     },
     async getFilesForTask(uuid, version) {
       try {
-        const response = await axios.get('/task/' + uuid + '/' + version + '/filelist')
-        console.log(response?.data)
-        return response.data
+        const response = await axios.get(
+          "/task/" + uuid + "/" + version + "/filelist"
+        );
+        console.log(response?.data);
+        return response.data;
       } catch (e) {
-        console.log('Error' + e)
-        this.processAxiosError(e)
+        console.log("Error" + e);
+        this.processAxiosError(e);
       }
     },
     async addFileToTask(uuid, version, filename, file) {
       try {
-        const formData = new FormData()
-        formData.append('file', file)
+        const formData = new FormData();
+        formData.append("file", file);
         const response = await axios.post(
-          '/task/' + uuid + '/' + version + '/resource/' + filename,
+          "/task/" + uuid + "/" + version + "/resource/" + filename,
           formData
-        )
-        return response.data.version
+        );
+        return response.data.version;
       } catch (e) {
-        console.log('Error' + e)
-        this.processAxiosError(e)
-        return null
+        console.log("Error" + e);
+        this.processAxiosError(e);
+        return null;
       }
     },
     async getResourceFile(uuid, version, filename) {
       try {
-        const url = '/task/' + uuid + '/' + version + '/resource/' + filename
-        const response = await axios.get(url)
-        console.log(response)
-        return { url: url, data: response.data, type: response.headers['content-type'] }
+        const url = "/task/" + uuid + "/" + version + "/resource/" + filename;
+        const response = await axios.get(url);
+        console.log(response);
+        return {
+          url: url,
+          data: response.data,
+          type: response.headers["content-type"],
+        };
       } catch (e) {
-        console.log('Error' + e)
-        this.processAxiosError(e)
-        return null
+        console.log("Error" + e);
+        this.processAxiosError(e);
+        return null;
       }
-    }
-  }
-})
+    },
+  },
+});

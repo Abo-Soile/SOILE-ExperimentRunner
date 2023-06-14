@@ -1,118 +1,118 @@
 /* eslint-disable */
 //const jQuery = require('jquery')
 
-var SOILE2
+var SOILE2;
 
-if (!('contains' in Array.prototype)) {
+if (!("contains" in Array.prototype)) {
   Array.prototype.contains = function (arr, startIndex) {
-    return ''.indexOf.call(this, arr, startIndex) !== -1
-  }
+    return "".indexOf.call(this, arr, startIndex) !== -1;
+  };
 }
 
 if (SOILE2 !== undefined) {
-  throw new Error('SOILE2 already defined!')
+  throw new Error("SOILE2 already defined!");
 }
 
 SOILE2 = (function () {
   /*'use strict';*/
 
-  var soile2 = {}
-  var bin = {} // builtin
-  var rt = {} // runtime
-  var defs = {} // definitions (gvars; vals; functions)
-  var util = {} // miscellaneous utility functions
+  var soile2 = {};
+  var bin = {}; // builtin
+  var rt = {}; // runtime
+  var defs = {}; // definitions (gvars; vals; functions)
+  var util = {}; // miscellaneous utility functions
 
-  var endFunc = null // function run when the program ends.
-  var logFunc = null // function used for logging
+  var endFunc = null; // function run when the program ends.
+  var logFunc = null; // function used for logging
 
-  var startFunc = null // run this when images are loaded
-  var loadScreen = false // not showing the loadscreen per default;
-  var toLoad = 0
+  var startFunc = null; // run this when images are loaded
+  var loadScreen = false; // not showing the loadscreen per default;
+  var toLoad = 0;
 
-  var allReady = false
+  var allReady = false;
 
-  var testDuration = 0
-  var startTime = 0
+  var testDuration = 0;
+  var startTime = 0;
 
-  var assignDebugCallback = null
+  var assignDebugCallback = null;
 
-  var intervalFunctions = []
+  var intervalFunctions = [];
 
-  soile2.defs = defs
-  soile2.rt = rt
-  soile2.bin = bin
-  soile2.util = util
+  soile2.defs = defs;
+  soile2.rt = rt;
+  soile2.bin = bin;
+  soile2.util = util;
 
-  soile2.util.debug = false
-  soile2.util.pilotMode = false
+  soile2.util.debug = false;
+  soile2.util.pilotMode = false;
 
   bin.calljs = function (func, lib) {
-    var args = Array.prototype.slice.call(arguments, 2)
-    var callObj = null
+    var args = Array.prototype.slice.call(arguments, 2);
+    var callObj = null;
 
-    if (lib == 'bin') {
-      callObj = bin
+    if (lib == "bin") {
+      callObj = bin;
     } else {
-      console.log('Function not supported')
+      console.log("Function not supported");
     }
 
     try {
       if (callObj) {
-        return callObj[func].apply({}, args)
+        return callObj[func].apply({}, args);
       } else {
-        return false
+        return false;
       }
     } catch (error) {
-      return false
+      return false;
     }
-  }
+  };
 
   bin.onmouseclick = function (id, conf) {
     //The args call basically converts a functions arguments object to
     //a real array so that we can expect it to behave like an array.
-    var args = Array.prototype.slice.call(arguments)
-    var _resettimer, _inputid, _id, action
+    var args = Array.prototype.slice.call(arguments);
+    var _resettimer, _inputid, _id, action;
 
     if (_.isString(id)) {
-      _id = soile2.util.getid(id)
+      _id = soile2.util.getid(id);
       if (_.isObject(conf)) {
         if (_.isNumber(conf.inputid)) {
-          _inputid = conf.inputid.toString(10)
+          _inputid = conf.inputid.toString(10);
         } else {
-          _inputid = id
+          _inputid = id;
         }
         //_inputid = (_.isString(conf['inputid'])) ? conf['inputid'] : id;
-        _resettimer = _.isBoolean(conf.resettimer) ? conf.resettimer : false
+        _resettimer = _.isBoolean(conf.resettimer) ? conf.resettimer : false;
         if (_.isFunction(conf.action)) {
-          action = conf.action
-          jQuery(_id).addClass('mouselistener')
+          action = conf.action;
+          jQuery(_id).addClass("mouselistener");
 
           if (conf.mousedown) {
             jQuery(_id).mousedown(function (e) {
               if (_resettimer) {
                 // TODO Reset timer here.
               }
-              console.log('mouse down. ' + _inputid)
-              action.call({}, _inputid)
-            })
+              console.log("mouse down. " + _inputid);
+              action.call({}, _inputid);
+            });
           } else {
             jQuery(_id).click(function (e) {
               if (_resettimer) {
                 // TODO Reset timer here.
               }
-              console.log('mouse clicked. ' + _inputid)
-              action.call({}, _inputid)
-            })
+              console.log("mouse clicked. " + _inputid);
+              action.call({}, _inputid);
+            });
           }
         }
       } else if (soile2.rt.truthvalue(conf) === false) {
-        jQuery(_id).unbind('click')
-        jQuery(_id).unbind('mousedown')
-        jQuery(_id).unbind('mouseup')
-        jQuery(_id).removeClass('mouselistener')
+        jQuery(_id).unbind("click");
+        jQuery(_id).unbind("mousedown");
+        jQuery(_id).unbind("mouseup");
+        jQuery(_id).removeClass("mouselistener");
       }
     }
-  }
+  };
 
   // bin.onkeyclick = function(key, conf) {
   //   var args = Array.prototype.slice.call(arguments);
@@ -124,60 +124,60 @@ SOILE2 = (function () {
   // }
 
   bin.onkeypress = function (key, func) {
-    var keycode = soile2.rt.kbd.keycode(key)
+    var keycode = soile2.rt.kbd.keycode(key);
     if (func) {
-      rt.keyhandler.add(keycode, func)
+      rt.keyhandler.add(keycode, func);
     } else {
-      rt.keyhandler.remove(keycode)
+      rt.keyhandler.remove(keycode);
     }
-  }
+  };
 
   bin.onkeyup = function (key, func) {
-    var keycode = soile2.rt.kbd.keycode(key)
+    var keycode = soile2.rt.kbd.keycode(key);
     if (func) {
-      rt.keyhandler.addkeyup(keycode, func)
+      rt.keyhandler.addkeyup(keycode, func);
     } else {
-      rt.keyhandler.removekeyup(keycode)
+      rt.keyhandler.removekeyup(keycode);
     }
-  }
+  };
 
   bin.onanykey = function (func, ignore) {
     if (func) {
       if (ignore) {
-        rt.keyhandler.addAny(func, ignore)
+        rt.keyhandler.addAny(func, ignore);
       } else {
-        rt.keyhandler.addAny(func)
+        rt.keyhandler.addAny(func);
       }
     } else {
-      rt.keyhandler.removeAny()
+      rt.keyhandler.removeAny();
     }
-  }
+  };
 
   bin.getlastkey = function (active) {
-    if (typeof active === 'undefined') {
-      return rt.keyhandler.lastActiveKey()
+    if (typeof active === "undefined") {
+      return rt.keyhandler.lastActiveKey();
     } else {
-      return rt.keyhandler.lastKey()
+      return rt.keyhandler.lastKey();
     }
-  }
+  };
 
   bin.resumeonkey = function (key) {
     if (key) {
-      console.log('Adding keyfunction ' + key)
-      rt.keyhandler.resume(key)
+      console.log("Adding keyfunction " + key);
+      rt.keyhandler.resume(key);
     } else {
-      console.log('No key specified')
-      rt.keyhandler.resume()
+      console.log("No key specified");
+      rt.keyhandler.resume();
     }
-  }
+  };
 
   /*
    * Copy data -- numbers, strings, arrays or objects but NO
    * functions.
    */
   bin.copydata = function (data) {
-    return soile2.util.copyobject(data)
-  }
+    return soile2.util.copyobject(data);
+  };
 
   /*
    * Stimuli are basically implemented as id strings (DOM id's),
@@ -185,47 +185,47 @@ SOILE2 = (function () {
    * identified by the ID string.
    */
   bin.copystimulus = function (stim) {
-    var id
-    var newId, newStim
+    var id;
+    var newId, newStim;
 
     if (soile2.util.is_string(stim)) {
-      id = soile2.util.getid(stim)
+      id = soile2.util.getid(stim);
     }
 
     if (soile2.util.is_string(id)) {
       // http://api.jquery.com/clone/
       // http://stackoverflow.com/questions/1226029/jquery-clone-id
-      newId = soile2.rt.uniqueid('id')
-      newStim = jQuery(id).clone().attr('id', newId)
-      newStim.appendTo(soile2.util.getid('display'))
-      return newId
+      newId = soile2.rt.uniqueid("id");
+      newStim = jQuery(id).clone().attr("id", newId);
+      newStim.appendTo(soile2.util.getid("display"));
+      return newId;
     }
-    return null
-  }
+    return null;
+  };
 
   /*
   The message is a static object that is displayed starting from the top left
   corner that is used to easily display text, for example instructions.
   */
   bin.emptymsg = function () {
-    var id = soile2.util.getid('message')
-    jQuery(id).text('')
-  }
+    var id = soile2.util.getid("message");
+    jQuery(id).text("");
+  };
 
   bin.hidemsg = function () {
-    var id = soile2.util.getid('message')
-    jQuery(id).css('display', 'none')
-    jQuery(id).text('')
-  }
+    var id = soile2.util.getid("message");
+    jQuery(id).css("display", "none");
+    jQuery(id).text("");
+  };
 
   bin.showmsg = function (msg) {
-    var id = soile2.util.getid('message')
-    jQuery(id).css('display', 'block')
-    jQuery(id).css('left', '50px')
-    jQuery(id).css('top', '50px')
-    jQuery(id).removeClass('invisibleElement')
-    jQuery(id).html(msg)
-  }
+    var id = soile2.util.getid("message");
+    jQuery(id).css("display", "block");
+    jQuery(id).css("left", "50px");
+    jQuery(id).css("top", "50px");
+    jQuery(id).removeClass("invisibleElement");
+    jQuery(id).html(msg);
+  };
   /*
   bin.helptext = function(msg){
     if (typeof message == 'object') {
@@ -243,139 +243,141 @@ SOILE2 = (function () {
   };*/
 
   bin.helptext = function () {
-    var args = _.toArray(arguments)
-    var msg = rt.mergeToString(args)
+    var args = _.toArray(arguments);
+    var msg = rt.mergeToString(args);
     if (msg.length > 0) {
       if (logFunc) {
-        logFunc(msg)
+        logFunc(msg);
       } else {
-        console.log(msg)
+        console.log(msg);
       }
     }
-  }
+  };
 
   bin.msgbox = function (msg, _size, maxwidth) {
-    var id = soile2.rt.uniqueid()
-    var size
+    var id = soile2.rt.uniqueid();
+    var size;
 
     if (!_size && !_.isNumber(_size)) {
-      size = 20
+      size = 20;
     } else {
-      size = _size
+      size = _size;
     }
 
     var props = {
       id: id,
-      class: 'hiddenelem',
-      style: 'font-size:' + size + 'px;'
+      class: "hiddenelem",
+      style: "font-size:" + size + "px;",
       /*"text": msg*/
       //"src": url
+    };
+
+    if (typeof maxwidth === "number") {
+      props.style += "max-width:" + maxwidth + "px;";
     }
 
-    if (typeof maxwidth === 'number') {
-      props.style += 'max-width:' + maxwidth + 'px;'
-    }
-
-    var box = jQuery('<p/>', props)
-    box.append(msg)
-    box.appendTo(soile2.util.getid('display'))
-    soile2.rt.dyn.add(id)
-    return id
-  }
+    var box = jQuery("<p/>", props);
+    box.append(msg);
+    box.appendTo(soile2.util.getid("display"));
+    soile2.rt.dyn.add(id);
+    return id;
+  };
 
   bin.rectangle = function (width, height, _borderWidth, _colour) {
-    var id = soile2.rt.uniqueid()
-    var borderWidth
+    var id = soile2.rt.uniqueid();
+    var borderWidth;
 
     if (!_borderWidth) {
-      borderWidth = 2
-      if (typeof _borderWidth != 'undefined' && _borderWidth == 0) {
-        borderWidth = 0
+      borderWidth = 2;
+      if (typeof _borderWidth != "undefined" && _borderWidth == 0) {
+        borderWidth = 0;
       }
     } else {
-      borderWidth = _borderWidth
+      borderWidth = _borderWidth;
     }
 
-    var styleSize = 'width:' + width + 'px; ' + 'height:' + height + 'px;'
-    var styleBorder = 'border:' + borderWidth + 'px solid black;'
-    var colourStyle = ''
+    var styleSize = "width:" + width + "px; " + "height:" + height + "px;";
+    var styleBorder = "border:" + borderWidth + "px solid black;";
+    var colourStyle = "";
 
     if (_colour !== undefined) {
-      colourStyle = 'background-color:' + _colour + ';'
+      colourStyle = "background-color:" + _colour + ";";
     }
 
     var props = {
       id: id,
-      class: 'hiddenelem',
-      style: styleSize + ' ' + styleBorder + ' ' + colourStyle
+      class: "hiddenelem",
+      style: styleSize + " " + styleBorder + " " + colourStyle,
       //"src": url
-    }
+    };
 
-    jQuery('<div/>', props).appendTo(soile2.util.getid('display'))
-    soile2.rt.dyn.add(id)
-    return id
-  }
+    jQuery("<div/>", props).appendTo(soile2.util.getid("display"));
+    soile2.rt.dyn.add(id);
+    return id;
+  };
 
   bin.button = function (text, style) {
-    var id = soile2.rt.uniqueid()
+    var id = soile2.rt.uniqueid();
 
     var props = {
       id: id,
-      class: 'hiddenelem btn btn-primary',
-      text: text
-    }
+      class: "hiddenelem btn btn-primary",
+      text: text,
+    };
 
-    jQuery('<button/>', props).appendTo(soile2.util.getid('display'))
-    soile2.rt.dyn.add(id)
-    return id
-  }
+    jQuery("<button/>", props).appendTo(soile2.util.getid("display"));
+    soile2.rt.dyn.add(id);
+    return id;
+  };
 
   bin.textbox = function (width) {
-    var id = soile2.rt.uniqueid()
+    var id = soile2.rt.uniqueid();
 
     var props = {
       id: id,
-      class: 'hiddenelem',
-      type: 'text'
+      class: "hiddenelem",
+      type: "text",
+    };
+
+    if (typeof width !== "undefined") {
+      props.style = "width:" + width + "px;";
     }
 
-    if (typeof width !== 'undefined') {
-      props.style = 'width:' + width + 'px;'
-    }
-
-    jQuery('<input/>', props).appendTo(soile2.util.getid('display'))
-    soile2.rt.dyn.add(id)
-    return id
-  }
+    jQuery("<input/>", props).appendTo(soile2.util.getid("display"));
+    soile2.rt.dyn.add(id);
+    return id;
+  };
 
   /*
     Text area that is a certain number of symbols wide/highe
   */
   bin.textarea = function (width, height) {
-    var id = soile2.rt.uniqueid()
+    var id = soile2.rt.uniqueid();
 
     var props = {
       id: id,
-      class: 'hiddenelem',
-      type: 'text'
-    }
+      class: "hiddenelem",
+      type: "text",
+    };
 
-    if (typeof height !== 'undefined') {
+    if (typeof height !== "undefined") {
       //area.height(height);
       //props.rows = height;
-      props.height = height
+      props.height = height;
     }
 
-    if (typeof width !== 'undefined') {
+    if (typeof width !== "undefined") {
       //props.cols = width;
-      props.width = width
+      props.width = width;
     }
 
-    var area = jQuery('<textarea/>', props).appendTo(soile2.util.getid('display'))
+    var area = jQuery("<textarea/>", props).appendTo(
+      soile2.util.getid("display")
+    );
 
-    soile2.rt.dyn.add(id)
-    return id
-  }
+    soile2.rt.dyn.add(id);
+    return id;
+  };
 
   /*
   bin.focus
@@ -383,172 +385,172 @@ SOILE2 = (function () {
   Gives focus to a text box or text area.
   */
   bin.focus = function (id) {
-    var elem = soile2.util.getid(id)
-    jQuery(elem).focus()
+    var elem = soile2.util.getid(id);
+    jQuery(elem).focus();
 
-    console.log('focusing ' + elem)
-    console.log(jQuery(elem))
-  }
+    console.log("focusing " + elem);
+    console.log(jQuery(elem));
+  };
 
   bin.readtext = function (id, clear) {
-    var box = jQuery(soile2.util.getid(id))
-    var value = box.val()
+    var box = jQuery(soile2.util.getid(id));
+    var value = box.val();
 
     if (clear) {
-      box.val('')
+      box.val("");
     }
 
-    return value
-  }
+    return value;
+  };
 
   bin.settext = function (id, text) {
-    var tbox = jQuery(soile2.util.getid(id))
+    var tbox = jQuery(soile2.util.getid(id));
 
-    if (tbox.is('p')) {
-      tbox.text(text)
+    if (tbox.is("p")) {
+      tbox.text(text);
     } else {
-      tbox.val(text)
+      tbox.val(text);
     }
-  }
+  };
 
   //Width in pixels, timer in ms
   bin.countdownbar = function (width, time) {
-    var id = soile2.rt.uniqueid()
+    var id = soile2.rt.uniqueid();
     var bar = [
       '<div class="progress pauseAnimation hiddenelem">',
       ' <div class="progress-bar animatedChild" style="animation:countdown ' +
         time +
         'ms linear" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%;">',
       '   <span class="sr-only">Complete</span>',
-      ' </div>',
-      '</div>'
-    ].join('\n')
+      " </div>",
+      "</div>",
+    ].join("\n");
 
-    var jBar = jQuery(bar)
-    jBar.css('width', width + 'px')
-    jBar.attr('id', id)
+    var jBar = jQuery(bar);
+    jBar.css("width", width + "px");
+    jBar.attr("id", id);
 
-    jBar.appendTo(soile2.util.getid('display'))
+    jBar.appendTo(soile2.util.getid("display"));
 
-    soile2.rt.dyn.add(id)
-    return id
-  }
+    soile2.rt.dyn.add(id);
+    return id;
+  };
 
   bin.not = function (arg) {
-    var args = Array.prototype.slice.call(arguments)
+    var args = Array.prototype.slice.call(arguments);
     if (args.length === 0) {
-      return undefined
+      return undefined;
     }
-    return !soile2.rt.truthvalue(args[0])
-  }
+    return !soile2.rt.truthvalue(args[0]);
+  };
 
   bin.and = function () {
-    var args = Array.prototype.slice.call(arguments)
+    var args = Array.prototype.slice.call(arguments);
     if (args.length === 0) {
-      return undefined
+      return undefined;
     }
     return _.reduce(
       _.map(args, soile2.rt.truthvalue),
       function (cumul, elem) {
-        return cumul && elem
+        return cumul && elem;
       },
       true
-    )
-  }
+    );
+  };
 
   bin.or = function () {
-    var args = Array.prototype.slice.call(arguments)
+    var args = Array.prototype.slice.call(arguments);
     if (args.length === 0) {
-      return undefined
+      return undefined;
     }
-    return _.some(_.map(args, soile2.rt.truthvalue))
-  }
+    return _.some(_.map(args, soile2.rt.truthvalue));
+  };
 
   bin.divide = function (mX, mY) {
-    var x = Number(mX)
-    var y = Number(mY)
+    var x = Number(mX);
+    var y = Number(mY);
 
     //if (_.isNumber(x) && _.isNumber(y)){
     if (util.can_be_number(x) && util.can_be_number(y)) {
       if (y === 0) {
-        return Number.NaN
+        return Number.NaN;
       }
-      return x / y
+      return x / y;
     }
-    return undefined
-  }
+    return undefined;
+  };
 
   bin.eq = function (x, y) {
     if (_.isArray(x) && _.isArray(y)) {
-      var equalArr = _.isEqual(x.map(String), y.map(String))
+      var equalArr = _.isEqual(x.map(String), y.map(String));
       if (equalArr) {
-        return true
+        return true;
       }
     }
 
     if (_.isArray(x)) {
-      if (x.join('') == y) {
-        return true
+      if (x.join("") == y) {
+        return true;
       }
     }
 
     if (_.isArray(y)) {
-      if (y.join('') == x) {
-        return true
+      if (y.join("") == x) {
+        return true;
       }
     }
 
     if (_.isObject(x) || _.isObject(y)) {
-      return _.isEqual(x, y)
+      return _.isEqual(x, y);
     } else {
-      return x == y
+      return x == y;
     }
-  }
+  };
 
-  bin.equals = bin.eq
+  bin.equals = bin.eq;
 
   bin.fuzzyequal = function (obj1, obj2, ignorecases) {
-    if (typeof obj1 !== 'undefined' && typeof obj2 !== 'undefined') {
-      var str1 = obj1.toString()
-      var str2 = obj2.toString()
+    if (typeof obj1 !== "undefined" && typeof obj2 !== "undefined") {
+      var str1 = obj1.toString();
+      var str2 = obj2.toString();
 
-      if (ignorecases || typeof ignorecases === 'undefined') {
-        str1 = obj1.toString().toLowerCase()
-        str2 = obj2.toString().toLowerCase()
+      if (ignorecases || typeof ignorecases === "undefined") {
+        str1 = obj1.toString().toLowerCase();
+        str2 = obj2.toString().toLowerCase();
       }
 
-      return levenshtein.get(str1, str2)
+      return levenshtein.get(str1, str2);
     }
 
-    return -1
-  }
+    return -1;
+  };
 
   bin.gt = function (x, y) {
     if (_.isNumber(x) && _.isNumber(y)) {
-      return x > y
+      return x > y;
     } else {
-      return x > y
+      return x > y;
     }
-    return false
-  }
+    return false;
+  };
 
   bin.gte = function (x, y) {
     if (_.isNumber(x) && _.isNumber(y)) {
-      return x >= y
+      return x >= y;
     } else {
-      return x >= y
+      return x >= y;
     }
-    return false
-  }
+    return false;
+  };
 
-  bin.greaterthan = bin.gt
+  bin.greaterthan = bin.gt;
 
   bin.hide = function (id) {
     for (var i = 0; i < arguments.length; i++) {
-      var id = soile2.util.getid(arguments[i])
-      var elem = jQuery(id)
+      var id = soile2.util.getid(arguments[i]);
+      var elem = jQuery(id);
       //jQuery(id).addClass("hiddenelem");
-      elem.addClass('invisibleElement')
+      elem.addClass("invisibleElement");
     }
 
     /*id = soile2.util.getid(id);
@@ -562,71 +564,71 @@ SOILE2 = (function () {
     //jQuery(id).addClass("invisibleElement");
     //jQuery(id).css("animation", "none");
     //jQuery(id).children("*").css("animation", "none");
-  }
+  };
 
   /*
   Hides everything
   */
   bin.hideall = function () {
-    jQuery('#display').children().addClass('invisibleElement')
-  }
+    jQuery("#display").children().addClass("invisibleElement");
+  };
 
   bin.show = function (mId) {
-    var args = Array.prototype.slice.call(arguments)
-    var id, pos
+    var args = Array.prototype.slice.call(arguments);
+    var id, pos;
 
     if (args.length === 2 || args.length === 3) {
-      id = soile2.util.getid(args[0])
-      pos = args[1]
+      id = soile2.util.getid(args[0]);
+      pos = args[1];
     } else if (args.length === 1) {
-      id = soile2.util.getid(args[0])
+      id = soile2.util.getid(args[0]);
     }
 
     if (args.length === 3 && args[2] && window.requestAnimationFrame) {
-      rt.dowait = true
-      rt.waitfor = 0
+      rt.dowait = true;
+      rt.waitfor = 0;
 
-      var reqID = ''
+      var reqID = "";
       //console.log(performance.now())
       reqID = window.requestAnimationFrame(function (time) {
-        bin.show(id, args[1])
+        bin.show(id, args[1]);
         //console.log(time + " animationframe ")
         window.requestAnimationFrame(function (inn) {
-          bin.resume()
+          bin.resume();
           //window.cancelAnimationFrame(reqID);
-        })
-      })
-      return
+        });
+      });
+      return;
     }
 
-    if (typeof id !== 'undefined') {
+    if (typeof id !== "undefined") {
       if (jQuery(id).length > 0) {
-        jQuery(id).removeClass('hiddenelem')
-        jQuery(id).removeClass('invisibleElement')
-        if (typeof pos !== 'undefined') {
-          soile2.bin.position(id, pos)
-          return
+        jQuery(id).removeClass("hiddenelem");
+        jQuery(id).removeClass("invisibleElement");
+        if (typeof pos !== "undefined") {
+          soile2.bin.position(id, pos);
+          return;
         }
       }
     }
-  }
+  };
 
   bin.animate = function (mId) {
-    var id = soile2.util.getid(mId)
-    if (typeof id !== 'undefined') {
+    var id = soile2.util.getid(mId);
+    if (typeof id !== "undefined") {
       if (jQuery(id).length > 0) {
-        var elem = jQuery(id)
+        var elem = jQuery(id);
 
-        var newone = elem.clone(true)
-        elem.before(newone)
+        var newone = elem.clone(true);
+        elem.before(newone);
 
-        elem.remove()
+        elem.remove();
 
-        newone.removeClass('noAnimation')
-        newone.children('*').removeClass('noAnimation')
+        newone.removeClass("noAnimation");
+        newone.children("*").removeClass("noAnimation");
 
-        newone.removeClass('pauseAnimation')
-        newone.children().removeClass('pauseAnimation')
+        newone.removeClass("pauseAnimation");
+        newone.children().removeClass("pauseAnimation");
 
         //Removing and reapplying animation to make it repeatable
         /*elem.addClass("noAnimation");
@@ -644,247 +646,254 @@ SOILE2 = (function () {
         }, 20);*/
       }
     }
-  }
+  };
 
   bin.setstyle = function (id, styles) {
-    var id = soile2.util.getid(id)
-    jQuery(id).css(styles)
-  }
+    var id = soile2.util.getid(id);
+    jQuery(id).css(styles);
+  };
 
   bin.imagefile = function (url) {
-    var id = soile2.rt.uniqueid()
+    var id = soile2.rt.uniqueid();
     var props = {
       id: id,
-      class: 'hiddenelem',
-      src: url
-    }
-    var img = jQuery('<img />', props).appendTo(soile2.util.getid('display'))
-    soile2.rt.dyn.add(id)
+      class: "hiddenelem",
+      src: url,
+    };
+    var img = jQuery("<img />", props).appendTo(soile2.util.getid("display"));
+    soile2.rt.dyn.add(id);
     if (loadScreen) {
       //console.log(performance.now() + " LOADING IMAGE");
-      toLoad += 1
-      img.on('load', soile2.util.onImageLoad)
+      toLoad += 1;
+      img.on("load", soile2.util.onImageLoad);
     }
 
     //if (soile2.util.debug) {
-    console.log('ImageLoaderror')
-    img.on('error', function (e) {
-      console.log('Could not load image')
-      soile2.util.debugFunction({ message: 'Failed to load image ' + url })
-    })
+    console.log("ImageLoaderror");
+    img.on("error", function (e) {
+      console.log("Could not load image");
+      soile2.util.debugFunction({ message: "Failed to load image " + url });
+    });
     //}
 
-    return id
-  }
+    return id;
+  };
 
   bin.jsonfile = function (url, name) {
-    console.log('Waiting for data')
+    console.log("Waiting for data");
 
     // Wait for a while to ensure that we have data
-    rt.dowait = true
-    rt.waitfor = 1000
+    rt.dowait = true;
+    rt.waitfor = 1000;
 
-    var json = jQuery.getJSON(url, '', function (data) {
-      soile2.defs.json[name] = data
-      rt.schd.resume()
-    })
-  }
+    var json = jQuery.getJSON(url, "", function (data) {
+      soile2.defs.json[name] = data;
+      rt.schd.resume();
+    });
+  };
 
   bin.getdata = function (name) {
-    return soile2.defs.json[name]
-  }
+    return soile2.defs.json[name];
+  };
 
   bin.draggable = function (mId, isdraggable, data) {
-    var id = soile2.util.getid(mId)
-    var elem = jQuery(id)
+    var id = soile2.util.getid(mId);
+    var elem = jQuery(id);
 
     if (
       isdraggable == true ||
-      (typeof data === 'undefined' && typeof isdraggable !== 'undefined' && isdraggable !== false)
+      (typeof data === "undefined" &&
+        typeof isdraggable !== "undefined" &&
+        isdraggable !== false)
     ) {
-      elem.attr('draggable', true)
-      elem.addClass('mouselistener')
+      elem.attr("draggable", true);
+      elem.addClass("mouselistener");
 
-      elem.on('dragstart', function (ev) {
-        var userAgent = window.navigator.userAgent
-        var msie = userAgent.indexOf('MSIE ') //Detect IE
-        var trident = userAgent.indexOf('Trident/')
-        var edge = userAgent.indexOf('Edge/')
+      elem.on("dragstart", function (ev) {
+        var userAgent = window.navigator.userAgent;
+        var msie = userAgent.indexOf("MSIE "); //Detect IE
+        var trident = userAgent.indexOf("Trident/");
+        var edge = userAgent.indexOf("Edge/");
 
         if (msie > 0 || trident > 0 || edge > 0) {
-          ev.originalEvent.dataTransfer.setData('Text', data.toString())
+          ev.originalEvent.dataTransfer.setData("Text", data.toString());
         } else {
-          ev.originalEvent.dataTransfer.setData('text/plain', data)
+          ev.originalEvent.dataTransfer.setData("text/plain", data);
         }
-      })
+      });
     }
 
     //Remove drag handlers
-    if ((typeof isdraggable == 'undefined' && typeof data == 'undefined') || !isdraggable) {
-      elem.off('dragestart')
-      elem.attre('draggable', false)
+    if (
+      (typeof isdraggable == "undefined" && typeof data == "undefined") ||
+      !isdraggable
+    ) {
+      elem.off("dragestart");
+      elem.attre("draggable", false);
 
-      elem.removeClass('mouselistener')
+      elem.removeClass("mouselistener");
     }
-  }
+  };
 
   bin.dropzone = function (mId, ondrop, mDropdata) {
-    var elem = jQuery(soile2.util.getid(mId))
-    var dropdata = mDropdata
+    var elem = jQuery(soile2.util.getid(mId));
+    var dropdata = mDropdata;
 
     // removeing handler
-    if (typeof ondrop === 'undefined' && typeof mDropdata === 'undefined') {
-      elem.removeClass('mouselistener')
-      elem.off('dragover', 'dragenter', 'dragleave')
-      return
+    if (typeof ondrop === "undefined" && typeof mDropdata === "undefined") {
+      elem.removeClass("mouselistener");
+      elem.off("dragover", "dragenter", "dragleave");
+      return;
     }
 
-    elem.addClass('mouselistener')
+    elem.addClass("mouselistener");
 
-    elem.on('dragenter', soile2.rt.dragenter)
-    elem.on('dragleave', soile2.rt.dragleave)
+    elem.on("dragenter", soile2.rt.dragenter);
+    elem.on("dragleave", soile2.rt.dragleave);
 
-    elem.on('dragover', function (ev) {
-      ev.preventDefault()
-    })
+    elem.on("dragover", function (ev) {
+      ev.preventDefault();
+    });
 
     /*elem.on("dropover", function(ev) {
       console.log("DROPPED OVER")
       console.log(ev)
     })*/
 
-    elem.on('drop', function (ev) {
-      ev.preventDefault()
-      var target = jQuery(ev.target)
-      target.removeClass('activeDropzone')
+    elem.on("drop", function (ev) {
+      ev.preventDefault();
+      var target = jQuery(ev.target);
+      target.removeClass("activeDropzone");
 
-      if (elem.attr('id') == target.attr('id')) {
-        var userAgent = window.navigator.userAgent
-        var msie = userAgent.indexOf('MSIE ') //Detect IE
-        var trident = userAgent.indexOf('Trident/')
-        var edge = userAgent.indexOf('Edge/')
+      if (elem.attr("id") == target.attr("id")) {
+        var userAgent = window.navigator.userAgent;
+        var msie = userAgent.indexOf("MSIE "); //Detect IE
+        var trident = userAgent.indexOf("Trident/");
+        var edge = userAgent.indexOf("Edge/");
 
         if (msie > 0 || trident > 0 || edge > 0) {
-          ondrop(ev.originalEvent.dataTransfer.getData('Text'), dropdata)
+          ondrop(ev.originalEvent.dataTransfer.getData("Text"), dropdata);
         } else {
-          ondrop(ev.originalEvent.dataTransfer.getData('text/plain'), dropdata)
+          ondrop(ev.originalEvent.dataTransfer.getData("text/plain"), dropdata);
         }
       }
-    })
-  }
+    });
+  };
 
   /*
    * Audio support
    */
   bin.audiofile = function (url) {
-    var id = soile2.rt.uniqueid()
+    var id = soile2.rt.uniqueid();
     var props = {
       id: id,
       src: url,
-      preload: 'auto'
-    }
-    var audio = jQuery('<audio />', props).appendTo(soile2.util.getid('display'))
-    soile2.rt.dyn.add(id)
+      preload: "auto",
+    };
+    var audio = jQuery("<audio />", props).appendTo(
+      soile2.util.getid("display")
+    );
+    soile2.rt.dyn.add(id);
     if (loadScreen) {
       //console.log(performance.now() + " LOADING IMAGE");
-      toLoad += 1
-      audio.on('load', soile2.util.onImageLoad)
+      toLoad += 1;
+      audio.on("load", soile2.util.onImageLoad);
     }
-    jQuery(soile2.util.getid(id))[0].load()
-    return id
-  }
+    jQuery(soile2.util.getid(id))[0].load();
+    return id;
+  };
 
   bin.play = function (id) {
-    var audioElement = jQuery(soile2.util.getid(id))[0]
+    var audioElement = jQuery(soile2.util.getid(id))[0];
 
     if (audioElement) {
-      audioElement.play()
+      audioElement.play();
     }
-  }
+  };
 
   bin.pause = function (id) {
-    var audioElement = jQuery(soile2.util.getid(id))[0]
+    var audioElement = jQuery(soile2.util.getid(id))[0];
 
     if (audioElement) {
-      audioElement.pause()
+      audioElement.pause();
     }
-  }
+  };
 
   bin.jumpto = function (id, seconds) {
-    var audioElement = jQuery(soile2.util.getid(id))[0]
-    console.log(audioElement.currentTime)
+    var audioElement = jQuery(soile2.util.getid(id))[0];
+    console.log(audioElement.currentTime);
     if (audioElement) {
-      console.log('jumping to ' + seconds)
-      audioElement.pause()
-      audioElement.currentTime = seconds
-      audioElement.play()
+      console.log("jumping to " + seconds);
+      audioElement.pause();
+      audioElement.currentTime = seconds;
+      audioElement.play();
     }
 
-    console.log(audioElement.currentTime)
-  }
+    console.log(audioElement.currentTime);
+  };
 
   /*
    * Convert an integer representing minutes to milliseconds.
    */
   bin.minutes = function (m) {
     if (soile2.util.is_number(m)) {
-      return m * 60 * 1000
+      return m * 60 * 1000;
     }
-    return 0
-  }
+    return 0;
+  };
 
   /*
    * Convert an integer representing seconds to milliseconds.
    */
   bin.seconds = function (m) {
     if (soile2.util.is_number(m)) {
-      return m * 1000
+      return m * 1000;
     }
-    return 0
-  }
+    return 0;
+  };
 
   bin.resume = function () {
-    console.log('Running resume')
-    rt.schd.cancel()
-    rt.schd.resume()
-  }
+    console.log("Running resume");
+    rt.schd.cancel();
+    rt.schd.resume();
+  };
 
   bin.position = function () {
-    var arr = Array.prototype.slice.call(arguments)
-    var id, top, left, args, pos
+    var arr = Array.prototype.slice.call(arguments);
+    var id, top, left, args, pos;
 
     //console.log(arr);
 
     if (arr.length < 2) {
-      return
+      return;
     }
-    args = arr.splice(1)
-    id = soile2.util.getid(arr[0])
+    args = arr.splice(1);
+    id = soile2.util.getid(arr[0]);
 
     if (args.length === 1) {
       if (
-        typeof args[0] === 'object' &&
-        args[0].hasOwnProperty('top') &&
-        args[0].hasOwnProperty('left')
+        typeof args[0] === "object" &&
+        args[0].hasOwnProperty("top") &&
+        args[0].hasOwnProperty("left")
       ) {
-        top = args[0].top
-        left = args[0].left
+        top = args[0].top;
+        left = args[0].left;
       }
     } else if (args.length > 1) {
-      left = args[0]
-      top = args[1]
+      left = args[0];
+      top = args[1];
     }
 
-    if (args[0] === 'center') {
-      var imgWidth, imgHeight
-      imgWidth = jQuery(id).outerWidth()
-      imgHeight = jQuery(id).outerHeight()
+    if (args[0] === "center") {
+      var imgWidth, imgHeight;
+      imgWidth = jQuery(id).outerWidth();
+      imgHeight = jQuery(id).outerHeight();
 
-      var posLeft = jQuery('#display').width() / 2 - imgWidth / 2
-      var posTop = jQuery('#display').height() / 2 - imgHeight / 2
+      var posLeft = jQuery("#display").width() / 2 - imgWidth / 2;
+      var posTop = jQuery("#display").height() / 2 - imgHeight / 2;
 
-      left = posLeft
-      top = posTop
+      left = posLeft;
+      top = posTop;
 
       //console.log("width: " + imgWidth + " height " + imgHeight);
       //soile2.bin.position(id, {"top":posTop, "left":posLeft})
@@ -893,408 +902,418 @@ SOILE2 = (function () {
     if (soile2.util.is_number(top) && soile2.util.is_number(left)) {
       // http://stackoverflow.com/questions/4724794/how-do-i-give-a-jquery-element-absolute-positioning-on-a-page
       jQuery(id).css({
-        position: 'absolute',
+        position: "absolute",
         top: soile2.util.to_integer(top),
-        left: soile2.util.to_integer(left)
-      })
+        left: soile2.util.to_integer(left),
+      });
     }
-  }
+  };
 
   bin.lt = function (x, y) {
     if (_.isNumber(x) && _.isNumber(y)) {
-      return x < y
+      return x < y;
     } else {
-      return x < y
+      return x < y;
     }
-    return false
-  }
+    return false;
+  };
 
-  bin.lessthan = bin.lt
+  bin.lessthan = bin.lt;
 
   bin.lte = function (x, y) {
     if (_.isNumber(x) && _.isNumber(y)) {
-      return x <= y
+      return x <= y;
     } else {
-      return x <= y
+      return x <= y;
     }
-    return false
-  }
+    return false;
+  };
 
   bin.minus = function () {
     //var nums = _.filter(_.toArray(arguments), _.isNumber);
-    var nums = _.filter(_.toArray(arguments), util.can_be_number)
+    var nums = _.filter(_.toArray(arguments), util.can_be_number);
     if (nums.length === 0) {
-      return undefined
+      return undefined;
     }
     if (nums.length === 1) {
-      return nums[0]
+      return nums[0];
     }
     return (
       parseFloat(nums[0]) +
       _.reduce(
         nums.slice(1),
         function (memo, num) {
-          return memo - parseFloat(num)
+          return memo - parseFloat(num);
         },
         0
       )
-    )
-  }
+    );
+  };
 
   bin.multiply = function () {
     //var nums = _.filter(_.toArray(arguments), _.isNumber);
-    var nums = _.filter(_.toArray(arguments), util.can_be_number)
+    var nums = _.filter(_.toArray(arguments), util.can_be_number);
     if (_.isEmpty(nums)) {
-      return undefined
+      return undefined;
     }
     if (nums.length === 1) {
-      return nums[0]
+      return nums[0];
     }
     return _.reduce(
       nums,
       function (memo, num) {
-        return memo * parseFloat(num)
+        return memo * parseFloat(num);
       },
       1
-    )
-  }
+    );
+  };
 
   bin.plus = function () {
     //var nums = _.filter(_.toArray(arguments), _.isNumber);
-    var nums = _.filter(_.toArray(arguments), util.can_be_number)
+    var nums = _.filter(_.toArray(arguments), util.can_be_number);
     if (_.isEmpty(nums)) {
-      return undefined
+      return undefined;
     }
     if (nums.length === 1) {
-      return nums[0]
+      return nums[0];
     }
     return _.reduce(
       nums,
       function (memo, num) {
-        return memo + parseFloat(num)
+        return memo + parseFloat(num);
       },
       0
-    )
-  }
+    );
+  };
 
   bin.modulo = function (num1, num2) {
-    var mod = num1 % num2
-    return mod
-  }
+    var mod = num1 % num2;
+    return mod;
+  };
 
   bin.round = function (num, op) {
-    if (op === 'floor') {
-      return Math.floor(num)
+    if (op === "floor") {
+      return Math.floor(num);
     }
-    if (op === 'ceil') {
-      return Math.ceil(num)
+    if (op === "ceil") {
+      return Math.ceil(num);
     }
-    return Math.round(num)
-  }
+    return Math.round(num);
+  };
 
   /*
   Datahandling
   */
   bin.storesingle = function (field, value) {
-    soile2.rt.dataHandler.storeSingle(field, value)
-  }
+    soile2.rt.dataHandler.storeSingle(field, value);
+  };
 
   bin.storerow = function (field, value) {
-    soile2.rt.dataHandler.storeRow(field, value)
-  }
+    soile2.rt.dataHandler.storeRow(field, value);
+  };
 
   bin.newrow = function () {
-    soile2.rt.dataHandler.newRow()
-  }
+    soile2.rt.dataHandler.newRow();
+  };
 
   /*Statistics*/
   bin.average = function (field) {
-    return soile2.rt.dataHandler.average(field)
-  }
+    return soile2.rt.dataHandler.average(field);
+  };
 
   bin.count = function (field, value) {
-    var res
-    if (typeof value !== 'undefined') {
-      res = soile2.rt.dataHandler.countValue(field, value)
+    var res;
+    if (typeof value !== "undefined") {
+      res = soile2.rt.dataHandler.countValue(field, value);
     } else {
-      res = soile2.rt.dataHandler.count(field)
+      res = soile2.rt.dataHandler.count(field);
     }
-    return res
-  }
+    return res;
+  };
 
-  bin.outliers = function (field, multiplier, standarddeviation, externalAverage) {
-    return soile2.rt.dataHandler.outlier(field, multiplier, standarddeviation, externalAverage)
-  }
+  bin.outliers = function (
+    field,
+    multiplier,
+    standarddeviation,
+    externalAverage
+  ) {
+    return soile2.rt.dataHandler.outlier(
+      field,
+      multiplier,
+      standarddeviation,
+      externalAverage
+    );
+  };
 
   bin.median = function (field, value) {
-    return soile2.rt.dataHandler.median(field)
-  }
+    return soile2.rt.dataHandler.median(field);
+  };
 
   bin.standarddeviation = function (field) {
-    return soile2.rt.dataHandler.standarddeviation(field)
-  }
+    return soile2.rt.dataHandler.standarddeviation(field);
+  };
 
   /*
   Functions related to time and timing
   */
 
   bin.recordts = function () {
-    return soile2.rt.timestamp()
-  }
+    return soile2.rt.timestamp();
+  };
 
   bin.starttimer = function () {
-    soile2.rt.timer.start()
-  }
+    soile2.rt.timer.start();
+  };
 
   bin.elapsedtime = function () {
-    console.log(soile2.rt.timer.elapsedTime())
-    return soile2.rt.timer.elapsedTime()
-  }
+    console.log(soile2.rt.timer.elapsedTime());
+    return soile2.rt.timer.elapsedTime();
+  };
 
   bin.stimulus = function () {
-    return soile2.rt.stimuli.get()
-  }
+    return soile2.rt.stimuli.get();
+  };
 
   bin.setstimuli = function (arr) {
-    soile2.rt.stimuli.set(arr)
-  }
+    soile2.rt.stimuli.set(arr);
+  };
 
   bin.addstimuli = function (stim) {
-    soile2.rt.stimuli.add(stim)
-  }
+    soile2.rt.stimuli.add(stim);
+  };
 
   bin.emptystimuli = function () {
-    soile2.rt.stimuli.empty()
-  }
+    soile2.rt.stimuli.empty();
+  };
 
   bin.shufflestimuli = function (count) {
-    if (typeof count === 'undefined') {
-      console.log('Shuffling')
-      soile2.rt.stimuli.shuffle()
+    if (typeof count === "undefined") {
+      console.log("Shuffling");
+      soile2.rt.stimuli.shuffle();
     } else {
-      console.log('Shuffling subset')
-      soile2.rt.stimuli.subset(count)
+      console.log("Shuffling subset");
+      soile2.rt.stimuli.subset(count);
     }
-  }
+  };
 
   bin.pickstimulisubset = function (count) {
-    soile2.rt.stimuli.subset(count)
-  }
+    soile2.rt.stimuli.subset(count);
+  };
 
   bin.length = function (o) {
     if (_.isNumber(o)) {
-      o = o.toString()
+      o = o.toString();
     }
 
     if (_.isArray(o) || _.isString(o)) {
-      return o.length
+      return o.length;
     }
-    return -1
-  }
+    return -1;
+  };
 
   bin.kbdkey = function (name) {
     if (_.isString(name)) {
-      return soile2.rt.kbd.keycode(name)
+      return soile2.rt.kbd.keycode(name);
     }
-    return undefined
-  }
+    return undefined;
+  };
 
   bin.tag = function () {
-    return {}
-  }
+    return {};
+  };
 
   bin.randominteger = function (min, max, not) {
-    min = typeof min !== 'undefined' ? min : 1
-    max = typeof max !== 'undefined' ? max : 10000000
+    min = typeof min !== "undefined" ? min : 1;
+    max = typeof max !== "undefined" ? max : 10000000;
 
-    if (typeof not !== 'undefined') {
+    if (typeof not !== "undefined") {
       if (!_.isArray(not)) {
-        not = [not]
+        not = [not];
       }
     } else {
-      not = false
+      not = false;
     }
 
     if (_.isNumber(min) && _.isNumber(max)) {
-      var ran = Math.floor(rt.random.get() * (max - min + 1) + min)
+      var ran = Math.floor(rt.random.get() * (max - min + 1) + min);
 
       if (not === false || !not.contains(ran)) {
-        return ran
+        return ran;
       } else {
-        return soile2.bin.randominteger(min, max, not)
+        return soile2.bin.randominteger(min, max, not);
       }
     }
-  }
+  };
 
   bin.randomnumber = function (min, max, not) {
-    min = typeof min !== 'undefined' ? min : 1
-    max = typeof max !== 'undefined' ? max : 10000000
+    min = typeof min !== "undefined" ? min : 1;
+    max = typeof max !== "undefined" ? max : 10000000;
 
-    if (typeof not !== 'undefined') {
+    if (typeof not !== "undefined") {
       if (!_.isArray(not)) {
-        not = [not]
+        not = [not];
       }
     } else {
-      not = false
+      not = false;
     }
 
     if (_.isNumber(min) && _.isNumber(max)) {
-      var ran = rt.random.get() * (max - min + 1) + min
+      var ran = rt.random.get() * (max - min + 1) + min;
 
       if (not === false || !not.contains(ran)) {
-        return ran
+        return ran;
       } else {
-        return soile2.bin.randomnumber(min, max, not)
+        return soile2.bin.randomnumber(min, max, not);
       }
     }
-  }
+  };
 
   bin.seedrandom = function (seed) {
-    rt.random.seed(seed)
-  }
+    rt.random.seed(seed);
+  };
 
   bin.shuffle = function (arr) {
-    return soile2.rt.shuffle(arr)
-  }
+    return soile2.rt.shuffle(arr);
+  };
 
   bin.timeout = function (dur) {
-    soile2.rt.schd.suspend(dur)
-  }
+    soile2.rt.schd.suspend(dur);
+  };
 
   bin.append = function (str1, str2) {
     //More than two arguments
     if (arguments.length > 2) {
       if (_.isArray(arguments[0])) {
         //Array first, add all args to array
-        var arr = arguments[0]
+        var arr = arguments[0];
         for (var i = 1; i < arguments.length; i++) {
-          arr.push(arguments[i])
+          arr.push(arguments[i]);
         }
 
-        return arr
+        return arr;
       } else {
         //Else, build a string
         //var args = Array.prototype.slice.call(arguments);
 
-        var string = ''
+        var string = "";
         for (var i = 0; i < arguments.length; i++) {
-          string += arguments[i]
+          string += arguments[i];
         }
 
-        return string
+        return string;
       }
     }
 
     if (_.isArray(str1) && _.isArray(str2)) {
-      str1.push.apply(str1, str2)
-      return str1
+      str1.push.apply(str1, str2);
+      return str1;
     }
 
     //console.log("str1: " + str1 + " " + typeof str1 + " ||str2 " + str2 + " " + typeof str2)
-    if (typeof str1 === 'undefined') {
-      var temp = []
-      temp.push(str2)
-      return temp
+    if (typeof str1 === "undefined") {
+      var temp = [];
+      temp.push(str2);
+      return temp;
       //return([].push(str2));
     }
 
-    if (typeof str1 !== 'object') {
+    if (typeof str1 !== "object") {
       //console.log("Appending strings " + str1 + str2);
-      var result = ''
+      var result = "";
       if (!_.isUndefined(str1) && !_.isUndefined(str2)) {
-        return str1.toString() + str2.toString()
+        return str1.toString() + str2.toString();
       } else {
         if (str1) {
-          return str1.toString()
+          return str1.toString();
         }
 
         if (str2) {
-          return str2.toString()
+          return str2.toString();
         }
       }
     }
 
-    if (typeof str1 === 'object') {
-      str1.push(str2)
-      return str1
+    if (typeof str1 === "object") {
+      str1.push(str2);
+      return str1;
     }
-  }
+  };
 
   bin.join = function (arr, sep) {
-    var separator = ','
-    if (typeof sep !== 'undefined') {
-      separator = sep
+    var separator = ",";
+    if (typeof sep !== "undefined") {
+      separator = sep;
     }
 
     if (_.isArray(arr)) {
-      return arr.join(separator)
+      return arr.join(separator);
     }
-  }
+  };
 
   bin.split = function (str, sep) {
-    if (typeof str === 'string') {
-      if (typeof sep !== 'undefined') {
-        return str.split(sep)
+    if (typeof str === "string") {
+      if (typeof sep !== "undefined") {
+        return str.split(sep);
       } else {
-        return str.split()
+        return str.split();
       }
     }
-  }
+  };
 
   bin.range = function (word, mStart, mEnd) {
-    var start = mStart
-    var end = mEnd
+    var start = mStart;
+    var end = mEnd;
 
-    if (typeof end == 'undefined') {
-      start = 0
-      end = mStart
+    if (typeof end == "undefined") {
+      start = 0;
+      end = mStart;
     }
 
     if (start == end) {
-      return false
+      return false;
     }
 
     if (start > end) {
-      return false
+      return false;
     }
 
     if (start > word.length) {
-      return false
+      return false;
     }
 
-    return word.slice(start, end)
-  }
+    return word.slice(start, end);
+  };
 
   bin.elementatindex = function (value, mIndex) {
-    var index = parseInt(mIndex)
-    if (typeof value !== 'undefined' && _.isNumber(index)) {
+    var index = parseInt(mIndex);
+    if (typeof value !== "undefined" && _.isNumber(index)) {
       if (index > value.length) {
-        return false
+        return false;
       }
       if (value instanceof Array) {
-        return value[index]
+        return value[index];
       } else {
-        return value.toString()[index]
+        return value.toString()[index];
       }
     }
-  }
+  };
 
   /*
     Saves score that is displayed to the user,
     named scores are displayed separately from the standard unnamed on
   */
   bin.savescore = function (mName, mScore) {
-    var name = mName
-    var score = mScore
+    var name = mName;
+    var score = mScore;
 
-    if (typeof score === 'undefined') {
-      name = 'score'
-      score = mName
-      soile2.rt.scoreHandler.save(score)
+    if (typeof score === "undefined") {
+      name = "score";
+      score = mName;
+      soile2.rt.scoreHandler.save(score);
     } else {
-      soile2.rt.scoreHandler.saveNamed(name, score)
+      soile2.rt.scoreHandler.saveNamed(name, score);
     }
-  }
+  };
 
   /*
     Toggle wether a standard score screen is displayed
@@ -1302,106 +1321,106 @@ SOILE2 = (function () {
   */
   bin.showscore = function (bool) {
     // TODO: Implement this
-    console.log('Showscore yes/no ' + bool)
-  }
+    console.log("Showscore yes/no " + bool);
+  };
 
   bin.savevariable = function (varName, value) {
-    soile2.rt.persistantDataHandler.save(varName, value)
-  }
+    soile2.rt.persistantDataHandler.save(varName, value);
+  };
 
   bin.loadvariable = function (varName, defaultValue) {
-    if (typeof defaultValue === 'undefined') {
-      defaultValue = 0
+    if (typeof defaultValue === "undefined") {
+      defaultValue = 0;
     }
 
-    var value = soile2.rt.persistantDataHandler.load(varName)
+    var value = soile2.rt.persistantDataHandler.load(varName);
 
     if (value === undefined) {
-      return defaultValue
+      return defaultValue;
     }
 
-    return value
-  }
+    return value;
+  };
 
   /** Create a looping function using set interval */
   bin.setinterval = function (func, time) {
-    return setInterval(func, time)
-  }
+    return setInterval(func, time);
+  };
 
   /**Disable the given looping function */
   bin.clearinterval = function (interval) {
-    clearInterval(interval)
-  }
+    clearInterval(interval);
+  };
 
   /*
   ---------------------------------------------
   */
   // For dynamically added elements. (For instance, a call to 'imagefile' adds an element.)
   rt.dyn = (function () {
-    var ids = []
+    var ids = [];
 
     return {
       add: function (id) {
-        ids.push(id)
+        ids.push(id);
       },
       clear: function () {
         while (ids.length > 0) {
-          jQuery(soile2.util.getid(ids.pop())).remove()
+          jQuery(soile2.util.getid(ids.pop())).remove();
         }
-      }
-    }
-  })()
+      },
+    };
+  })();
 
   rt.finalize_defs = function () {
-    console.log('finalizing definitions')
-    soile2.rt.seal(soile2.defs.gvars)
-    soile2.rt.freeze(soile2.defs.vals)
-    soile2.rt.freeze(soile2.defs.fns)
+    console.log("finalizing definitions");
+    soile2.rt.seal(soile2.defs.gvars);
+    soile2.rt.freeze(soile2.defs.vals);
+    soile2.rt.freeze(soile2.defs.fns);
 
-    allReady = true
-  }
+    allReady = true;
+  };
 
   rt.freeze = (function () {
-    if (Object.freeze !== undefined || typeof Object.freeze === 'function') {
+    if (Object.freeze !== undefined || typeof Object.freeze === "function") {
       return function (obj) {
-        return Object.freeze(obj)
-      }
+        return Object.freeze(obj);
+      };
     }
     return function (obj) {
-      return obj
-    }
-  })()
+      return obj;
+    };
+  })();
 
   rt.truthvalue = function (value) {
     // http://stackoverflow.com/questions/7615214/in-javascript-why-is-0-equal-to-false-but-not-false-by-itself
     // http://javascriptweblog.wordpress.com/2011/02/07/truth-equality-and-javascript/
 
     if (_.isBoolean(value)) {
-      return value
+      return value;
     }
     if (_.isNull(value) || _.isUndefined(value)) {
-      return false
+      return false;
     }
-    return true
-  }
+    return true;
+  };
 
   rt.milliseconds = function (num) {
     if (_.isNumber(num)) {
-      return Math.abs(num)
+      return Math.abs(num);
     }
     if (_.isString(num)) {
-      return Math.abs(parseInt(num, 10))
+      return Math.abs(parseInt(num, 10));
     }
-    return 0
-  }
+    return 0;
+  };
 
   rt.undefvar = function (name) {
-    var vars = soile2.defs.vars
+    var vars = soile2.defs.vars;
 
     if (vars.hasOwnProperty(name)) {
-      delete vars[name]
+      delete vars[name];
     }
-  }
+  };
 
   /* Builds a string out of multiple arguments */
   rt.mergeToString = function (arr) {
@@ -1409,17 +1428,17 @@ SOILE2 = (function () {
       arr,
       function (memo, num) {
         if (_.isArray(num) || _.isObject(num)) {
-          num = JSON.stringify(num)
+          num = JSON.stringify(num);
         } else {
-          num = String(num)
+          num = String(num);
         }
-        return memo.concat(num)
+        return memo.concat(num);
       },
-      ''
-    )
+      ""
+    );
 
-    return msg
-  }
+    return msg;
+  };
 
   rt.kbd = (function () {
     var name2keycode = soile2.rt.freeze({
@@ -1477,226 +1496,226 @@ SOILE2 = (function () {
       w: 87,
       x: 88,
       y: 89,
-      z: 90
-    })
+      z: 90,
+    });
 
     var keycode2name = soile2.rt.freeze({
-      32: 'space',
-      8: 'backspace',
-      9: 'tab',
-      13: 'enter',
-      16: 'shift',
-      17: 'ctrl',
-      18: 'alt',
-      20: 'capslock',
-      27: 'escape',
-      33: 'pageup',
-      34: 'pagedown',
-      35: 'end',
-      36: 'home',
-      45: 'insert',
-      46: 'delete',
-      37: 'left',
-      38: 'up',
-      39: 'right',
-      40: 'down',
-      48: '0',
-      49: '1',
-      50: '2',
-      51: '3',
-      52: '4',
-      53: '5',
-      54: '6',
-      55: '7',
-      56: '8',
-      57: '9',
-      65: 'a',
-      66: 'b',
-      67: 'c',
-      68: 'd',
-      69: 'e',
-      70: 'f',
-      71: 'g',
-      72: 'h',
-      73: 'i',
-      74: 'j',
-      75: 'k',
-      76: 'l',
-      77: 'm',
-      78: 'n',
-      79: 'o',
-      80: 'p',
-      81: 'q',
-      82: 'r',
-      83: 's',
-      84: 't',
-      85: 'u',
-      86: 'v',
-      87: 'w',
-      88: 'x',
-      89: 'y',
-      90: 'z'
-    })
+      32: "space",
+      8: "backspace",
+      9: "tab",
+      13: "enter",
+      16: "shift",
+      17: "ctrl",
+      18: "alt",
+      20: "capslock",
+      27: "escape",
+      33: "pageup",
+      34: "pagedown",
+      35: "end",
+      36: "home",
+      45: "insert",
+      46: "delete",
+      37: "left",
+      38: "up",
+      39: "right",
+      40: "down",
+      48: "0",
+      49: "1",
+      50: "2",
+      51: "3",
+      52: "4",
+      53: "5",
+      54: "6",
+      55: "7",
+      56: "8",
+      57: "9",
+      65: "a",
+      66: "b",
+      67: "c",
+      68: "d",
+      69: "e",
+      70: "f",
+      71: "g",
+      72: "h",
+      73: "i",
+      74: "j",
+      75: "k",
+      76: "l",
+      77: "m",
+      78: "n",
+      79: "o",
+      80: "p",
+      81: "q",
+      82: "r",
+      83: "s",
+      84: "t",
+      85: "u",
+      86: "v",
+      87: "w",
+      88: "x",
+      89: "y",
+      90: "z",
+    });
 
     var lookupf = function (key) {
       if (this.hasOwnProperty(key) === true) {
-        return this[key]
+        return this[key];
       }
-      return null
-    }
+      return null;
+    };
 
     return {
       name: function (keyCode) {
-        return lookupf.call(keycode2name, keyCode)
+        return lookupf.call(keycode2name, keyCode);
       },
 
       keycode: function (keyName) {
-        return lookupf.call(name2keycode, keyName)
-      }
-    }
-  })()
+        return lookupf.call(name2keycode, keyName);
+      },
+    };
+  })();
 
   // The keyhandler captures all keystrokes and executes a callback
   // function if a key is bound to one.
   rt.keyhandler = (function () {
-    var keyfunctions = {}
-    var keyupfunctions = {}
-    var anykeyfunctions = []
-    var lastKey = ''
-    var lastActiveKey = ''
+    var keyfunctions = {};
+    var keyupfunctions = {};
+    var anykeyfunctions = [];
+    var lastKey = "";
+    var lastActiveKey = "";
 
     // Special ignore case
     // Nothing ignored
     var anything = function (keyCode) {
-      return true
-    }
+      return true;
+    };
 
     // Special ignore case
     // Checks if keyCode is a letter
     var lettersOnly = function (keyCode) {
       if (keyCode < 48 || keyCode > 90) {
-        return false
+        return false;
       } else {
-        return true
+        return true;
       }
-    }
+    };
 
     var keyFunction = function (e) {
-      lastKey = soile2.rt.kbd.name(e.keyCode)
+      lastKey = soile2.rt.kbd.name(e.keyCode);
       //console.log(e.keyCode);
       if (keyfunctions[e.keyCode]) {
-        lastActiveKey = e.keyCode
-        keyfunctions[e.keyCode].apply(null, [lastKey])
+        lastActiveKey = e.keyCode;
+        keyfunctions[e.keyCode].apply(null, [lastKey]);
       }
 
       //console.log(anykeyfunctions);
       for (var i = 0; i < anykeyfunctions.length; i++) {
-        var key = soile2.rt.kbd.name(e.keyCode)
+        var key = soile2.rt.kbd.name(e.keyCode);
 
         //console.log(anykeyfunctions[i].ignoreFunc(e.keyCode));
         //Check if the click key is ignored before calling
         // the bound function
         if (anykeyfunctions[i].ignoreFunc(e.keyCode)) {
-          lastActiveKey = e.keyCode
-          anykeyfunctions[i].func.apply(null, [key])
+          lastActiveKey = e.keyCode;
+          anykeyfunctions[i].func.apply(null, [key]);
         }
       }
-    }
+    };
 
     var keyUpFunction = function (e) {
-      lastKey = soile2.rt.kbd.name(e.keyCode)
+      lastKey = soile2.rt.kbd.name(e.keyCode);
       //console.log(e.keyCode);
       if (keyupfunctions[e.keyCode]) {
-        lastActiveKey = e.keyCode
-        keyupfunctions[e.keyCode].apply(null, [lastKey])
+        lastActiveKey = e.keyCode;
+        keyupfunctions[e.keyCode].apply(null, [lastKey]);
       }
-    }
+    };
 
-    document.onkeydown = keyFunction
-    document.onkeyup = keyUpFunction
+    document.onkeydown = keyFunction;
+    document.onkeyup = keyUpFunction;
 
     return {
       add: function (keycode, func) {
-        keyfunctions[keycode] = func
+        keyfunctions[keycode] = func;
       },
       addkeyup: function (keycode, func) {
-        keyupfunctions[keycode] = func
+        keyupfunctions[keycode] = func;
       },
       remove: function (keycode, func) {
-        keyfunctions[keycode] = null
+        keyfunctions[keycode] = null;
       },
       removekeyup: function (keycode, func) {
-        keyupfunctions[keycode] = null
+        keyupfunctions[keycode] = null;
       },
       reset: function () {
-        keyfunctions = {}
-        keyupfunctions = {}
-        anykeyfunctions = []
-        lastKey = ''
-        lastActiveKey = ''
+        keyfunctions = {};
+        keyupfunctions = {};
+        anykeyfunctions = [];
+        lastKey = "";
+        lastActiveKey = "";
         // document.onkeydown = null;
       },
       resume: function (key) {
-        var ignoreFunc = anything
-        var onkey = null
+        var ignoreFunc = anything;
+        var onkey = null;
         if (key) {
-          var keycode = soile2.rt.kbd.keycode(key)
+          var keycode = soile2.rt.kbd.keycode(key);
 
           onkey = function () {
-            keyfunctions[keycode] = null
-            soile2.bin.resume()
-          }
+            keyfunctions[keycode] = null;
+            soile2.bin.resume();
+          };
 
-          keyfunctions[keycode] = onkey
+          keyfunctions[keycode] = onkey;
         } else {
           onkey = function (key) {
-            var index = anykeyfunctions.indexOf(onkey)
-            anykeyfunctions.splice(index, 1)
-            soile2.bin.resume()
-          }
+            var index = anykeyfunctions.indexOf(onkey);
+            anykeyfunctions.splice(index, 1);
+            soile2.bin.resume();
+          };
 
-          anykeyfunctions.push({ func: onkey, ignoreFunc: ignoreFunc })
+          anykeyfunctions.push({ func: onkey, ignoreFunc: ignoreFunc });
         }
       },
 
       addAny: function (func, ignore) {
-        var ignoreFunc = anything
+        var ignoreFunc = anything;
 
-        if (ignore === 'onlyletters') {
-          ignoreFunc = lettersOnly
+        if (ignore === "onlyletters") {
+          ignoreFunc = lettersOnly;
         }
         // Ignore case, specific letters
         if (ignore instanceof Array) {
           //Converting keynames to keycodes berfore use
           for (var i in ignore) {
-            ignore[i] = soile2.rt.kbd.keycode(ignore[i])
+            ignore[i] = soile2.rt.kbd.keycode(ignore[i]);
           }
-          console.log(ignore)
+          console.log(ignore);
 
           ignoreFunc = function (keyCode) {
             if (ignore.indexOf(keyCode) === -1) {
-              return true
+              return true;
             } else {
-              return false
+              return false;
             }
-          }
+          };
         }
 
-        anykeyfunctions.push({ func: func, ignoreFunc: ignoreFunc })
+        anykeyfunctions.push({ func: func, ignoreFunc: ignoreFunc });
       },
       removeAny: function () {
-        anykeyfunctions = []
+        anykeyfunctions = [];
       },
       lastKey: function () {
-        return lastKey
+        return lastKey;
       },
       lastActiveKey: function () {
-        var key = soile2.rt.kbd.name(lastActiveKey)
-        lastActiveKey = ''
-        return key
-      }
-    }
-  })()
+        var key = soile2.rt.kbd.name(lastActiveKey);
+        lastActiveKey = "";
+        return key;
+      },
+    };
+  })();
 
   /*
   Methods for storing testdata.
@@ -1711,52 +1730,52 @@ SOILE2 = (function () {
   Row values should also be stored in the backend if further analysis is neeeded.
   */
   rt.dataHandler = (function () {
-    var data
-    var currentRow
+    var data;
+    var currentRow;
 
     var _iterateRows = function (f) {
-      var len = data.rows.length
+      var len = data.rows.length;
       for (var i = 0; i < len; i++) {
-        f(data.rows[i])
+        f(data.rows[i]);
       }
-    }
+    };
 
     /* Returns an arroy with data from the current field
        if field is an array do nothign and return it.
     */
     var _fieldToArray = function (field) {
       if (field instanceof Array) {
-        return field
+        return field;
       }
-      var arr = []
+      var arr = [];
       _iterateRows(function (row) {
         if (row.hasOwnProperty(field)) {
-          arr.push(row[field])
+          arr.push(row[field]);
         }
-      })
-      return arr
-    }
+      });
+      return arr;
+    };
 
     var _setData = function () {
-      data = {}
-      currentRow = 0
+      data = {};
+      currentRow = 0;
 
-      data.single = {}
-      data.rows = []
-      data.rows.push({})
-    }
+      data.single = {};
+      data.rows = [];
+      data.rows.push({});
+    };
 
     var _average = function (array) {
       if (!(array instanceof Array)) {
-        return 0
+        return 0;
       }
       var sum = array.reduce(function (sum, value) {
-        return sum + value
-      }, 0)
+        return sum + value;
+      }, 0);
 
-      var avg = sum / array.length
-      return avg
-    }
+      var avg = sum / array.length;
+      return avg;
+    };
 
     /*
       Calculates sum of array divided by n-1, used when calculating
@@ -1764,133 +1783,133 @@ SOILE2 = (function () {
     */
     var _avNminusOne = function (array) {
       if (!(array instanceof Array)) {
-        return 0
+        return 0;
       }
       var sum = array.reduce(function (sum, value) {
-        return sum + value
-      }, 0)
+        return sum + value;
+      }, 0);
 
-      var avg = sum / (array.length - 1)
-      return avg
-    }
+      var avg = sum / (array.length - 1);
+      return avg;
+    };
 
     /* Using population standard deviation */
     var _standardDeviation = function (array) {
-      var avg = _average(array)
+      var avg = _average(array);
 
       //Calcualting squarediffs
       var squareDiffs = array.map(function (value) {
-        var diff = value - avg
-        var sqr = diff * diff
-        return sqr
-      })
+        var diff = value - avg;
+        var sqr = diff * diff;
+        return sqr;
+      });
 
       //var standardDev = Math.sqrt(_average(squareDiffs));
-      var standardDev = Math.sqrt(_avNminusOne(squareDiffs))
+      var standardDev = Math.sqrt(_avNminusOne(squareDiffs));
 
-      return standardDev
-    }
+      return standardDev;
+    };
 
     var _median = function (array) {
-      var median = 0
+      var median = 0;
 
       array.sort(function (a, b) {
-        return a - b
-      })
-      var half = Math.floor(array.length / 2)
+        return a - b;
+      });
+      var half = Math.floor(array.length / 2);
 
       if (array.length % 2) {
-        median = array[half]
+        median = array[half];
       } else {
-        median = (array[half - 1] + array[half]) / 2.0
+        median = (array[half - 1] + array[half]) / 2.0;
       }
-      return median
-    }
+      return median;
+    };
 
-    _setData()
+    _setData();
 
     return {
       //Storage methods
       storeSingle: function (field, value) {
-        data.single[field] = value
+        data.single[field] = value;
       },
       storeRow: function (field, value) {
-        data.rows[currentRow][field] = value
+        data.rows[currentRow][field] = value;
       },
       newRow: function () {
-        currentRow += 1
-        data.rows.push({})
+        currentRow += 1;
+        data.rows.push({});
       },
 
       //Aggregation methods
       average: function (field) {
-        var noOfvalues = 0
-        var sum = 0
+        var noOfvalues = 0;
+        var sum = 0;
 
-        return _average(_fieldToArray(field))
+        return _average(_fieldToArray(field));
       },
       count: function (field) {
-        var count = 0
-        var arr = _fieldToArray(field)
+        var count = 0;
+        var arr = _fieldToArray(field);
 
-        console.log(arr)
-        console.log(arr.length)
+        console.log(arr);
+        console.log(arr.length);
 
-        return arr.length
+        return arr.length;
       },
       countValue: function (field, value) {
-        var count = 0
-        var arr = _fieldToArray(field)
+        var count = 0;
+        var arr = _fieldToArray(field);
 
         _.each(arr, function (val) {
           if (val === value) {
-            count += 1
+            count += 1;
           }
-        })
+        });
 
-        return count
+        return count;
       },
       median: function (field) {
-        var values = _fieldToArray(field)
-        var median
+        var values = _fieldToArray(field);
+        var median;
 
-        median = _median(values)
-        return median
+        median = _median(values);
+        return median;
       },
       standarddeviation: function (field) {
-        var values = _fieldToArray(field)
+        var values = _fieldToArray(field);
 
-        var standardDev = _standardDeviation(values)
+        var standardDev = _standardDeviation(values);
 
         //data.single["standarddeviation_"+field] = standardDev;
-        return standardDev
+        return standardDev;
       },
 
       //Finds values that are within a certain range from the standarddeviation times x
       outlier: function (field, multiplier, standardd, externalAverage) {
-        var arr = _fieldToArray(field)
-        var sd = standardd
+        var arr = _fieldToArray(field);
+        var sd = standardd;
 
         if (sd === undefined) {
-          sd = _standardDeviation(arr)
+          sd = _standardDeviation(arr);
         }
         if (multiplier === undefined) {
-          multiplier = 1
+          multiplier = 1;
         }
 
-        var limit = sd * multiplier
-        var av = _average(arr)
+        var limit = sd * multiplier;
+        var av = _average(arr);
         //console.log(externalAverage);
         if (externalAverage !== undefined) {
-          av = externalAverage
-          console.log('external averagfe: ' + av)
+          av = externalAverage;
+          console.log("external averagfe: " + av);
         }
         //console.log("Limit: " + limit + " av: " + av );
 
-        var upperLimit = av + limit
-        var lowerLimit = av - limit
+        var upperLimit = av + limit;
+        var lowerLimit = av - limit;
 
-        var reminder = []
+        var reminder = [];
 
         //console.log("Upper: " + upperLimit + " Lower: " + lowerLimit);
 
@@ -1904,158 +1923,162 @@ SOILE2 = (function () {
           ) {
             //if(Math.abs(row[field]*multiplier))
             //console.log("Outlier value: " + row[field])
-            row[field + '_outlier'] = row[field]
+            row[field + "_outlier"] = row[field];
           }
-        })
+        });
 
         for (var i = 0; i < arr.length; i++) {
-          if (util.is_number(arr[i]) && arr[i] < upperLimit && arr[i] > lowerLimit) {
-            reminder.push(arr[i])
+          if (
+            util.is_number(arr[i]) &&
+            arr[i] < upperLimit &&
+            arr[i] > lowerLimit
+          ) {
+            reminder.push(arr[i]);
           }
         }
         //console.log("Reminder: "+reminder);
-        return reminder
+        return reminder;
       },
 
       //Getters and setters
       getData: function () {
-        return data
+        return data;
       },
       //Return data to initial state, used when debugging tests
       reset: function () {
-        _setData()
-      }
-    }
-  })()
+        _setData();
+      },
+    };
+  })();
 
   rt.scoreHandler = (function () {
-    var _score = {}
+    var _score = {};
 
     function _saveGeneralScore(score) {
-      _score.score = score
+      _score.score = score;
     }
 
     function _saveNamedScore(name, score) {
-      _score[name] = score
+      _score[name] = score;
     }
 
     return {
       save: function (score) {
-        _saveGeneralScore(score)
+        _saveGeneralScore(score);
       },
       saveNamed: function (name, score) {
-        _saveNamedScore(name, score)
+        _saveNamedScore(name, score);
       },
       get: function () {
         if (_.isEmpty(_score)) {
-          return null
+          return null;
         }
-        return _score
+        return _score;
       },
       reset: function () {
-        _score = {}
-      }
-    }
-  })()
+        _score = {};
+      },
+    };
+  })();
 
   rt.dragenter = function (ev) {
-    jQuery(ev.target).addClass('activeDropzone')
-    ev.preventDefault()
-  }
+    jQuery(ev.target).addClass("activeDropzone");
+    ev.preventDefault();
+  };
 
   rt.dragleave = function (ev) {
-    jQuery(ev.target).removeClass('activeDropzone')
-  }
+    jQuery(ev.target).removeClass("activeDropzone");
+  };
 
   rt.persistantDataHandler = (function () {
-    var _variables = {}
+    var _variables = {};
 
     return {
       save: function (name, value) {
-        name = name.toString()
-        _variables[name] = value
+        name = name.toString();
+        _variables[name] = value;
       },
       load: function (name) {
-        console.log('LOADING VARIABLE ' + JSON.stringify(_variables))
-        name = name.toString()
-        console.log('VAR.' + name + ' = ' + _variables[name])
+        console.log("LOADING VARIABLE " + JSON.stringify(_variables));
+        name = name.toString();
+        console.log("VAR." + name + " = " + _variables[name]);
 
-        if (typeof _variables[name] === 'undefined') {
-          return undefined
+        if (typeof _variables[name] === "undefined") {
+          return undefined;
         }
 
-        return _variables[name]
+        return _variables[name];
       },
       get: function () {
         if (_.isEmpty(_variables)) {
-          return null
+          return null;
         }
-        return _variables
+        return _variables;
       },
       set: function (data) {
-        _variables = data
+        _variables = data;
       },
       reset: function () {
-        _variables = {}
-      }
-    }
-  })()
+        _variables = {};
+      },
+    };
+  })();
 
   // Seedable randomfunction based on Math.sin. appears to produce sufficienlty
   // random numbers for this use.
   // http://stackoverflow.com/questions/521295/javascript-random-seeds
   rt.random = (function () {
-    var _seed = Math.random()
+    var _seed = Math.random();
 
     var _randomFunction = function () {
-      var x = Math.sin(_seed++) * 10000
-      return x - Math.floor(x)
-    }
+      var x = Math.sin(_seed++) * 10000;
+      return x - Math.floor(x);
+    };
 
     return {
       seed: function (seed) {
-        _seed = seed
+        _seed = seed;
       },
       get: function () {
-        return _randomFunction()
-      }
-    }
-  })()
+        return _randomFunction();
+      },
+    };
+  })();
 
   // Simple single timer function.
   rt.timer = (function () {
-    var startTime = null
+    var startTime = null;
 
     return {
       start: function () {
-        startTime = soile2.rt.timestamp()
+        startTime = soile2.rt.timestamp();
       },
       elapsedTime: function () {
         if (startTime) {
-          var elapsed = soile2.rt.timestamp() - startTime
-          return elapsed
+          var elapsed = soile2.rt.timestamp() - startTime;
+          return elapsed;
         } else {
-          return 0
+          return 0;
         }
-      }
-    }
-  })()
+      },
+    };
+  })();
 
   rt.stimuli = (function () {
-    var _stimuli = []
+    var _stimuli = [];
 
-    var currentInteration = true
+    var currentInteration = true;
 
     //Stimuli for the  current iteration
-    var _iterationStimuli = null
+    var _iterationStimuli = null;
 
     //Hasmore is called at the end of an iteration to check if there's
     //still any stimulus left, _hasMore should only be called once per iteration
     var _hasmore = function () {
-      _iterationStimuli = null
+      _iterationStimuli = null;
 
-      return _stimuli.length > 0
-    }
+      return _stimuli.length > 0;
+    };
 
     return {
       hasmore: _hasmore,
@@ -2068,13 +2091,13 @@ SOILE2 = (function () {
         //if (_stimuli.length > 0) {
         if (_iterationStimuli === null || _iterationStimuli === undefined) {
           //console.log("Popping stimuli");
-          _iterationStimuli = _stimuli.pop()
+          _iterationStimuli = _stimuli.pop();
 
           if (_iterationStimuli === undefined) {
-            _iterationStimuli = null
+            _iterationStimuli = null;
           }
         }
-        return _iterationStimuli
+        return _iterationStimuli;
 
         //}
         //return null;
@@ -2082,75 +2105,75 @@ SOILE2 = (function () {
       set: function (arr) {
         if (_.isArray(arr) && arr.length > 0) {
           //Setting current stimuli to 0
-          _iterationStimuli = null
+          _iterationStimuli = null;
 
-          _stimuli = soile2.bin.copydata(arr)
-          _stimuli.reverse()
+          _stimuli = soile2.bin.copydata(arr);
+          _stimuli.reverse();
         }
       },
       add: function (stim) {
         if (_.isArray(stim)) {
-          _stimuli = _stimuli.concat(stim)
+          _stimuli = _stimuli.concat(stim);
         } else {
-          _stimuli.push(stim)
+          _stimuli.push(stim);
         }
       },
       //Shuffle stimuli with Fisher-Yates Shuffle
       shuffle: function (count) {
         if (_stimuli.length > 0) {
-          var counter = _stimuli.length
-          var temp, index
+          var counter = _stimuli.length;
+          var temp, index;
           while (counter > 0) {
-            index = Math.floor(Math.random() * counter)
+            index = Math.floor(Math.random() * counter);
 
-            counter--
+            counter--;
 
-            temp = _stimuli[counter]
-            _stimuli[counter] = _stimuli[index]
-            _stimuli[index] = temp
+            temp = _stimuli[counter];
+            _stimuli[counter] = _stimuli[index];
+            _stimuli[index] = temp;
           }
         }
       },
       //Randomly remove stimuli until x are left
       subset: function (stimuliCount) {
-        this.shuffle()
+        this.shuffle();
         if (stimuliCount < _stimuli.length) {
-          var removeCount = _stimuli.length - stimuliCount
+          var removeCount = _stimuli.length - stimuliCount;
           for (var i = 0; i < removeCount; i++) {
-            _stimuli.pop(0)
+            _stimuli.pop(0);
             //console.log("Popping stimuli " + i);
           }
         }
       },
       empty: function () {
-        _stimuli = []
-      }
-    }
-  })()
+        _stimuli = [];
+      },
+    };
+  })();
 
   rt.clear_vars = function () {
-    var __vars = soile2.defs.vars
+    var __vars = soile2.defs.vars;
     for (var p in __vars) {
       if (__vars.hasOwnProperty(p) === true) {
-        delete __vars[p]
+        delete __vars[p];
       }
     }
-  }
+  };
 
   rt.reset_defs = function () {
     var reset = function (obj, name) {
       if (obj.hasOwnProperty(name)) {
-        delete obj[name]
+        delete obj[name];
       }
-      obj[name] = {}
-    }
+      obj[name] = {};
+    };
 
-    reset(soile2.defs, 'gvars')
-    reset(soile2.defs, 'vals')
-    reset(soile2.defs, 'fns')
-    reset(soile2.defs, 'vars')
-    reset(soile2.defs, 'json')
-  }
+    reset(soile2.defs, "gvars");
+    reset(soile2.defs, "vals");
+    reset(soile2.defs, "fns");
+    reset(soile2.defs, "vars");
+    reset(soile2.defs, "json");
+  };
 
   rt.opcodes = (function () {
     return soile2.rt.freeze({
@@ -2163,19 +2186,19 @@ SOILE2 = (function () {
       Wait: 5,
       Def: 6,
       Undef: 7,
-      Suspend: 8
-    })
-  })()
+      Suspend: 8,
+    });
+  })();
 
   // Get next "program instruction."
-  rt.get_pi = undefined
+  rt.get_pi = undefined;
 
   // Reset "program instructions."
   rt.reset_piarray = function () {
     soile2.rt.get_pi = function (idx) {
-      return null
-    }
-  }
+      return null;
+    };
+  };
 
   /*
    * Save "program instructions." Note that we are
@@ -2185,245 +2208,245 @@ SOILE2 = (function () {
    * (this is for encapsulation).
    */
   rt.set_piarray = function (piafunc) {
-    soile2.rt.get_pi = piafunc
-  }
+    soile2.rt.get_pi = piafunc;
+  };
 
   rt.shuffle = function (array) {
-    var arr = array
+    var arr = array;
     if (arr.length > 0) {
-      var counter = arr.length
-      var temp, index
+      var counter = arr.length;
+      var temp, index;
       while (counter > 0) {
-        index = Math.floor(Math.random() * counter)
+        index = Math.floor(Math.random() * counter);
 
-        counter--
+        counter--;
 
-        temp = arr[counter]
-        arr[counter] = arr[index]
-        arr[index] = temp
+        temp = arr[counter];
+        arr[counter] = arr[index];
+        arr[index] = temp;
       }
-      return arr
+      return arr;
     }
-  }
+  };
 
   rt.pi_opcode = function (pi) {
     if (pi === undefined || pi === null) {
-      return -1
+      return -1;
     }
-    if (typeof pi !== 'object' || pi.hasOwnProperty('opcode') === false) {
-      return -1
+    if (typeof pi !== "object" || pi.hasOwnProperty("opcode") === false) {
+      return -1;
     }
-    return pi.opcode
-  }
+    return pi.opcode;
+  };
 
   rt.pi_index = (function () {
-    var index = 0
+    var index = 0;
 
     return {
       get: function () {
-        var current = index
-        index += 1
-        return current
+        var current = index;
+        index += 1;
+        return current;
       },
       set: function (i) {
-        index = i
-      }
-    }
-  })()
+        index = i;
+      },
+    };
+  })();
 
-  rt.dowait = false
-  rt.waitfor = 0
+  rt.dowait = false;
+  rt.waitfor = 0;
 
   /*
    * Execute a program instruction (or several program instructions).
    */
   rt.exec_pi = function () {
-    var scheduler = soile2.rt.schd
-    var opcodes = soile2.rt.opcodes
-    var dowait = false
-    var waitfor = 0
-    var pi, opcode, idx
+    var scheduler = soile2.rt.schd;
+    var opcodes = soile2.rt.opcodes;
+    var dowait = false;
+    var waitfor = 0;
+    var pi, opcode, idx;
 
     try {
       while (true) {
         if (rt.dowait) {
-          dowait = true
-          waitfor = rt.waitfor
+          dowait = true;
+          waitfor = rt.waitfor;
           if (waitfor == 0) {
-            waitfor = 100000000000000000
+            waitfor = 100000000000000000;
           }
 
-          rt.dowait = false
-          rt.waitfor = 0
+          rt.dowait = false;
+          rt.waitfor = 0;
 
-          break
+          break;
         }
 
-        idx = soile2.rt.pi_index.get()
-        pi = soile2.rt.get_pi(idx)
-        opcode = soile2.rt.pi_opcode(pi)
+        idx = soile2.rt.pi_index.get();
+        pi = soile2.rt.get_pi(idx);
+        opcode = soile2.rt.pi_opcode(pi);
 
         if (opcode < 0) {
           // TODO
-          rt.finish()
+          rt.finish();
 
           // Program is over, remove listeners send data and navigate to next view
-          break
+          break;
         }
         if (opcode === opcodes.Assign) {
           if (soile2.assignDebugCallback) {
             //soile2.assignDebugCallback(pi.host);
-            soile2.assignDebugCallback(soile2.defs.gvars, soile2.defs.vars)
+            soile2.assignDebugCallback(soile2.defs.gvars, soile2.defs.vars);
           }
 
-          pi.host[pi.name] = pi.value()
-          continue
+          pi.host[pi.name] = pi.value();
+          continue;
         } else if (opcode === opcodes.Fcall) {
-          pi.host[pi.name].apply(pi.host, pi.params())
-          continue
+          pi.host[pi.name].apply(pi.host, pi.params());
+          continue;
         } else if (opcode === opcodes.If) {
           if (pi.cond.call({}) === false) {
-            soile2.rt.pi_index.set(pi.jmp)
+            soile2.rt.pi_index.set(pi.jmp);
           }
-          continue
+          continue;
         } else if (opcode === opcodes.While) {
           if (pi.cond() === false) {
-            soile2.rt.pi_index.set(pi.jmp)
+            soile2.rt.pi_index.set(pi.jmp);
           }
-          continue
+          continue;
         } else if (opcode === opcodes.Goto) {
-          soile2.rt.pi_index.set(pi.jmp)
-          continue
+          soile2.rt.pi_index.set(pi.jmp);
+          continue;
         } else if (opcode === opcodes.Def) {
-          pi['func'].call({}, [])
-          continue
+          pi["func"].call({}, []);
+          continue;
         } else if (opcode === opcodes.Undef) {
-          soile2.rt.clear_vars()
-          continue
+          soile2.rt.clear_vars();
+          continue;
         } else if (opcode === opcodes.Suspend) {
-          scheduler.suspend()
-          return
+          scheduler.suspend();
+          return;
         }
 
         if (opcode === opcodes.Wait) {
-          dowait = true
-          waitfor = pi.ms()
+          dowait = true;
+          waitfor = pi.ms();
 
           if (soile2.util.pilotMode) {
             if (waitfor > 0 && waitfor < 999999999) {
               // Wait time is set to 999999999 when wait() is called
-              waitfor = 1
+              waitfor = 1;
             }
           }
-          console.log(opcode)
-          break
+          console.log(opcode);
+          break;
         }
       }
     } catch (e) {
-      console.log(e)
+      console.log(e);
       if (soile2.util.debug) {
         //console.log("error");
         //console.log(e);
 
-        soile2.util.debugFunction(e)
+        soile2.util.debugFunction(e);
       } else {
-        if (typeof Raven != 'undefined') {
-          Raven.captureException(e)
+        if (typeof Raven != "undefined") {
+          Raven.captureException(e);
         }
       }
     }
 
     if (dowait) {
-      scheduler.wait(waitfor)
-      return
+      scheduler.wait(waitfor);
+      return;
     }
-  }
+  };
 
   // The scheduler.
   rt.schd = (function () {
     // The "unit" of the delay times; i.e. the delay time is some multiple of this.
-    var MINDELAY = 1
+    var MINDELAY = 1;
 
     // How long the execution will be suspended. ('dur' stands for duration.)
-    var suspend_dur = -1
+    var suspend_dur = -1;
 
-    var due_ts
+    var due_ts;
 
     // This will be the integer returned from a call to setTimeout.
-    var settimeout_id
+    var settimeout_id;
 
     var msleft = function (ts) {
-      return ts - soile2.rt.timestamp()
+      return ts - soile2.rt.timestamp();
       //return Math.abs(ts - soile2.rt.timestamp());
-    }
+    };
 
     var keep_waiting = function (ts) {
-      return msleft(ts) > MINDELAY
-    }
+      return msleft(ts) > MINDELAY;
+    };
 
     var compute_delay = function (ts) {
-      var delay = msleft(ts)
+      var delay = msleft(ts);
       //console.log("Delay = " + delay)
       if (delay < 6) {
-        return 1
+        return 1;
       }
       if (delay < 14) {
-        return 2
+        return 2;
         //return MINDELAY;
       }
       if (delay < 50) {
-        return 10
+        return 10;
         //return MINDELAY * 5;
       }
       if (delay < 100) {
-        return 20
+        return 20;
         //return MINDELAY * 10;
       }
       if (delay < 500) {
-        return 50
+        return 50;
         //return MINDELAY * 15;
       }
       if (delay < 1000) {
-        return 100
+        return 100;
         //return MINDELAY * 30;
       }
-      return 300
+      return 300;
       //return MINDELAY * 40;
-    }
+    };
 
     var schedule = function (delay) {
-      settimeout_id = setTimeout(scheduled, delay)
-    }
+      settimeout_id = setTimeout(scheduled, delay);
+    };
 
     var scheduled = function () {
-      settimeout_id = undefined
+      settimeout_id = undefined;
       if (keep_waiting(due_ts) === true) {
-        schedule(compute_delay(due_ts))
-        return
+        schedule(compute_delay(due_ts));
+        return;
       }
-      resume()
-    }
+      resume();
+    };
 
     var cancel = function () {
       if (settimeout_id) {
-        clearTimeout(settimeout_id)
-        settimeout_id = undefined
-        due_ts = -1
+        clearTimeout(settimeout_id);
+        settimeout_id = undefined;
+        due_ts = -1;
       }
-    }
+    };
 
     var resume = function () {
-      var args = Array.prototype.slice.call(arguments)
+      var args = Array.prototype.slice.call(arguments);
       if (args.length > 0) {
         if (soile2.util.is_number(args[0])) {
-          soile2.rt.pi_index.set(args[0])
+          soile2.rt.pi_index.set(args[0]);
         }
       }
-      soile2.rt.exec_pi()
-    }
+      soile2.rt.exec_pi();
+    };
 
     var suspend = function () {
-      var args = Array.prototype.slice.call(arguments)
+      var args = Array.prototype.slice.call(arguments);
 
       /*
        * When the 'suspend' method is called with a number as a parameter,
@@ -2436,120 +2459,121 @@ SOILE2 = (function () {
        */
       if (args.length > 0) {
         if (soile2.util.is_number(args[0])) {
-          suspend_dur = Math.abs(args[0])
+          suspend_dur = Math.abs(args[0]);
         }
-        return
+        return;
       }
 
       /*
        * If no suspension duration has been set previously, just stop the
        * execution of the program; otherwise, set a timeout.
        */
-      cancel()
+      cancel();
       if (suspend_dur > 0) {
         settimeout_id = setTimeout(function () {
-          resume()
-        }, suspend_dur)
-        suspend_dur = -1
+          resume();
+        }, suspend_dur);
+        suspend_dur = -1;
       }
-    }
+    };
 
     var wait = function (ms) {
-      due_ts = soile2.rt.future_timestamp(ms)
-      schedule(compute_delay(due_ts))
-    }
+      due_ts = soile2.rt.future_timestamp(ms);
+      schedule(compute_delay(due_ts));
+    };
 
     return {
       cancel: cancel,
       resume: resume,
       suspend: suspend,
-      wait: wait
-    }
-  })()
+      wait: wait,
+    };
+  })();
 
   rt.finish = function () {
-    console.log('Test over')
+    console.log("Test over");
 
-    soile2.rt.keyhandler.reset() // Removing all keyhandlers
+    soile2.rt.keyhandler.reset(); // Removing all keyhandlers
     //$("#display").add('*').off(); // Removing all clickhandlers
-    $('#display').off() // Removing all clickhandlers
-    $('#display').children().off()
+    $("#display").off(); // Removing all clickhandlers
+    $("#display").children().off();
 
-    SOILE2.testDuration = Date.now() - SOILE2.startTime
+    SOILE2.testDuration = Date.now() - SOILE2.startTime;
 
-    var data = soile2.rt.dataHandler.getData()
-    var duration = SOILE2.testDuration
-    var score = soile2.rt.scoreHandler.get()
-    var persistantData = soile2.rt.persistantDataHandler.get()
+    var data = soile2.rt.dataHandler.getData();
+    var duration = SOILE2.testDuration;
+    var score = soile2.rt.scoreHandler.get();
+    var persistantData = soile2.rt.persistantDataHandler.get();
 
     //endFunc(soile2.rt.dataHandler.getData());
-    endFunc(data, duration, score, persistantData)
-  }
+    endFunc(data, duration, score, persistantData);
+  };
 
   rt.seal = (function () {
-    if (Object.seal !== undefined || typeof Object.seal === 'function') {
+    if (Object.seal !== undefined || typeof Object.seal === "function") {
       return function (obj) {
-        return Object.seal(obj)
-      }
+        return Object.seal(obj);
+      };
     }
     return function (obj) {
-      return obj
-    }
-  })()
+      return obj;
+    };
+  })();
 
   rt.future_timestamp = function (ms) {
-    return soile2.rt.timestamp() + ms
-  }
+    return soile2.rt.timestamp() + ms;
+  };
 
   rt.timestamp = (function () {
     // http://stackoverflow.com/questions/221294/how-do-you-get-a-timestamp-in-javascript
-    if (Date.now !== undefined && typeof Date.now === 'function') {
+    if (Date.now !== undefined && typeof Date.now === "function") {
       return function () {
-        return Date.now()
-      }
+        return Date.now();
+      };
     }
     return function () {
-      return new Date().getTime()
-    }
-  })()
+      return new Date().getTime();
+    };
+  })();
 
   rt.uniqueid = (function () {
-    var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-    var prefix = 'id'
-    var default_len = 16
+    var chars =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    var prefix = "id";
+    var default_len = 16;
 
     return function () {
-      var args = Array.prototype.slice.call(arguments)
-      var len = default_len
-      var idx = 0
-      var id = prefix
-      var i = 0
+      var args = Array.prototype.slice.call(arguments);
+      var len = default_len;
+      var idx = 0;
+      var id = prefix;
+      var i = 0;
 
       while (i < args.length) {
         if (_.isNumber(args[i]) && Math.abs(args[i]) > 0) {
-          len = Math.abs(args[i])
+          len = Math.abs(args[i]);
         }
         if (_.isString(args[i])) {
-          id = args[i]
+          id = args[i];
         }
-        i += 1
+        i += 1;
       }
 
       while (len > 0) {
-        idx = Math.floor(Math.random() * chars.length)
-        id += chars.substring(idx, idx + 1)
-        len -= 1
+        idx = Math.floor(Math.random() * chars.length);
+        id += chars.substring(idx, idx + 1);
+        len -= 1;
       }
-      return id
-    }
-  })()
+      return id;
+    };
+  })();
 
   rt.phases = (function () {
     return {
       intermezzo: function () {},
-      information: function (idx) {}
-    }
-  })()
+      information: function (idx) {},
+    };
+  })();
 
   // High-level utility functions.
 
@@ -2567,134 +2591,134 @@ SOILE2 = (function () {
      * functions. They would be lost in the
      * serializing process.
      */
-    return JSON.parse(JSON.stringify(oldObject))
-  }
+    return JSON.parse(JSON.stringify(oldObject));
+  };
 
   util.eval = function (code) {
-    jQuery.globalEval(code)
-  }
+    jQuery.globalEval(code);
+  };
 
   util.setEndFunction = function (f) {
-    endFunc = f
-  }
+    endFunc = f;
+  };
 
   util.enableLoadScreen = function () {
-    console.log('Enabling loadscreen')
-    var a = $('#loadAnim').toggleClass('hidden', false)
-    a.removeClass('hidden')
-    console.log(a)
-    loadScreen = true
-  }
+    console.log("Enabling loadscreen");
+    var a = $("#loadAnim").toggleClass("hidden", false);
+    a.removeClass("hidden");
+    console.log(a);
+    loadScreen = true;
+  };
 
   util.setStartFunction = function (f) {
-    startFunc = f
-  }
+    startFunc = f;
+  };
 
   util.setLogFunction = function (f) {
-    logFunc = f
-  }
+    logFunc = f;
+  };
 
   //Resets collected data, should be when a test is rerun when
   //debugging
   util.resetData = function () {
-    soile2.rt.dataHandler.reset()
-    soile2.rt.keyhandler.reset()
-    soile2.rt.scoreHandler.reset()
-    soile2.rt.persistantDataHandler.reset()
+    soile2.rt.dataHandler.reset();
+    soile2.rt.keyhandler.reset();
+    soile2.rt.scoreHandler.reset();
+    soile2.rt.persistantDataHandler.reset();
 
-    allReady = false
-  }
+    allReady = false;
+  };
 
   util.getid = function (s) {
-    if (typeof s === 'string') {
-      if (s.charAt(0) === '#') {
-        return s
+    if (typeof s === "string") {
+      if (s.charAt(0) === "#") {
+        return s;
       }
-      return '#'.concat(s)
+      return "#".concat(s);
     }
-    return s
-  }
+    return s;
+  };
 
   // Return true if an object has an id property.
   util.hasobjid = function (elem) {
-    return _.isObject(elem) && (_.has(elem, '_id') || _.has(elem, 'id'))
-  }
+    return _.isObject(elem) && (_.has(elem, "_id") || _.has(elem, "id"));
+  };
 
   util.is_boolean = function (o) {
-    return _.isBoolean(o)
-  }
+    return _.isBoolean(o);
+  };
 
   util.is_number = function (i) {
     // http://stackoverflow.com/questions/1019515/javascript-test-for-an-integer
     //return ! isNaN(parseInt(i, 10));
-    return _.isNumber(i)
-  }
+    return _.isNumber(i);
+  };
 
   util.can_be_number = function (i) {
-    var n = parseFloat(i)
-    return _.isNumber(n)
-  }
+    var n = parseFloat(i);
+    return _.isNumber(n);
+  };
 
   util.is_string = function (s) {
-    return _.isString(s)
-  }
+    return _.isString(s);
+  };
 
   util.to_integer = function (i) {
-    return parseInt(i, 10)
-  }
+    return parseInt(i, 10);
+  };
 
   util.onImageLoad = function () {
-    toLoad -= 1
-    console.log('Image loaded')
+    toLoad -= 1;
+    console.log("Image loaded");
     //console.log(performance.now() + " Image Loaded, images left:" + toLoad + " allready: " + allReady);
     if (toLoad === 0) {
       if (allReady) {
-        soile2.start()
+        soile2.start();
       }
     }
-  }
+  };
 
   util.setPersistantData = function (data) {
-    soile2.rt.persistantDataHandler.set(data)
-  }
+    soile2.rt.persistantDataHandler.set(data);
+  };
 
   /**
    * Pilot mode will sets all waits to 1 ms which makes it easier to debug long
    */
   util.setPilotMode = function (state) {
     if (!state) {
-      soile2.util.pilotMode = false
+      soile2.util.pilotMode = false;
     }
 
-    soile2.util.pilotMode = state
-  }
+    soile2.util.pilotMode = state;
+  };
 
   util.setDebug = function (func) {
-    soile2.util.debug = true
-    soile2.util.debugFunction = func
-  }
+    soile2.util.debug = true;
+    soile2.util.debugFunction = func;
+  };
 
   util.setAssignCallback = function (callback) {
-    soile2.assignDebugCallback = callback
-  }
+    soile2.assignDebugCallback = callback;
+  };
 
-  soile2.bin = soile2.rt.seal(bin)
+  soile2.bin = soile2.rt.seal(bin);
 
   soile2.start = function () {
     if (toLoad > 0) {
-      console.log('loading images')
+      console.log("loading images");
     } else {
       if (startFunc !== null) {
-        startFunc()
+        startFunc();
       }
-      SOILE2.startTime = Date.now()
-      console.log('Starting to execute')
-      $('#loadAnim').toggleClass('hidden', true)
+      SOILE2.startTime = Date.now();
+      console.log("Starting to execute");
+      $("#loadAnim").toggleClass("hidden", true);
 
-      SOILE2.rt.exec_pi()
+      SOILE2.rt.exec_pi();
     }
-    console.log('started')
-  }
+    console.log("started");
+  };
 
-  return soile2
-})()
+  return soile2;
+})();

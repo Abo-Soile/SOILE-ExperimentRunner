@@ -8,7 +8,11 @@
     :data-node-type="node.type"
     @pointerdown="select"
   >
-    <div class="__title" @pointerdown.self.stop="startDrag" @contextmenu="openBaklavaContextMenu">
+    <div
+      class="__title"
+      @pointerdown.self.stop="startDrag"
+      @contextmenu="openBaklavaContextMenu"
+    >
       <template v-if="!renaming">
         <div class="__title-label">
           {{ node.title }}
@@ -69,139 +73,158 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, toRef, nextTick, onUpdated, onMounted, onBeforeUnmount } from 'vue'
-import { AbstractNode, GRAPH_NODE_TYPE_PREFIX, IGraphNode } from '@baklavajs/core'
-import { useDragMove, useGraph, useViewModel } from '@baklavajs/renderer-vue'
-import { Components } from '@baklavajs/renderer-vue'
-import NodeInterface from './NodeInterface.vue'
-import { useGraphStore } from '@/stores'
-import { ResizeObserverEntry } from '@vueuse/core'
-import SoileNode from '../NodeTypes/SoileNode'
+import {
+  ref,
+  computed,
+  toRef,
+  nextTick,
+  onUpdated,
+  onMounted,
+  onBeforeUnmount,
+} from "vue";
+import {
+  AbstractNode,
+  GRAPH_NODE_TYPE_PREFIX,
+  IGraphNode,
+} from "@baklavajs/core";
+import { useDragMove, useGraph, useViewModel } from "@baklavajs/renderer-vue";
+import { Components } from "@baklavajs/renderer-vue";
+import NodeInterface from "./NodeInterface.vue";
+import { useGraphStore } from "@/stores";
+import { ResizeObserverEntry } from "@vueuse/core";
+import SoileNode from "../NodeTypes/SoileNode";
 
-const graphStore = useGraphStore()
-const contextMenu = Components.ContextMenu
+const graphStore = useGraphStore();
+const contextMenu = Components.ContextMenu;
 
 const props = withDefaults(
   defineProps<{
-    node: SoileNode
-    selected?: boolean
+    node: SoileNode;
+    selected?: boolean;
   }>(),
   { selected: false }
-)
+);
 const emit = defineEmits<{
-  (e: 'select'): void
-}>()
-const { viewModel } = useViewModel()
-const { graph, switchGraph } = useGraph()
-const dragMove = useDragMove(toRef(props.node, 'position'))
-const el = ref<HTMLElement | null>(null)
-const renaming = ref(false)
-const tempName = ref('')
-const renameInputEl = ref<HTMLInputElement | null>(null)
-const showContextMenu = ref(false)
+  (e: "select"): void;
+}>();
+const { viewModel } = useViewModel();
+const { graph, switchGraph } = useGraph();
+const dragMove = useDragMove(toRef(props.node, "position"));
+const el = ref<HTMLElement | null>(null);
+const renaming = ref(false);
+const tempName = ref("");
+const renameInputEl = ref<HTMLInputElement | null>(null);
+const showContextMenu = ref(false);
 const contextMenuItems = computed(() => {
   const items = [
-    { value: 'rename', label: 'Rename' },
-    { value: 'delete', label: 'Delete' }
-  ]
+    { value: "rename", label: "Rename" },
+    { value: "delete", label: "Delete" },
+  ];
   if (props.node.type.startsWith(GRAPH_NODE_TYPE_PREFIX)) {
-    items.push({ value: 'editSubgraph', label: 'Edit Subgraph' })
+    items.push({ value: "editSubgraph", label: "Edit Subgraph" });
   }
-  if (!props.node.type.startsWith('Filter') && !props.node.isStartNode()) {
-    items.push({ value: 'makeStart', label: 'Make Start Node' })
+  if (!props.node.type.startsWith("Filter") && !props.node.isStartNode()) {
+    items.push({ value: "makeStart", label: "Make Start Node" });
   }
-  return items
-})
+  return items;
+});
 const classes = computed(() => ({
-  '--selected': props.selected,
-  '--dragging': dragMove.dragging.value,
-  '--two-column': !!props.node.twoColumn
-}))
+  "--selected": props.selected,
+  "--dragging": dragMove.dragging.value,
+  "--two-column": !!props.node.twoColumn,
+}));
 const styles = computed(() => ({
   top: `${props.node.position?.y ?? 0}px`,
   left: `${props.node.position?.x ?? 0}px`,
   width: `${props.node.position.width ?? 200}px`,
-  'box-shadow': props.node.isStartNode() ? '0 0 0 3px green' : undefined
-}))
+  "box-shadow": props.node.isStartNode() ? "0 0 0 3px green" : undefined,
+}));
 const displayedInputs = computed(() =>
   Object.values(props.node.inputs).filter((ni) => !ni.hidden && ni.port)
-)
+);
 const displayedOutputs = computed(() =>
   Object.values(props.node.outputs).filter((ni) => !ni.hidden && ni.port)
-)
+);
 const displayedOptions = computed(() => {
-  let inputOptions = Object.values(props.node.outputs).filter((ni) => !ni.hidden && !ni.port)
-  let outputOptions = Object.values(props.node.inputs).filter((ni) => !ni.hidden && !ni.port)
-  return inputOptions.concat(outputOptions)
-})
+  let inputOptions = Object.values(props.node.outputs).filter(
+    (ni) => !ni.hidden && !ni.port
+  );
+  let outputOptions = Object.values(props.node.inputs).filter(
+    (ni) => !ni.hidden && !ni.port
+  );
+  return inputOptions.concat(outputOptions);
+});
 const select = () => {
-  emit('select')
-}
+  emit("select");
+};
 const startDrag = (ev: PointerEvent) => {
-  dragMove.onPointerDown(ev)
-  document.addEventListener('pointermove', dragMove.onPointerMove)
-  document.addEventListener('pointerup', stopDrag)
-  select()
-}
+  dragMove.onPointerDown(ev);
+  document.addEventListener("pointermove", dragMove.onPointerMove);
+  document.addEventListener("pointerup", stopDrag);
+  select();
+};
 const stopDrag = () => {
-  dragMove.onPointerUp()
-  document.removeEventListener('pointermove', dragMove.onPointerMove)
-  document.removeEventListener('pointerup', stopDrag)
-}
+  dragMove.onPointerUp();
+  document.removeEventListener("pointermove", dragMove.onPointerMove);
+  document.removeEventListener("pointerup", stopDrag);
+};
 const openContextMenu = () => {
-  showContextMenu.value = true
-}
+  showContextMenu.value = true;
+};
 const openBaklavaContextMenu = (event: MouseEvent) => {
-  event.preventDefault()
-  openContextMenu()
-}
+  event.preventDefault();
+  openContextMenu();
+};
 const onContextMenuClick = async (action: string) => {
   switch (action) {
-    case 'delete':
-      graph.value.removeNode(props.node)
-      break
-    case 'rename':
-      tempName.value = props.node.title
-      renaming.value = true
-      await nextTick()
-      renameInputEl.value?.focus()
-      break
-    case 'makeStart':
-      props.node.makeStartNode()
-      break
-    case 'editSubgraph':
-      switchGraph((props.node as AbstractNode & IGraphNode).template)
-      break
+    case "delete":
+      graph.value.removeNode(props.node);
+      break;
+    case "rename":
+      tempName.value = props.node.title;
+      renaming.value = true;
+      await nextTick();
+      renameInputEl.value?.focus();
+      break;
+    case "makeStart":
+      props.node.makeStartNode();
+      break;
+    case "editSubgraph":
+      switchGraph((props.node as AbstractNode & IGraphNode).template);
+      break;
   }
-}
+};
 const doneRenaming = () => {
   if (graphStore.isNameOk(props.node, tempName.value)) {
-    props.node.title = tempName.value
+    props.node.title = tempName.value;
   }
-  renaming.value = false
-}
+  renaming.value = false;
+};
 const onRender = () => {
   if (el.value) {
-    viewModel.value.hooks.renderNode.execute({ node: props.node, el: el.value })
+    viewModel.value.hooks.renderNode.execute({
+      node: props.node,
+      el: el.value,
+    });
   }
-}
+};
 
 const handleResize = (event: Array<ResizeObserverEntry>) => {
   // otherwise this will be overwriting tab-out events, where they are made invisible.
   if (event[0].contentRect.width > 0 && event[0].contentRect.height > 0) {
-    props.node.position.width = event[0].contentRect.width
-    props.node.position.height = event[0].contentRect.height
+    props.node.position.width = event[0].contentRect.width;
+    props.node.position.height = event[0].contentRect.height;
   }
-}
+};
 
 onMounted(() => {
-  new ResizeObserver(handleResize).observe(el.value)
-  onRender()
-})
+  new ResizeObserver(handleResize).observe(el.value);
+  onRender();
+});
 onBeforeUnmount(() => {
-  el.value.removeEventListener('resize', handleResize)
-})
-onUpdated(onRender)
+  el.value.removeEventListener("resize", handleResize);
+});
+onUpdated(onRender);
 </script>
 
 <style scoped>

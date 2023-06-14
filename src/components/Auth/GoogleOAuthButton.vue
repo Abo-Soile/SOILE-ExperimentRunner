@@ -12,18 +12,18 @@
 </template>
 <script>
 export default {
-  name: 'GoogleOAuthButton',
+  name: "GoogleOAuthButton",
   props: {
     googleClientID: {
       type: String,
-      required: true
+      required: true,
     },
     googleRedirectAddress: {
       type: String,
-      required: true
-    }
-  }
-}
+      required: true,
+    },
+  },
+};
 </script>
 <style scoped>
 .googleButton {

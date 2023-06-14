@@ -29,139 +29,143 @@
 </template>
 
 <script>
-import Dropdown from 'primevue/dropdown'
-import { useElementStore } from '@/stores'
-import { defineComponent } from 'vue'
+import Dropdown from "primevue/dropdown";
+import { useElementStore } from "@/stores";
+import { defineComponent } from "vue";
 export default defineComponent({
   components: { Dropdown },
   props: {
     objectType: {
       type: String,
-      required: true
+      required: true,
     },
     element: {
       type: Object,
-      required: false
+      required: false,
     },
     version: {
       type: [Object, String],
-      required: false
+      required: false,
     },
     elementLabel: {
       type: String,
-      default: 'name'
+      default: "name",
     },
     versionLabel: {
       type: String,
-      default: 'tag'
+      default: "tag",
     },
     dropDownClasses: {
-      type: String
+      type: String,
     },
     elementTitle: {
       type: String,
-      default: (props) => props.objectType
+      default: (props) => props.objectType,
     },
     versionTitle: {
       type: String,
-      default: 'Version'
-    }
+      default: "Version",
+    },
   },
-  emits: ['update:element', 'update:version'],
+  emits: ["update:element", "update:version"],
   data() {
     return {
       loading: true,
       currentElement: undefined,
       currentVersion: undefined,
       availableItems: [],
-      availableVersions: []
-    }
+      availableVersions: [],
+    };
   },
   setup() {
-    const elementStore = useElementStore()
-    return { elementStore: elementStore }
+    const elementStore = useElementStore();
+    return { elementStore: elementStore };
   },
   computed: {
     elementSelected() {
-      return this.currentElement != undefined
+      return this.currentElement != undefined;
     },
     selectedItem() {
       return {
         name: this.selectedElement?.name,
         uuid: this.selectedElement?.uuid,
-        version: this.selectedVersion?.version
-      }
+        version: this.selectedVersion?.version,
+      };
     },
     selectedElement: {
       get() {
-        return this.element ? this.element : this.currentElement
+        return this.element ? this.element : this.currentElement;
       },
       set(newValue) {
         // reset the version, since the value changed;
         if (this.currentElement != newValue) {
-          this.selectedVersion = undefined
+          this.selectedVersion = undefined;
         }
-        this.currentElement = newValue
-        this.$emit('update:element', newValue)
-      }
+        this.currentElement = newValue;
+        this.$emit("update:element", newValue);
+      },
     },
     selectedVersion: {
       get() {
-        console.log(this.version)
-        if (typeof this.version === 'string') {
-          return this.availableVersions.find((x) => x.version === this.version)
+        console.log(this.version);
+        if (typeof this.version === "string") {
+          return this.availableVersions.find((x) => x.version === this.version);
         } else {
-          return this.version ? this.version : this.currentVersion
+          return this.version ? this.version : this.currentVersion;
         }
       },
       set(newValue) {
         // reset the version, since the value changed;
-        console.log('setting version')
-        this.currentVersion = newValue
-        this.$emit('update:version', newValue)
-      }
-    }
+        console.log("setting version");
+        this.currentVersion = newValue;
+        this.$emit("update:version", newValue);
+      },
+    },
   },
   methods: {
     async updateAvailableVersions(uuid) {
       const versions = await this.elementStore.getOptionsForElement(
         uuid,
         this.objectType.toLowerCase()
-      )
+      );
       this.availableVersions = versions
         .filter((x) => x.tag)
         .map((x) => {
-          return { tag: x.tag, version: x.version }
-        })
-    }
+          return { tag: x.tag, version: x.version };
+        });
+    },
   },
   watch: {
     selectedItem: {
       handler(newValue) {
-        this.$emit('update:element', newValue)
+        this.$emit("update:element", newValue);
       },
-      deep: true
+      deep: true,
     },
-    'selectedItem.uuid': {
+    "selectedItem.uuid": {
       async handler(newValue) {
-        console.log('SelectedItem uuid changed')
+        console.log("SelectedItem uuid changed");
         if (newValue) {
-          this.updateAvailableVersions(newValue)
+          this.updateAvailableVersions(newValue);
         }
-      }
-    }
+      },
+    },
   },
   async mounted() {
     // TODO: heck whether this savely works with onMounted or whether this should be done with onDisplay
-    console.log(this.objectType)
-    this.loading = true
-    await this.elementStore.updateAvailableOptions(this.objectType.toLowerCase())
-    this.availableItems = await this.elementStore.getListForType(this.objectType.toLowerCase())
+    console.log(this.objectType);
+    this.loading = true;
+    await this.elementStore.updateAvailableOptions(
+      this.objectType.toLowerCase()
+    );
+    this.availableItems = await this.elementStore.getListForType(
+      this.objectType.toLowerCase()
+    );
     if (this.selectedItem.uuid) {
-      await this.updateAvailableVersions(this.selectedItem.uuid)
+      await this.updateAvailableVersions(this.selectedItem.uuid);
     }
-    this.loading = false
-    this.currentElement = this.element
-  }
-})
+    this.loading = false;
+    this.currentElement = this.element;
+  },
+});
 </script>

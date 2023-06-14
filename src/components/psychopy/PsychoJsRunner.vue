@@ -9,12 +9,12 @@ export default {
   props: {
     psychoJSVersion: {
       type: String,
-      required: true
+      required: true,
     },
     code: {
       type: String,
-      required: true
-    }
+      required: true,
+    },
   },
   methods: {
     /**
@@ -24,22 +24,22 @@ export default {
      * @param {*} mimetype (unused)
      */
     handleData(filename, data, mimetype) {
-      console.log(filename)
-      console.log(data)
-      console.log(mimetype)
-      this.results = data
+      console.log(filename);
+      console.log(data);
+      console.log(mimetype);
+      this.results = data;
     },
     /**
      * Submit data
      */
     async submit() {
       try {
-        const submitJson = this.buildResults()
+        const submitJson = this.buildResults();
         // clean up the page.
-        this.$emit('handleSubmit', submitJson)
+        this.$emit("handleSubmit", submitJson);
       } catch (error) {
-        console.log(error)
-        this.$emit('handleError', error.message)
+        console.log(error);
+        this.$emit("handleError", error.message);
       }
     },
     /**
@@ -47,19 +47,22 @@ export default {
      */
     buildResults() {
       //TODO: Check whether there is a sensible way to allow outputs to be defined here.
-      let jsonResults = []
+      let jsonResults = [];
       for (let field in this.results) {
-        jsonResults.push({ name: field, value: this.results[field] })
+        jsonResults.push({ name: field, value: this.results[field] });
       }
-      return { outputData: [], resultData: { fileData: [], jsonData: jsonResults } }
-    }
+      return {
+        outputData: [],
+        resultData: { fileData: [], jsonData: jsonResults },
+      };
+    },
   },
   mounted() {
-    const iframeWindow = this.$refs.psychoJSWindow.contentWindow
-    iframeWindow.reportResult = this.handleData
-    iframeWindow.submitResults = this.submit
-  }
-}
+    const iframeWindow = this.$refs.psychoJSWindow.contentWindow;
+    iframeWindow.reportResult = this.handleData;
+    iframeWindow.submitResults = this.submit;
+  },
+};
 </script>
 
 <style scoped></style>

@@ -12,7 +12,12 @@
         </div>
         <div class="p-field-checkbox">
           <label for="rememberMe">Remember Me</label>
-          <Checkbox v-model="rememberMe" :binary="true" name="rememberMe" label="Remember Me" />
+          <Checkbox
+            v-model="rememberMe"
+            :binary="true"
+            name="rememberMe"
+            label="Remember Me"
+          />
         </div>
         <div class="p-field">
           <Button type="submit" label="Log in" class="p-button-success" />
@@ -23,40 +28,40 @@
 </template>
 
 <script>
-import InputText from 'primevue/inputtext'
-import Password from 'primevue/password'
-import Checkbox from 'primevue/checkbox'
-import Button from 'primevue/button'
-import { useAuthStore } from '../stores'
+import InputText from "primevue/inputtext";
+import Password from "primevue/password";
+import Checkbox from "primevue/checkbox";
+import Button from "primevue/button";
+import { useAuthStore } from "../stores";
 
 export default {
-  name: 'LoginForm',
+  name: "LoginForm",
   components: {
     Card,
     InputText,
     Password,
     Checkbox,
-    Button
+    Button,
   },
   data() {
     return {
-      username: '',
-      password: '',
-      rememberMe: false
-    }
+      username: "",
+      password: "",
+      rememberMe: false,
+    };
   },
   setup() {
-    const authStore = useAuthStore()
+    const authStore = useAuthStore();
     return {
-      login: authStore.login
-    }
+      login: authStore.login,
+    };
   },
 
   methods: {
     async submitForm() {
-      await this.login(this.username, this.password, this.rememberMe)
-      this.$emit('submitted')
-    }
-  }
-}
+      await this.login(this.username, this.password, this.rememberMe);
+      this.$emit("submitted");
+    },
+  },
+};
 </script>

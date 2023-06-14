@@ -4,7 +4,11 @@
       <label for="name">Name</label>
     </div>
     <div class="col">
-      <InputText :class="{ 'p-invalid': !nameValid }" id="name" v-model="currentName" />
+      <InputText
+        :class="{ 'p-invalid': !nameValid }"
+        id="name"
+        v-model="currentName"
+      />
     </div>
   </div>
   <div class="grid">
@@ -54,95 +58,96 @@
 </template>
 
 <script>
-import Checkbox from 'primevue/checkbox'
-import InputText from 'primevue/inputtext'
-import TextArea from 'primevue/textarea'
-import ObjectAndVersionSelector from '@/components/utils/ObjectAndVersionSelector.vue'
+import Checkbox from "primevue/checkbox";
+import InputText from "primevue/inputtext";
+import TextArea from "primevue/textarea";
+import ObjectAndVersionSelector from "@/components/utils/ObjectAndVersionSelector.vue";
 
 export default {
   components: { TextArea, InputText, Checkbox },
   emits: [
-    'update:valid',
-    'update:name',
-    'update:shortCut',
-    'update:descriptionShort',
-    'update:descriptionLong',
-    'update:private'
+    "update:valid",
+    "update:name",
+    "update:shortCut",
+    "update:descriptionShort",
+    "update:descriptionLong",
+    "update:private",
   ],
   props: {
     name: {
       type: String,
-      required: true
+      required: true,
     },
     descriptionShort: {
       type: String,
-      required: true
+      required: true,
     },
     descriptionLong: {
       type: String,
-      required: true
+      required: true,
     },
     shortCut: {
       type: String,
-      required: true
+      required: true,
     },
     private: {
       type: Boolean,
-      required: true
-    }
+      required: true,
+    },
   },
   computed: {
     currentName: {
       set(newValue) {
-        this.$emit('update:name', newValue)
+        this.$emit("update:name", newValue);
       },
       get() {
-        return this.name
-      }
+        return this.name;
+      },
     },
     currentDescriptionShort: {
       set(newValue) {
-        this.$emit('update:descriptionShort', newValue)
+        this.$emit("update:descriptionShort", newValue);
       },
       get() {
-        return this.descriptionShort
-      }
+        return this.descriptionShort;
+      },
     },
     currentDescriptionLong: {
       set(newValue) {
-        this.$emit('update:descriptionLong', newValue)
+        this.$emit("update:descriptionLong", newValue);
       },
       get() {
-        return this.descriptionLong
-      }
+        return this.descriptionLong;
+      },
     },
     currentShortCut: {
       set(newValue) {
-        this.$emit('update:shortCut', newValue)
+        this.$emit("update:shortCut", newValue);
       },
       get() {
-        return this.shortCut
-      }
+        return this.shortCut;
+      },
     },
     currentPrivate: {
       set(newValue) {
-        this.$emit('update:private', newValue)
+        this.$emit("update:private", newValue);
       },
       get() {
-        return this.private
-      }
+        return this.private;
+      },
     },
     shortCutValid() {
       const isValid =
-        (this.shortCut.search(/^[0-9a-zA-Z]*$/) == 0 || this.shortCut.length == 0) &&
-        this.shortCut.length <= 15
-      this.$emit('update:valid', isValid && this.nameValid)
-      return isValid
+        (this.shortCut.search(/^[0-9a-zA-Z]*$/) == 0 ||
+          this.shortCut.length == 0) &&
+        this.shortCut.length <= 15;
+      this.$emit("update:valid", isValid && this.nameValid);
+      return isValid;
     },
     nameValid() {
-      this.$emit('update:valid', this.name.length > 0 && this.shortCutValid)
-      return this.name.length > 0
-    }
-  }
-}
+      this.$emit("update:valid", this.name.length > 0 && this.shortCutValid);
+      return this.name.length > 0;
+    },
+  },
+};
 </script>

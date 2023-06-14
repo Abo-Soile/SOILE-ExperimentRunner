@@ -7,7 +7,13 @@
       @handleSubmit="(event) => displayResults(event)"
       @handleError="(error) => handleError(error)"
       @handleUpload="
-        (event) => uploadFile(event.file, event.fileName, event.idCallBack, event.errorCallBack)
+        (event) =>
+          uploadFile(
+            event.file,
+            event.fileName,
+            event.idCallBack,
+            event.errorCallBack
+          )
       "
     >
     </SoileExpRunner>
@@ -18,7 +24,13 @@
       @handleSubmit="(event) => submitResults(event)"
       @handleError="(error) => handleError(error)"
       @handleUpload="
-        (event) => uploadFile(event.file, event.fileName, event.idCallBack, event.errorCallBack)
+        (event) =>
+          uploadFile(
+            event.file,
+            event.fileName,
+            event.idCallBack,
+            event.errorCallBack
+          )
       "
     >
     </PsychoJsRunner>
@@ -34,73 +46,73 @@
 </template>
 
 <script>
-import axios from 'axios'
-import SoileQuestionnaire from '@/components/questionnaire/SoileQuestionnaire.vue'
-import SoileExpRunner from '@/components/experimentlang/SoileExpRunner.vue'
-import PsychoJsRunner from '@/components/psychopy/PsychoJsRunner.vue'
-import { mapState } from 'pinia'
-import { useErrorStore } from '@/stores'
-import { useUserStore } from '@/stores/users'
-import Button from 'primevue/button'
+import axios from "axios";
+import SoileQuestionnaire from "@/components/questionnaire/SoileQuestionnaire.vue";
+import SoileExpRunner from "@/components/experimentlang/SoileExpRunner.vue";
+import PsychoJsRunner from "@/components/psychopy/PsychoJsRunner.vue";
+import { mapState } from "pinia";
+import { useErrorStore } from "@/stores";
+import { useUserStore } from "@/stores/users";
+import Button from "primevue/button";
 
 export default {
-  name: 'CodePreview',
+  name: "CodePreview",
   components: { SoileQuestionnaire, SoileExpRunner, PsychoJsRunner, Button },
   setup() {
-    const errorStore = useErrorStore()
-    const userStore = useUserStore()
-    userStore.setTaskActive()
-    return { errorStore }
+    const errorStore = useErrorStore();
+    const userStore = useUserStore();
+    userStore.setTaskActive();
+    return { errorStore };
   },
   data() {
     return {
       isRunning: false,
-      compiledCode: '',
+      compiledCode: "",
       codeReady: false,
       codeType: undefined,
       codeVersion: undefined,
       taskUUID: undefined,
-      outputs: []
-    }
+      outputs: [],
+    };
   },
   computed: {
     canRun() {
-      return true
-    }
+      return true;
+    },
   },
   methods: {
     start() {
-      const currentData = window.getCodeData()
-      this.codeType = currentData.type
-      this.codeVersion = currentData.version
-      this.compiledCode = currentData.compiledCode
-      this.isRunning = true
-      this.codeReady = true
+      const currentData = window.getCodeData();
+      this.codeType = currentData.type;
+      this.codeVersion = currentData.version;
+      this.compiledCode = currentData.compiledCode;
+      this.isRunning = true;
+      this.codeReady = true;
     },
     stop() {
-      this.isRunning = false
-      this.codeReady = false
-      this.codeType = ''
-      this.codeVersion = ''
-      this.compiledCode = ''
+      this.isRunning = false;
+      this.codeReady = false;
+      this.codeType = "";
+      this.codeVersion = "";
+      this.compiledCode = "";
     },
     displayResults(event) {
-      window.displayResults(event)
+      window.displayResults(event);
     },
     handleError(err) {
-      window.handleError(err)
+      window.handleError(err);
     },
     uploadFile(file, fileName, idCallback, errorCallback) {
-      window.uploadFile(file, fileName, idCallback, errorCallback)
+      window.uploadFile(file, fileName, idCallback, errorCallback);
     },
     submitResults(event) {
-      window.submitResults(event)
-    }
+      window.submitResults(event);
+    },
   },
   mounted() {
-    console.log(window)
-    window.start = this.start
-    window.stop = this.stop
-  }
-}
+    console.log(window);
+    window.start = this.start;
+    window.stop = this.stop;
+  },
+};
 </script>

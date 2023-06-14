@@ -42,14 +42,14 @@
 </template>
 
 <script>
-import Dropdown from 'primevue/dropdown'
-import ObjectAndVersionSelectorWithProps from '@/components/utils/ObjectAndVersionSelectorWithProps.vue'
-import { useStudyStore, useElementStore } from '@/stores'
-import { reactive } from 'vue'
+import Dropdown from "primevue/dropdown";
+import ObjectAndVersionSelectorWithProps from "@/components/utils/ObjectAndVersionSelectorWithProps.vue";
+import { useStudyStore, useElementStore } from "@/stores";
+import { reactive } from "vue";
 
-import StudyProperties from './StudyProperties.vue'
-import StudyActivity from './StudyActivity.vue'
-import StudyDataSelector from './StudyDataSelector.vue'
+import StudyProperties from "./StudyProperties.vue";
+import StudyActivity from "./StudyActivity.vue";
+import StudyDataSelector from "./StudyDataSelector.vue";
 
 export default {
   components: {
@@ -57,17 +57,17 @@ export default {
     ObjectAndVersionSelectorWithProps,
     Dropdown,
     StudyProperties,
-    StudyActivity
+    StudyActivity,
   },
   props: {
     editableStudies: {
       type: Array,
-      required: true
+      required: true,
     },
     selectedStudy: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
   data() {
     return {
@@ -75,94 +75,104 @@ export default {
       accessTokens: [],
       permanentAccessToken: null,
       usedTokens: [],
-      availableData: {}
-    }
+      availableData: {},
+    };
   },
   setup(props) {
-    console.log('Setting up StudyEditor')
-    const currentStudy = reactive(JSON.parse(JSON.stringify(props.selectedStudy)))
-    const projectStore = useStudyStore()
-    const elementStore = useElementStore()
-    return { currentStudy, elementStore, projectStore }
+    console.log("Setting up StudyEditor");
+    const currentStudy = reactive(
+      JSON.parse(JSON.stringify(props.selectedStudy))
+    );
+    const projectStore = useStudyStore();
+    const elementStore = useElementStore();
+    return { currentStudy, elementStore, projectStore };
   },
   computed: {
     isProjectEditable() {
       return (
         this.selectedStudy.UUID == null ||
-        this.editableStudies.map((x) => x.uuid).includes(this.selectedStudy.UUID)
-      )
+        this.editableStudies
+          .map((x) => x.uuid)
+          .includes(this.selectedStudy.UUID)
+      );
     },
     sourceProject: {
       get() {
         return this.elementStore.availableProjects.find(
           (x) => x.uuid === this.selectedStudy.sourceUUID
-        )
+        );
       },
       set(newValue) {
-        this.selectedStudy.sourceUUID = newValue.uuid
-      }
+        this.selectedStudy.sourceUUID = newValue.uuid;
+      },
     },
     sourceVersion: {
       get() {
-        return this.selectedStudy.version
+        return this.selectedStudy.version;
       },
       set(newValue) {
         if (newValue) {
-          this.selectedStudy.version = newValue.version
+          this.selectedStudy.version = newValue.version;
         } else {
-          this.selectedStudy.version = undefined
+          this.selectedStudy.version = undefined;
         }
-      }
-    }
+      },
+    },
   },
   watch: {
     // on an updated project, we reparse it.
     selectedStudy(newValue) {
-      console.log('Selected Project Changed')
-      this.currentStudy = reactive(JSON.parse(JSON.stringify(this.selectedStudy)))
-      this.updateData()
+      console.log("Selected Project Changed");
+      this.currentStudy = reactive(
+        JSON.parse(JSON.stringify(this.selectedStudy))
+      );
+      this.updateData();
     },
-    async 'currentStudy.active'(newValue) {
-      console.log('Activity of current project changed')
+    async "currentStudy.active"(newValue) {
+      console.log("Activity of current project changed");
       if (newValue) {
-        this.projectStore.activate(this.currentStudy.UUID)
+        this.projectStore.activate(this.currentStudy.UUID);
       } else {
-        this.projectStore.deactivate(this.currentStudy.UUID)
+        this.projectStore.deactivate(this.currentStudy.UUID);
       }
-    }
+    },
   },
   methods: {
     updateData() {
-      console.log('Updating Data for Study in Editor')
-      this.updateTokenData()
-      this.updateAvailableDLData()
+      console.log("Updating Data for Study in Editor");
+      this.updateTokenData();
+      this.updateAvailableDLData();
     },
     async updateTokenData() {
-      console.log('Updating token data')
-      const tokenInformation = await this.projectStore.getTokenInformation(this.currentStudy.UUID)
-      this.usedTokens = tokenInformation.usedTokens || []
-      this.accessTokens = tokenInformation.signupTokens || []
-      this.permanentAccessToken = tokenInformation.permanentAccessToken || ''
+      console.log("Updating token data");
+      const tokenInformation = await this.projectStore.getTokenInformation(
+        this.currentStudy.UUID
+      );
+      this.usedTokens = tokenInformation.usedTokens || [];
+      this.accessTokens = tokenInformation.signupTokens || [];
+      this.permanentAccessToken = tokenInformation.permanentAccessToken || "";
     },
     async updateAvailableDLData() {
-      this.availableData = await this.projectStore.getDownloadableData(this.currentStudy.UUID)
+      this.availableData = await this.projectStore.getDownloadableData(
+        this.currentStudy.UUID
+      );
     },
     async createAccessTokens(count) {
-      await this.projectStore.generateTokens(this.currentStudy.UUID, count)
-      await this.updateTokenData()
+      await this.projectStore.generateTokens(this.currentStudy.UUID, count);
+      await this.updateTokenData();
     },
     async createMasterToken() {
-      await this.projectStore.generateMasterToken(currentStudy)
-      await this.updateTokenData()
-    }
+      await this.projectStore.generateMasterToken(currentStudy);
+      await this.updateTokenData();
+    },
   },
   mounted() {
     if (this.currentStudy && this.currentStudy.UUID) {
-      console.log('StudyEditor Mounted')
-      this.updateData()
+      console.log("StudyEditor Mounted");
+      this.updateData();
     }
-  }
-}
+  },
+};
 </script>
 
 <style scoped>

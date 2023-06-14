@@ -7,74 +7,76 @@
     <label for="addOutput">Filter expression:</label>
     <input type="text" v-model="newFilter" name="addOutput" />
   </div>
-  <button class="baklava-button" @click="updateFilter()">{{ buttonLabel }}</button>
+  <button class="baklava-button" @click="updateFilter()">
+    {{ buttonLabel }}
+  </button>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { ComponentInterface } from './projecteditor/NodeInterfaces/ComponentInterface'
-import FilterNode from './projecteditor/NodeTypes/FilterNode'
-import { useGraphStore } from '@/stores/graph'
+import { defineComponent } from "vue";
+import { ComponentInterface } from "./projecteditor/NodeInterfaces/ComponentInterface";
+import FilterNode from "./projecteditor/NodeTypes/FilterNode";
+import { useGraphStore } from "@/stores/graph";
 
 //TODO: Have Checks for the Filters.
 export default defineComponent({
   props: {
     node: {
       type: Object as () => ComponentInterface<FilterNode>,
-      required: true
+      required: true,
     },
     filterName: {
-      type: String
+      type: String,
     },
     filterString: {
-      type: String
+      type: String,
     },
     buttonLabel: {
       type: String,
-      default: 'Save Filter'
-    }
+      default: "Save Filter",
+    },
   },
-  emits: ['update:filterName', 'update:filterString', 'saveFilter'],
+  emits: ["update:filterName", "update:filterString", "saveFilter"],
   setup() {
-    const graphStore = useGraphStore()
-    return { graphStore }
+    const graphStore = useGraphStore();
+    return { graphStore };
   },
   data() {
     return {
       editedFilterName: undefined,
-      filterValue: undefined
-    }
+      filterValue: undefined,
+    };
   },
   methods: {
     updateFilter() {
-      this.$emit('saveFilter', {
+      this.$emit("saveFilter", {
         oldName: this.filterName,
         name: this.editedFilterName,
-        value: this.filterValue
-      })
-    }
+        value: this.filterValue,
+      });
+    },
   },
   computed: {
     newFilterName: {
       get() {
-        return this.filterName
+        return this.filterName;
       },
       set(newValue: string) {
-        this.editedFilterName = newValue
-        this.$emit('update:filterName', newValue)
-      }
+        this.editedFilterName = newValue;
+        this.$emit("update:filterName", newValue);
+      },
     },
     newFilter: {
       get() {
-        return this.filterString
+        return this.filterString;
       },
       set(newValue: string) {
-        this.filterValue = newValue
-        this.$emit('update:filterString', newValue)
-      }
-    }
+        this.filterValue = newValue;
+        this.$emit("update:filterString", newValue);
+      },
+    },
   },
   watch: {},
-  async mounted() {}
-})
+  async mounted() {},
+});
 </script>

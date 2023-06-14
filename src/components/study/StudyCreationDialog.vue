@@ -10,7 +10,10 @@
         <label for="project">Project to execute</label>
       </div>
       <div class="col">
-        <ObjectAndVersionSelector object-type="project" @update-selection="setSelected" />
+        <ObjectAndVersionSelector
+          object-type="project"
+          @update-selection="setSelected"
+        />
       </div>
     </div>
     <StudyProperties
@@ -22,7 +25,12 @@
       @update:valid="(event) => (dataValid = event)"
     ></StudyProperties>
     <template #footer>
-      <Button label="Cancel" icon="pi pi-times" @click="$emit('selected', false)" text />
+      <Button
+        label="Cancel"
+        icon="pi pi-times"
+        @click="$emit('selected', false)"
+        text
+      />
       <Button
         label="Create"
         icon="pi pi-check"
@@ -35,35 +43,35 @@
 </template>
 
 <script>
-import Dialog from 'primevue/dialog'
-import Button from 'primevue/button'
-import ObjectAndVersionSelector from '@/components/utils/ObjectAndVersionSelector.vue'
-import StudyProperties from './StudyProperties.vue'
+import Dialog from "primevue/dialog";
+import Button from "primevue/button";
+import ObjectAndVersionSelector from "@/components/utils/ObjectAndVersionSelector.vue";
+import StudyProperties from "./StudyProperties.vue";
 
 export default {
   components: { StudyProperties, Dialog, Button, ObjectAndVersionSelector },
-  emits: ['selected', 'update:visible'],
+  emits: ["selected", "update:visible"],
   props: {
     visible: {
       type: Boolean,
-      required: true
-    }
+      required: true,
+    },
   },
   data() {
     return {
       selected: undefined,
-      name: '',
-      descriptionShort: '',
-      descriptionLong: '',
-      shortCut: '',
+      name: "",
+      descriptionShort: "",
+      descriptionLong: "",
+      shortCut: "",
       private: false,
-      dataValid: false
-    }
+      dataValid: false,
+    };
   },
   methods: {
     setSelected(selected) {
-      console.log(selected)
-      this.selected = selected
+      console.log(selected);
+      this.selected = selected;
     },
     getProjectData() {
       return {
@@ -73,38 +81,38 @@ export default {
         sourceUUID: this.selected.uuid,
         version: this.selected.version,
         shortcut: this.shortCut,
-        private: this.private
-      }
-    }
+        private: this.private,
+      };
+    },
   },
   computed: {
     selectionValid() {
       if (this.selected?.uuid && this.selected?.version && this.dataValid) {
-        return true
+        return true;
       } else {
-        return false
+        return false;
       }
     },
     dialogVisible: {
       get() {
-        return this.visible
+        return this.visible;
       },
       set(value) {
-        this.$emit('update:visible', value)
-      }
-    }
+        this.$emit("update:visible", value);
+      },
+    },
   },
   watch: {
     visible(newValue) {
       // reset
-      this.selected = undefined
-      this.name = ''
-      this.descriptionShort = ''
-      this.descriptionLong = ''
-      this.shortCut = ''
-      this.private = false
-      this.dataValid = false
-    }
-  }
-}
+      this.selected = undefined;
+      this.name = "";
+      this.descriptionShort = "";
+      this.descriptionLong = "";
+      this.shortCut = "";
+      this.private = false;
+      this.dataValid = false;
+    },
+  },
+};
 </script>

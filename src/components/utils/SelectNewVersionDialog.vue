@@ -6,9 +6,18 @@
     :style="{ width: '50vw' }"
   >
     Selecting a new Version will discard all existing changes!
-    <VersionSelector :object-type="objectType" :element="element" @update-selection="setSelected" />
+    <VersionSelector
+      :object-type="objectType"
+      :element="element"
+      @update-selection="setSelected"
+    />
     <template #footer>
-      <Button label="Cancel" icon="pi pi-times" @click="$emit('selected', false)" text />
+      <Button
+        label="Cancel"
+        icon="pi pi-times"
+        @click="$emit('selected', false)"
+        text
+      />
       <Button
         label="Select"
         icon="pi pi-check"
@@ -21,54 +30,54 @@
 </template>
 
 <script>
-import Dialog from 'primevue/dialog'
-import Button from 'primevue/button'
-import VersionSelector from './VersionSelector.vue'
+import Dialog from "primevue/dialog";
+import Button from "primevue/button";
+import VersionSelector from "./VersionSelector.vue";
 
 export default {
   components: { Button, Dialog, VersionSelector },
-  emits: ['selected', 'update:visible'],
+  emits: ["selected", "update:visible"],
   props: {
     objectType: {
       type: String,
-      required: true
+      required: true,
     },
     element: {
       type: Object,
-      required: true
+      required: true,
     },
     visible: {
       type: Boolean,
-      required: true
-    }
+      required: true,
+    },
   },
   data() {
     return {
-      selectedVersion: undefined
-    }
+      selectedVersion: undefined,
+    };
   },
   methods: {
     setSelected(selected) {
-      console.log(selected)
-      this.selected = selected
-    }
+      console.log(selected);
+      this.selected = selected;
+    },
   },
   computed: {
     selectionValid() {
       if (this.selectedVersion) {
-        return true
+        return true;
       } else {
-        return false
+        return false;
       }
     },
     dialogVisible: {
       get() {
-        return this.visible
+        return this.visible;
       },
       set(value) {
-        this.$emit('update:visible', value)
-      }
-    }
-  }
-}
+        this.$emit("update:visible", value);
+      },
+    },
+  },
+};
 </script>

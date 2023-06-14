@@ -28,21 +28,21 @@
 </template>
 
 <script>
-import Tree from 'primevue/tree'
-import Button from 'primevue/button'
-import ProgressSpinner from 'primevue/progressspinner'
+import Tree from "primevue/tree";
+import Button from "primevue/button";
+import ProgressSpinner from "primevue/progressspinner";
 
 export default {
   components: { Tree, Button, ProgressSpinner },
   props: {
     availableData: {
       type: Object,
-      required: true
+      required: true,
     },
     projectID: {
       type: String,
-      required: true
-    }
+      required: true,
+    },
   },
   data() {
     return {
@@ -51,112 +51,122 @@ export default {
       selectedTasks: null,
       downloadID: null,
       waitingForDL: false,
-      downloadReady: false
-    }
+      downloadReady: false,
+    };
   },
   computed: {
     participantSelectionView() {
       if (!this.availableData.participants) {
-        return []
+        return [];
       }
-      const participants = []
+      const participants = [];
       const participantElement = {
-        key: 'Participants',
-        label: 'Participants',
-        icon: 'pi pi-user',
-        type: 'group',
-        children: participants
-      }
+        key: "Participants",
+        label: "Participants",
+        icon: "pi pi-user",
+        type: "group",
+        children: participants,
+      };
       this.availableData.participants.forEach((participant) => {
         participants.push({
           key: participant.participantID,
           label: participant.participantID,
-          type: 'participant',
+          type: "participant",
           data: participant.finished,
-          icon: 'pi pi-user'
-        })
-      })
-      return participantElement
+          icon: "pi pi-user",
+        });
+      });
+      return participantElement;
     },
     taskSelectionView() {
       if (!this.availableData.tasks) {
-        return []
+        return [];
       }
-      const tasks = []
-      const taskElement = { key: 'Tasks', label: 'Tasks', icon: 'pi pi-folder', children: tasks }
+      const tasks = [];
+      const taskElement = {
+        key: "Tasks",
+        label: "Tasks",
+        icon: "pi pi-folder",
+        children: tasks,
+      };
       this.availableData.tasks.forEach((task) => {
         tasks.push({
           key: task.taskID,
           label: task.taskName,
-          type: 'element',
+          type: "element",
           data: task.taskID,
-          icon: 'pi pi-document'
-        })
-      })
-      return taskElement
+          icon: "pi pi-document",
+        });
+      });
+      return taskElement;
     },
     currentSelectionView() {
       if (this.tasksSelected) {
-        return [this.taskSelectionView]
+        return [this.taskSelectionView];
       } else {
         if (this.participantsSelected) {
-          return [this.participantSelectionView]
+          return [this.participantSelectionView];
         } else {
-          return [this.taskSelectionView, this.participantSelectionView]
+          return [this.taskSelectionView, this.participantSelectionView];
         }
       }
     },
     tasksSelected() {
-      return this.selectedElements != null && 'Tasks' in this.selectedElements
+      return this.selectedElements != null && "Tasks" in this.selectedElements;
     },
     participantsSelected() {
-      return this.selectedElements != null && 'Participants' in this.selectedElements
-    }
+      return (
+        this.selectedElements != null && "Participants" in this.selectedElements
+      );
+    },
   },
   watch: {
     downloadReady(newValue) {
       if (this.downloadID && newValue) {
       }
-    }
+    },
   },
   methods: {
     downloadSelected() {
-      this.waitingForDL = true
+      this.waitingForDL = true;
       // download whatever was selected, either tasks or participants.
-      const request = {}
-      if ('Tasks' in this.selectedElements) {
-        const tasks = []
+      const request = {};
+      if ("Tasks" in this.selectedElements) {
+        const tasks = [];
         for (const task of this.selectedElements) {
-          if (task != 'Tasks') {
-            tasks.push(task)
+          if (task != "Tasks") {
+            tasks.push(task);
           }
         }
-        request.tasks = tasks
+        request.tasks = tasks;
       } else {
-        const participants = []
+        const participants = [];
         for (const participant of this.selectedElements) {
-          if (task != 'Participants') {
-            participants.push(participant)
+          if (task != "Participants") {
+            participants.push(participant);
           }
         }
-        request.participants = participants
+        request.participants = participants;
       }
-      this.download(request)
+      this.download(request);
     },
     downloadAll() {
-      this.waitingForDL = true
-      this.download('all')
+      this.waitingForDL = true;
+      this.download("all");
     },
     async download(request) {
-      this.downloadID = await this.studyStore.requestDownload(this.projectID, request)
+      this.downloadID = await this.studyStore.requestDownload(
+        this.projectID,
+        request
+      );
       if (this.downloadID) {
       } else {
-        this.waitingForDL = false
+        this.waitingForDL = false;
       }
-    }
+    },
   },
-  mounted() {}
-}
+  mounted() {},
+};
 </script>
 
 <style scoped>

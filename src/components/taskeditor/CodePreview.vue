@@ -9,7 +9,13 @@
           @handleSubmit="(event) => submitResults(event)"
           @handleError="(error) => handleError(error)"
           @handleUpload="
-            (event) => uploadFile(event.file, event.fileName, event.idCallBack, event.errorCallBack)
+            (event) =>
+              uploadFile(
+                event.file,
+                event.fileName,
+                event.idCallBack,
+                event.errorCallBack
+              )
           "
         >
         </SoileExpRunner>
@@ -21,7 +27,12 @@
           @handleError="(error) => handleError(error)"
           @handleUpload="
             (event) =>
-              handleUploadData(event.file, event.fileName, event.idCallBack, event.errorCallBack)
+              handleUploadData(
+                event.file,
+                event.fileName,
+                event.idCallBack,
+                event.errorCallBack
+              )
           "
         >
         </PsychoJsRunner>
@@ -42,8 +53,12 @@
       <Button @click="runTask">Start Task</Button>
     </div>
     <div class="results">
-      <div v-if="Object.keys(outputs).length > 0" class="outputs">Outputs: {{ outputs }}</div>
-      <div v-if="Object.keys(results).length > 0" class="results">Results: {{ results }}</div>
+      <div v-if="Object.keys(outputs).length > 0" class="outputs">
+        Outputs: {{ outputs }}
+      </div>
+      <div v-if="Object.keys(results).length > 0" class="results">
+        Results: {{ results }}
+      </div>
       <div v-if="uploadedFiles.length > 0" class="uploadedFiles">
         Uploaded Files: {{ uploadedFiles }}
       </div>
@@ -53,39 +68,39 @@
 </template>
 
 <script>
-import axios from 'axios'
-import SoileQuestionnaire from '@/components/questionnaire/SoileQuestionnaire.vue'
-import SoileExpRunner from '@/components/experimentlang/SoileExpRunner.vue'
-import PsychoJsRunner from '@/components/psychopy/PsychoJsRunner.vue'
-import { mapState } from 'pinia'
-import { useErrorStore } from '@/stores'
-import { useUserStore } from '@/stores/users'
-import Button from 'primevue/button'
+import axios from "axios";
+import SoileQuestionnaire from "@/components/questionnaire/SoileQuestionnaire.vue";
+import SoileExpRunner from "@/components/experimentlang/SoileExpRunner.vue";
+import PsychoJsRunner from "@/components/psychopy/PsychoJsRunner.vue";
+import { mapState } from "pinia";
+import { useErrorStore } from "@/stores";
+import { useUserStore } from "@/stores/users";
+import Button from "primevue/button";
 
 export default {
-  name: 'CodePreview',
+  name: "CodePreview",
   components: { SoileQuestionnaire, SoileExpRunner, PsychoJsRunner, Button },
   props: {
     sourceCode: {
       type: String,
-      required: true
+      required: true,
     },
     codeType: {
       type: String,
-      required: true
+      required: true,
     },
     codeTypeVersion: {
       type: String,
-      required: true
+      required: true,
     },
     canRun: {
       type: Boolean,
-      required: true
-    }
+      required: true,
+    },
   },
   setup() {
-    const errorStore = useErrorStore()
-    return { errorStore }
+    const errorStore = useErrorStore();
+    return { errorStore };
   },
   data() {
     return {
@@ -95,36 +110,36 @@ export default {
       isRunningTask: false,
       outputs: {},
       uploadedFiles: [],
-      results: {}
-    }
+      results: {},
+    };
   },
   methods: {
     /**
      * Set the task to active
      */
     runTask() {
-      ;(this.outputs = {}), (this.uploadedFiles = []), (this.results = {})
+      (this.outputs = {}), (this.uploadedFiles = []), (this.results = {});
       this.compileTask()
         .then(() => {
-          this.isRunningTask = true
+          this.isRunningTask = true;
         })
         .catch((err) => {
           if (err.response?.data) {
-            this.errorStore.raiseError('error', err.response.data)
+            this.errorStore.raiseError("error", err.response.data);
           } else {
-            this.errorStore.raiseError('error', err.message)
+            this.errorStore.raiseError("error", err.message);
           }
-        })
+        });
     },
     stopTask() {
-      this.isRunningTask = false
+      this.isRunningTask = false;
     },
     async compileTask() {
-      const response = await axios.post('/task/compile/', {
+      const response = await axios.post("/task/compile/", {
         code: this.sourceCode,
-        type: this.codeType
-      })
-      this.code = response?.data
+        type: this.codeType,
+      });
+      this.code = response?.data;
     },
     /**
      * This function assumes, that results is an object with the following fields:
@@ -137,22 +152,24 @@ export default {
      * @param {*} results
      */
     async submitResults(results) {
-      console.log(results)
-      var TaskData = {}
-      const userStore = useUserStore()
-      this.outputs = results.outputData ? results.outputData : []
-      this.results = results.resultData ? results.resultData : { resultData: [], fileData: [] }
+      console.log(results);
+      var TaskData = {};
+      const userStore = useUserStore();
+      this.outputs = results.outputData ? results.outputData : [];
+      this.results = results.resultData
+        ? results.resultData
+        : { resultData: [], fileData: [] };
     },
     handleUploadData(file, fileName, idCallBack, errorCallback) {
-      this.uploadedFiles.push(fileName)
+      this.uploadedFiles.push(fileName);
     },
     handleError(error) {
-      const errorStore = useErrorStore()
-      errorStore.raiseError(undefined, error)
-    }
+      const errorStore = useErrorStore();
+      errorStore.raiseError(undefined, error);
+    },
   },
   mounted() {
-    console.log('ExpView Mounted')
-  }
-}
+    console.log("ExpView Mounted");
+  },
+};
 </script>

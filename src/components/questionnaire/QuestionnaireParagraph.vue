@@ -10,48 +10,48 @@
 </template>
 
 <script>
-import QuestionnaireComponent from './QuestionnaireComponent.vue'
+import QuestionnaireComponent from "./QuestionnaireComponent.vue";
 
 export default {
   props: {
     paragraph_data: {
       type: Array,
-      required: true
-    }
+      required: true,
+    },
   },
-  emits: ['dataUpdate'],
+  emits: ["dataUpdate"],
   methods: {
     dataUpdate(data) {
-      this.$emit('dataUpdate', data)
-      console.log(data)
-    }
+      this.$emit("dataUpdate", data);
+      console.log(data);
+    },
   },
   computed: {
     inlineGroups() {
-      var groups = []
-      var currentgroup = []
+      var groups = [];
+      var currentgroup = [];
       for (const element of this.paragraph_data) {
         if (element.data.inline) {
-          currentgroup.push(element)
+          currentgroup.push(element);
         } else {
           if (currentgroup.length > 0) {
-            groups.push(currentgroup)
+            groups.push(currentgroup);
           }
           // start with the new element
-          currentgroup = []
-          groups.push([element])
+          currentgroup = [];
+          groups.push([element]);
         }
       }
       if (currentgroup.length > 0) {
-        groups.push(currentgroup)
+        groups.push(currentgroup);
       }
-      console.log(groups)
-      return groups
-    }
+      console.log(groups);
+      return groups;
+    },
   },
   components: { QuestionnaireComponent, QuestionnaireComponent },
-  emits: ['dataUpdate']
-}
+  emits: ["dataUpdate"],
+};
 </script>
 
 <style scoped>

@@ -35,37 +35,40 @@
       @dataUpdate="dataUpdate"
       :source_data="element.data"
     />
-    <QuestionnaireText v-else-if="element.type == 'html'" :data="element.data" />
+    <QuestionnaireText
+      v-else-if="element.type == 'html'"
+      :data="element.data"
+    />
   </span>
 </template>
 
 <script>
-import QuestionnaireDropDownMenu from './QuestionnaireDropDownMenu.vue'
-import QuestionnaireText from './QuestionnaireText.vue'
-import QuestionnaireMultiSelect from './QuestionnaireMultiSelect.vue'
-import QuestionnaireNumberField from './QuestionnaireNumberField.vue'
-import QuestionnaireSingleSelect from './QuestionnaireSingleSelect.vue'
-import QuestionnaireSlider from './QuestionnaireSlider.vue'
-import QuestionnaireTextArea from './QuestionnaireTextArea.vue'
-import QuestionnaireTextBox from './QuestionnaireTextBox.vue'
+import QuestionnaireDropDownMenu from "./QuestionnaireDropDownMenu.vue";
+import QuestionnaireText from "./QuestionnaireText.vue";
+import QuestionnaireMultiSelect from "./QuestionnaireMultiSelect.vue";
+import QuestionnaireNumberField from "./QuestionnaireNumberField.vue";
+import QuestionnaireSingleSelect from "./QuestionnaireSingleSelect.vue";
+import QuestionnaireSlider from "./QuestionnaireSlider.vue";
+import QuestionnaireTextArea from "./QuestionnaireTextArea.vue";
+import QuestionnaireTextBox from "./QuestionnaireTextBox.vue";
 
 export default {
   props: {
     component_data: {
       type: Array,
-      required: true
-    }
+      required: true,
+    },
   },
   data() {
     return {
-      questionnaire_data: {}
-    }
+      questionnaire_data: {},
+    };
   },
-  emits: ['dataUpdate'],
+  emits: ["dataUpdate"],
   methods: {
     dataUpdate(data) {
-      this.$emit('dataUpdate', data)
-    }
+      this.$emit("dataUpdate", data);
+    },
   },
   mounted() {},
   components: {
@@ -76,9 +79,9 @@ export default {
     QuestionnaireMultiSelect,
     QuestionnaireTextBox,
     QuestionnaireTextArea,
-    QuestionnaireSlider
-  }
-}
+    QuestionnaireSlider,
+  },
+};
 </script>
 
 <style scoped></style>

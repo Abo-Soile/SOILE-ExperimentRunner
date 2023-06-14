@@ -5,23 +5,23 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { NodeInterface } from '@baklavajs/core'
+import { defineComponent } from "vue";
+import { NodeInterface } from "@baklavajs/core";
 
 export default defineComponent({
   props: {
     intf: {
       type: Object as () => NodeInterface,
-      required: true
-    }
+      required: true,
+    },
   },
-  emits: ['openSidebar'],
+  emits: ["openSidebar"],
   setup(props, { emit }) {
     const onClick = () => {
-      emit('openSidebar')
-    }
+      emit("openSidebar");
+    };
 
-    return { onClick }
-  }
-})
+    return { onClick };
+  },
+});
 </script>

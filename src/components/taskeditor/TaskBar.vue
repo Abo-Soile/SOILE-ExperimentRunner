@@ -28,7 +28,12 @@
       />
     </div>
     <div class="taskbarfield">
-      <Button class="taskbarfield" :disabled="!isValid" :label="saveLabel" @click="save"></Button>
+      <Button
+        class="taskbarfield"
+        :disabled="!isValid"
+        :label="saveLabel"
+        @click="save"
+      ></Button>
     </div>
     <div v-if="!newTask" class="taskbarfield">
       <Button class="taskbarfield" label="Reload" @click="reload"></Button>
@@ -51,136 +56,136 @@
 </template>
 
 <script>
-import Dropdown from 'primevue/dropdown'
-import InputText from 'primevue/inputtext'
-import Button from 'primevue/button'
-import ObjectAndVersionSelectorWithProps from '@/components/utils/ObjectAndVersionSelectorWithProps.vue'
-import SelectNewVersionDialog from '@/components/utils/SelectNewVersionDialog.vue'
+import Dropdown from "primevue/dropdown";
+import InputText from "primevue/inputtext";
+import Button from "primevue/button";
+import ObjectAndVersionSelectorWithProps from "@/components/utils/ObjectAndVersionSelectorWithProps.vue";
+import SelectNewVersionDialog from "@/components/utils/SelectNewVersionDialog.vue";
 
 export default {
-  name: 'TaskBar',
+  name: "TaskBar",
   props: {
     codeType: {
-      type: String
+      type: String,
     },
     codeVersion: {
-      type: String
+      type: String,
     },
     // the task is the Name/UUID combination.
     task: {
       type: Object,
-      required: false
+      required: false,
     },
     taskVersion: {
       type: Object,
-      required: true
+      required: true,
     },
     codeTypeOptions: {
       type: Object,
-      required: true
+      required: true,
     },
     newTask: {
       type: Boolean,
-      required: true
+      required: true,
     },
     // this is somewhat hackish, but necessary to allow an update of the enclosing validity.
     valid: {
       type: Boolean,
-      required: true
-    }
+      required: true,
+    },
   },
   data() {
     return {
       currentType: null,
-      showChangeVersion: false
-    }
+      showChangeVersion: false,
+    };
   },
   computed: {
     codeTypeVersions() {
-      const selectedType = this.codeTypeOptions[this.codeType]
-      console.log(this.codeTypeOptions)
-      console.log(this.codeType)
-      console.log(selectedType)
-      return selectedType ? selectedType.versions : []
+      const selectedType = this.codeTypeOptions[this.codeType];
+      console.log(this.codeTypeOptions);
+      console.log(this.codeType);
+      console.log(selectedType);
+      return selectedType ? selectedType.versions : [];
     },
     codeOptions() {
-      const codeOptions = []
+      const codeOptions = [];
       Object.keys(this.codeTypeOptions).forEach((element) => {
-        console.log(element)
-        codeOptions.push(element)
-      })
-      return codeOptions
+        console.log(element);
+        codeOptions.push(element);
+      });
+      return codeOptions;
     },
     selectedCodeType: {
       get() {
-        return this.codeType
+        return this.codeType;
       },
       set(newValue) {
         // reset the version, since the value changed;
         if (this.currentType != newValue) {
-          this.selectedVersion = null
+          this.selectedVersion = null;
         }
-        this.currentType = newValue
-        this.$emit('update:codeType', newValue)
-      }
+        this.currentType = newValue;
+        this.$emit("update:codeType", newValue);
+      },
     },
     selectedVersion: {
       get() {
-        return this.codeVersion
+        return this.codeVersion;
       },
       set(newValue) {
         // reset the version, since the value changed;
-        this.$emit('update:codeVersion', newValue)
-      }
+        this.$emit("update:codeVersion", newValue);
+      },
     },
     currentName: {
       get() {
-        return this.task.name
+        return this.task.name;
       },
       set(newValue) {
         // reset the version, since the value changed;
-        console.log('Setting new Name')
-        this.$emit('update:task', { name: newValue })
-      }
+        console.log("Setting new Name");
+        this.$emit("update:task", { name: newValue });
+      },
     },
     // this is just a VERY informal check.
     isValid() {
       // either new or has a task and version to base any changes on.
       const taskBasicsOK =
-        (this.newTask && this.currentName != '') ||
-        (this.task.name != null && this.taskVersion.version != null)
-      const taskTypeOk = this.codeType != null && this.codeVersion != null
-      console.log('Emitting an update for valid')
-      this.$emit('update:valid', taskBasicsOK && taskTypeOk)
-      return taskBasicsOK && taskTypeOk
+        (this.newTask && this.currentName != "") ||
+        (this.task.name != null && this.taskVersion.version != null);
+      const taskTypeOk = this.codeType != null && this.codeVersion != null;
+      console.log("Emitting an update for valid");
+      this.$emit("update:valid", taskBasicsOK && taskTypeOk);
+      return taskBasicsOK && taskTypeOk;
     },
     saveLabel() {
-      return this.newTask ? 'Create Task' : 'Save'
-    }
+      return this.newTask ? "Create Task" : "Save";
+    },
   },
   methods: {
     save() {
-      this.$emit('save')
+      this.$emit("save");
     },
 
     reload() {
       // Perform reload logic here
-      this.$emit('changeTaskVersion', taskVersion)
+      this.$emit("changeTaskVersion", taskVersion);
     },
     changeTaskVersion(updated) {
       if (updated) {
-        this.$emit('changeTaskVersion', updated)
+        this.$emit("changeTaskVersion", updated);
       }
-    }
+    },
   },
   components: {
     Dropdown,
     Button,
     ObjectAndVersionSelectorWithProps,
     InputText,
-    SelectNewVersionDialog
-  }
-}
+    SelectNewVersionDialog,
+  },
+};
 </script>
 
 <style scoped>

@@ -16,17 +16,17 @@
 </template>
 
 <script>
-import Dropdown from 'primevue/dropdown'
-import { useElementStore } from '../../stores'
+import Dropdown from "primevue/dropdown";
+import { useElementStore } from "../../stores";
 
 export default {
   components: { Dropdown },
-  emits: ['updateSelection', 'updateVersion'],
+  emits: ["updateSelection", "updateVersion"],
   props: {
     objectType: {
       type: String,
-      required: true
-    }
+      required: true,
+    },
   },
   data() {
     return {
@@ -34,46 +34,50 @@ export default {
       selectedVersion: undefined,
       loading: true,
       availableItems: [],
-      availableVersions: []
-    }
+      availableVersions: [],
+    };
   },
 
   setup() {
-    const elementStore = useElementStore()
-    return { elementStore: elementStore }
+    const elementStore = useElementStore();
+    return { elementStore: elementStore };
   },
   computed: {
     selectedItem() {
       return {
         name: this.selectedElement?.name,
         uuid: this.selectedElement?.uuid,
-        version: this.selectedVersion?.version
-      }
-    }
+        version: this.selectedVersion?.version,
+      };
+    },
   },
   watch: {
     selectedItem: {
       handler(newValue) {
-        this.$emit('updateSelection', newValue)
+        this.$emit("updateSelection", newValue);
       },
-      deep: true
+      deep: true,
     },
-    'selectedItem.uuid': {
+    "selectedItem.uuid": {
       async handler(newValue) {
         this.availableVersions = await this.elementStore.getTagsForElement(
           newValue,
           this.objectType.toLowerCase()
-        )
-      }
-    }
+        );
+      },
+    },
   },
   async mounted() {
     // TODO: heck whether this savely works with onMounted or whether this should be done with onDisplay
 
-    this.loading = true
-    await this.elementStore.updateAvailableOptions(this.objectType.toLowerCase())
-    this.availableItems = await this.elementStore.getListForType(this.objectType.toLowerCase())
-    this.loading = false
-  }
-}
+    this.loading = true;
+    await this.elementStore.updateAvailableOptions(
+      this.objectType.toLowerCase()
+    );
+    this.availableItems = await this.elementStore.getListForType(
+      this.objectType.toLowerCase()
+    );
+    this.loading = false;
+  },
+};
 </script>

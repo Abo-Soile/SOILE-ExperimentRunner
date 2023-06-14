@@ -13,53 +13,53 @@
 </template>
 
 <script>
-import Dropdown from 'primevue/dropdown'
+import Dropdown from "primevue/dropdown";
 
 export default {
   props: {
     source_data: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
-  emits: ['dataUpdate'],
+  emits: ["dataUpdate"],
   components: { Dropdown },
   data() {
     return {
-      value: null
-    }
+      value: null,
+    };
   },
   watch: {
     value() {
-      this.$emit('dataUpdate', {
+      this.$emit("dataUpdate", {
         isValid: true,
         target: this.source_data.id,
-        value: this.value
-      })
+        value: this.value,
+      });
     },
     source_data(newValue) {
       if (newValue.value != undefined && newValue != null) {
-        this.value = newValue.value
+        this.value = newValue.value;
       }
       if (newValue.required) {
-        this.$emit('dataUpdate', {
+        this.$emit("dataUpdate", {
           isValid: this.isValid,
           target: newValue.id,
-          value: this.value
-        })
+          value: this.value,
+        });
       }
-    }
+    },
   },
   computed: {
     isValid() {
-      return this.value ? true : false
+      return this.value ? true : false;
     },
     getComputedStyle() {
-      return 'width: ' + this.data.width + 'em'
-    }
+      return "width: " + this.data.width + "em";
+    },
   },
-  mounted() {}
-}
+  mounted() {},
+};
 </script>
 
 <style scoped></style>

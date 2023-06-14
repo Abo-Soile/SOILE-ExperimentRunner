@@ -26,67 +26,67 @@
 </template>
 
 <script>
-import Dialog from 'primevue/dialog'
-import Button from 'primevue/button'
-import Dropdown from 'primevue/dropdown'
-import ObjectAndVersionSelector from '@/components/utils/ObjectAndVersionSelector.vue'
-import StudyProperties from './StudyProperties.vue'
-import { useStudyStore } from '@/stores'
-import { mapState } from 'pinia'
+import Dialog from "primevue/dialog";
+import Button from "primevue/button";
+import Dropdown from "primevue/dropdown";
+import ObjectAndVersionSelector from "@/components/utils/ObjectAndVersionSelector.vue";
+import StudyProperties from "./StudyProperties.vue";
+import { useStudyStore } from "@/stores";
+import { mapState } from "pinia";
 
 export default {
   components: { Dialog, Dropdown, Button },
-  emits: ['selected', 'update:visible'],
+  emits: ["selected", "update:visible"],
   props: {
     visible: {
       type: Boolean,
-      required: true
+      required: true,
     },
     researchStudies: {
       type: Array,
-      reuired: true
-    }
+      reuired: true,
+    },
   },
   data() {
     return {
       selected: undefined,
-      loading: false
-    }
+      loading: false,
+    };
   },
   setup() {
-    const projectStore = useStudyStore()
-    return { projectStore }
+    const projectStore = useStudyStore();
+    return { projectStore };
   },
   async mounted() {
-    this.loading = true
-    await this.projectStore.updateResearchStudies()
-    this.loading = false
+    this.loading = true;
+    await this.projectStore.updateResearchStudies();
+    this.loading = false;
   },
 
   methods: {
     abort() {
-      this.$emit('selected', false)
+      this.$emit("selected", false);
     },
     async elementSelected() {
-      this.loading = true
-      this.$emit('selected', this.selected)
-    }
+      this.loading = true;
+      this.$emit("selected", this.selected);
+    },
   },
   computed: {
     dialogVisible: {
       get() {
-        return this.visible
+        return this.visible;
       },
       set(value) {
-        this.loading = false
-        this.$emit('update:visible', value)
-      }
-    }
+        this.loading = false;
+        this.$emit("update:visible", value);
+      },
+    },
   },
   watch: {
     visible() {
-      this.loading = false
-    }
-  }
-}
+      this.loading = false;
+    },
+  },
+};
 </script>

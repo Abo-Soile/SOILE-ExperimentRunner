@@ -1,30 +1,35 @@
-import { IBaklavaViewModel } from '@baklavajs/renderer-vue'
-import TaskNode from '@/components/projecteditor/NodeTypes/TaskNode'
-import FilterNode from '@/components/projecteditor/NodeTypes/FilterNode'
-import { AbstractNode, Connection, Graph, NodeInterface } from '@baklavajs/core'
-import ExperimentNode from '@/components/projecteditor/NodeTypes/ExperimentNode'
+import { IBaklavaViewModel } from "@baklavajs/renderer-vue";
+import TaskNode from "@/components/projecteditor/NodeTypes/TaskNode";
+import FilterNode from "@/components/projecteditor/NodeTypes/FilterNode";
+import {
+  AbstractNode,
+  Connection,
+  Graph,
+  NodeInterface,
+} from "@baklavajs/core";
+import ExperimentNode from "@/components/projecteditor/NodeTypes/ExperimentNode";
 import {
   Experiment,
   ExperimentInstance,
   FilterInstance,
   SOILEProject,
-  TaskInstance
-} from './SoileTypes'
-import { useGraphStore } from '@/stores/graph'
-import { instantiateExperimentInProject } from './experimentConverter'
-import SoileNode from '@/components/projecteditor/NodeTypes/SoileNode'
+  TaskInstance,
+} from "./SoileTypes";
+import { useGraphStore } from "@/stores/graph";
+import { instantiateExperimentInProject } from "./experimentConverter";
+import SoileNode from "@/components/projecteditor/NodeTypes/SoileNode";
 
 interface BasicConnection {
-  from: string
-  to: string
+  from: string;
+  to: string;
 }
 
 interface FilterConnection {
-  from: NodeInterface
-  to: String
+  from: NodeInterface;
+  to: String;
 }
-let defaultX = 200
-let defaultY = 300
+let defaultX = 200;
+let defaultY = 300;
 /**
  * Load a Soile Project into a baklava editor.
  * @param baklava the aklava view instance.
@@ -35,24 +40,45 @@ export async function loadSoileProjectToBaklava(
   soileJson: SOILEProject
 ) {
   // this is a map of InstanceIDs to OutputInterfaces
-  const nextMap = new Map<String, NodeInterface>()
+  const nextMap = new Map<String, NodeInterface>();
   // and this is a map of InstanceIDs to "Previous" interfaces
-  const previousMap = new Map<String, NodeInterface>()
-  const connections = new Array<BasicConnection>()
-  const filterconnections = new Array<FilterConnection>()
-  const graph = baklava.editor.graph
-  defaultX = 500
-  defaultY = 300
+  const previousMap = new Map<String, NodeInterface>();
+  const connections = new Array<BasicConnection>();
+  const filterconnections = new Array<FilterConnection>();
+  const graph = baklava.editor.graph;
+  defaultX = 500;
+  defaultY = 300;
   for (const task of soileJson.tasks) {
-    await addTask(graph, task, soileJson.start, connections, nextMap, previousMap)
+    await addTask(
+      graph,
+      task,
+      soileJson.start,
+      connections,
+      nextMap,
+      previousMap
+    );
   }
   for (const filter of soileJson.filters) {
-    await addFilter(graph, filter, filterconnections, connections, nextMap, previousMap)
+    await addFilter(
+      graph,
+      filter,
+      filterconnections,
+      connections,
+      nextMap,
+      previousMap
+    );
   }
   for (const experiment of soileJson.experiments) {
-    await addExperiment(graph, experiment, soileJson.start, connections, nextMap, previousMap)
+    await addExperiment(
+      graph,
+      experiment,
+      soileJson.start,
+      connections,
+      nextMap,
+      previousMap
+    );
   }
-  buildconnections(graph, filterconnections, connections, nextMap, previousMap)
+  buildconnections(graph, filterconnections, connections, nextMap, previousMap);
 }
 
 /**
@@ -65,19 +91,26 @@ export async function loadSoileExperimentToBaklava(
   soileJson: Experiment
 ) {
   // this is a map of InstanceIDs to OutputInterfaces
-  const nextMap = new Map<String, NodeInterface>()
+  const nextMap = new Map<String, NodeInterface>();
   // and this is a map of InstanceIDs to "Previous" interfaces
-  const previousMap = new Map<String, NodeInterface>()
-  const connections = new Array<BasicConnection>()
-  const filterconnections = new Array<FilterConnection>()
-  const graph = baklava.editor.graph
-  defaultX = 500
-  defaultY = 300
+  const previousMap = new Map<String, NodeInterface>();
+  const connections = new Array<BasicConnection>();
+  const filterconnections = new Array<FilterConnection>();
+  const graph = baklava.editor.graph;
+  defaultX = 500;
+  defaultY = 300;
   for (const element of soileJson.elements) {
-    if (element.elementType === 'task') {
-      await addTask(graph, element.data as TaskInstance, '', connections, nextMap, previousMap)
+    if (element.elementType === "task") {
+      await addTask(
+        graph,
+        element.data as TaskInstance,
+        "",
+        connections,
+        nextMap,
+        previousMap
+      );
     }
-    if (element.elementType === 'filter') {
+    if (element.elementType === "filter") {
       await addFilter(
         graph,
         element.data as FilterInstance,
@@ -85,20 +118,20 @@ export async function loadSoileExperimentToBaklava(
         connections,
         nextMap,
         previousMap
-      )
+      );
     }
-    if (element.elementType === 'experiment') {
+    if (element.elementType === "experiment") {
       await addExperiment(
         graph,
         element.data as ExperimentInstance,
-        '',
+        "",
         connections,
         nextMap,
         previousMap
-      )
+      );
     }
   }
-  buildconnections(graph, filterconnections, connections, nextMap, previousMap)
+  buildconnections(graph, filterconnections, connections, nextMap, previousMap);
 }
 
 /**
@@ -118,17 +151,20 @@ function buildconnections(
   previousMap: Map<String, NodeInterface>
 ) {
   for (const connection of connections) {
-    if (connection.to != 'end') {
+    if (connection.to != "end") {
       // We need to map from the next Interface to the previous interface
       graph.addConnection(
         nextMap.get(connection.from) as NodeInterface,
         previousMap.get(connection.to) as NodeInterface
-      )
+      );
     }
   }
   for (const connection of filterconnections) {
-    if (connection.to != 'end') {
-      graph.addConnection(connection.from, previousMap.get(connection.to) as NodeInterface)
+    if (connection.to != "end") {
+      graph.addConnection(
+        connection.from,
+        previousMap.get(connection.to) as NodeInterface
+      );
     }
   }
 }
@@ -141,29 +177,29 @@ async function addTask(
   nextMap: Map<String, NodeInterface>,
   previousMap: Map<String, NodeInterface>
 ) {
-  const graphStore = useGraphStore()
-  console.log(task)
-  const t = new TaskNode()
+  const graphStore = useGraphStore();
+  console.log(task);
+  const t = new TaskNode();
   if (task.position) {
-    t.position = task.position
+    t.position = task.position;
   } else {
-    t.position = { x: defaultX, y: defaultY, width: 300, height: 300 }
-    defaultX = defaultX + 300
-    defaultY = defaultY + 100
+    t.position = { x: defaultX, y: defaultY, width: 300, height: 300 };
+    defaultX = defaultX + 300;
+    defaultY = defaultY + 100;
   }
-  t.setElement(task.UUID, task.name)
-  await t.setElementVersion(task.version, task.tag)
-  graph.addNode(t)
-  t.title = task.instanceID
+  t.setElement(task.UUID, task.name);
+  await t.setElementVersion(task.version, task.tag);
+  graph.addNode(t);
+  t.title = task.instanceID;
   if (task.instanceID === start) {
-    graphStore.setStartNode(t)
+    graphStore.setStartNode(t);
   }
-  nextMap.set(task.instanceID, t.outputs.next)
-  previousMap.set(task.instanceID, t.inputs.previous)
+  nextMap.set(task.instanceID, t.outputs.next);
+  previousMap.set(task.instanceID, t.inputs.previous);
   for (const output of task.outputs) {
-    t.addElementOutput(output)
+    t.addElementOutput(output);
   }
-  connections.push({ from: task.instanceID, to: task.next })
+  connections.push({ from: task.instanceID, to: task.next });
 }
 
 async function addExperiment(
@@ -174,30 +210,30 @@ async function addExperiment(
   nextMap: Map<String, NodeInterface>,
   previousMap: Map<String, NodeInterface>
 ) {
-  const graphStore = useGraphStore()
+  const graphStore = useGraphStore();
 
-  console.log(experiment)
-  const e = new ExperimentNode()
+  console.log(experiment);
+  const e = new ExperimentNode();
   if (experiment.position) {
-    e.position = experiment.position
+    e.position = experiment.position;
   } else {
-    e.position = { x: defaultX, y: defaultY, width: 300, height: 300 }
-    defaultX = defaultX + 300
-    defaultY = defaultY + 100
+    e.position = { x: defaultX, y: defaultY, width: 300, height: 300 };
+    defaultX = defaultX + 300;
+    defaultY = defaultY + 100;
   }
 
-  e.setElement(experiment.UUID, experiment.name)
-  await e.setElementVersion(experiment.version, experiment.tag)
+  e.setElement(experiment.UUID, experiment.name);
+  await e.setElementVersion(experiment.version, experiment.tag);
 
-  graph.addNode(e)
+  graph.addNode(e);
   if (experiment.instanceID === start) {
-    graphStore.setStartNode(e)
+    graphStore.setStartNode(e);
   }
-  e.title = experiment.instanceID
-  e.random.value = experiment.randomize ? experiment.randomize : false
-  nextMap.set(experiment.instanceID, e.outputs.next)
-  previousMap.set(experiment.instanceID, e.inputs.previous)
-  connections.push({ from: experiment.instanceID, to: experiment.next })
+  e.title = experiment.instanceID;
+  e.random.value = experiment.randomize ? experiment.randomize : false;
+  nextMap.set(experiment.instanceID, e.outputs.next);
+  previousMap.set(experiment.instanceID, e.inputs.previous);
+  connections.push({ from: experiment.instanceID, to: experiment.next });
 }
 
 async function addFilter(
@@ -208,205 +244,234 @@ async function addFilter(
   nextMap: Map<String, NodeInterface>,
   previousMap: Map<String, NodeInterface>
 ) {
-  console.log(filter)
-  const f = new FilterNode()
+  console.log(filter);
+  const f = new FilterNode();
   if (filter.position) {
-    f.position = filter.position
+    f.position = filter.position;
   } else {
-    f.position = { x: defaultX, y: defaultY, width: 300, height: 300 }
-    defaultX = defaultX + 300
-    defaultY = defaultY + 100
+    f.position = { x: defaultX, y: defaultY, width: 300, height: 300 };
+    defaultX = defaultX + 300;
+    defaultY = defaultY + 100;
   }
-  graph.addNode(f)
-  f.title = filter.instanceID
+  graph.addNode(f);
+  f.title = filter.instanceID;
 
-  for (const { index, value } of filter.options.map((value, index) => ({ index, value }))) {
-    const filterName = value.name ? value.name : 'Filter ' + index
-    f.addFilter(filterName, value.filter)
-    filterconnections.push({ from: f.outputs[filterName], to: value.next })
+  for (const { index, value } of filter.options.map((value, index) => ({
+    index,
+    value,
+  }))) {
+    const filterName = value.name ? value.name : "Filter " + index;
+    f.addFilter(filterName, value.filter);
+    filterconnections.push({ from: f.outputs[filterName], to: value.next });
   }
-  connections.push({ from: filter.instanceID, to: filter.defaultOption })
+  connections.push({ from: filter.instanceID, to: filter.defaultOption });
 
-  nextMap.set(filter.instanceID, f.outputs.default)
+  nextMap.set(filter.instanceID, f.outputs.default);
 
-  previousMap.set(filter.instanceID, f.inputs.previous)
+  previousMap.set(filter.instanceID, f.inputs.previous);
 }
 
-export async function BaklavaToSoileProjectJSON(graph: Graph): Promise<SOILEProject> {
-  const nodes = graph.nodes
-  const connections = graph.connections
+export async function BaklavaToSoileProjectJSON(
+  graph: Graph
+): Promise<SOILEProject> {
+  const nodes = graph.nodes;
+  const connections = graph.connections;
   const projectData = {
     tasks: new Array<TaskInstance>(),
     experiments: new Array<ExperimentInstance>(),
     filters: new Array<FilterInstance>(),
-    start: '',
-    UUID: '',
-    name: '',
-    version: '',
-    tag: '',
-    private: false
-  }
-  const nextMap = createNextMap(nodes, connections)
+    start: "",
+    UUID: "",
+    name: "",
+    version: "",
+    tag: "",
+    private: false,
+  };
+  const nextMap = createNextMap(nodes, connections);
   // now actually make the nodes
   for (const node of nodes) {
-    const soileNode = node as SoileNode
+    const soileNode = node as SoileNode;
     if (!soileNode.isValid()) {
       throw new Error(
-        'Cannot convert. Node ' +
+        "Cannot convert. Node " +
           soileNode.title +
-          ' is not valid (Probably no target Element selected)'
-      )
+          " is not valid (Probably no target Element selected)"
+      );
     }
-    if (node.type === 'TaskNode') {
-      const taskNode = node as TaskNode
+    if (node.type === "TaskNode") {
+      const taskNode = node as TaskNode;
       if (taskNode.isStartNode()) {
-        projectData.start = taskNode.title
+        projectData.start = taskNode.title;
       }
-      projectData.tasks.push(createTaskJson(node as TaskNode, nextMap))
+      projectData.tasks.push(createTaskJson(node as TaskNode, nextMap));
     }
-    if (node.type === 'FilterNode') {
-      projectData.filters.push(createFilterJson(node as FilterNode, nextMap))
+    if (node.type === "FilterNode") {
+      projectData.filters.push(createFilterJson(node as FilterNode, nextMap));
     }
-    if (node.type === 'ExperimentNode') {
-      const cnode = node as ExperimentNode
+    if (node.type === "ExperimentNode") {
+      const cnode = node as ExperimentNode;
       const instance = await instantiateExperimentInProject(
         cnode.objectData.uuid,
         cnode.objectData.version,
         cnode.random.value,
         cnode.title
-      )
+      );
       instance.next = nextMap.get(cnode.outputs.next.id)
         ? nextMap.get(cnode.outputs.next.id)
-        : 'end'
-      instance.position = cnode.position
-      projectData.experiments.push(instance)
+        : "end";
+      instance.position = cnode.position;
+      projectData.experiments.push(instance);
     }
   }
-  return projectData
+  return projectData;
 }
 
-export async function BaklavaToSoileExperimentJSON(graph: Graph): Promise<Experiment> {
-  const nodes = graph.nodes
-  const connections = graph.connections
+export async function BaklavaToSoileExperimentJSON(
+  graph: Graph
+): Promise<Experiment> {
+  const nodes = graph.nodes;
+  const connections = graph.connections;
   const experimentData = {
     elements: new Array<{
-      elementType: string
-      data: TaskInstance | ExperimentInstance | FilterInstance
+      elementType: string;
+      data: TaskInstance | ExperimentInstance | FilterInstance;
     }>(),
-    UUID: '',
-    version: '',
-    tag: '',
+    UUID: "",
+    version: "",
+    tag: "",
     randomize: false,
     private: false,
-    name: ''
-  }
-  const tempData = {} as Experiment
+    name: "",
+  };
+  const tempData = {} as Experiment;
   tempData.elements = new Array<{
-    elementType: string
-    data: TaskInstance | ExperimentInstance | FilterInstance
-  }>()
-  const nextMap = createNextMap(nodes, connections)
+    elementType: string;
+    data: TaskInstance | ExperimentInstance | FilterInstance;
+  }>();
+  const nextMap = createNextMap(nodes, connections);
   // now actually make the nodes
   for (const node of nodes) {
-    const soileNode = node as SoileNode
+    const soileNode = node as SoileNode;
     if (!soileNode.isValid()) {
       throw new Error(
-        'Cannot convert. Node ' +
+        "Cannot convert. Node " +
           soileNode.title +
-          ' is not valid (Probably no target Element selected)'
-      )
+          " is not valid (Probably no target Element selected)"
+      );
     }
-    if (node.type === 'TaskNode') {
+    if (node.type === "TaskNode") {
       if (!(node as TaskNode).isStartNode()) {
         experimentData.elements.push({
-          elementType: 'task',
-          data: createTaskJson(node as TaskNode, nextMap)
-        })
+          elementType: "task",
+          data: createTaskJson(node as TaskNode, nextMap),
+        });
       } else {
         // start Node needs to be the very first element. (maybe we change this later...)
         experimentData.elements.splice(0, 0, {
-          elementType: 'task',
-          data: createTaskJson(node as TaskNode, nextMap)
-        })
+          elementType: "task",
+          data: createTaskJson(node as TaskNode, nextMap),
+        });
       }
     }
-    if (node.type === 'FilterNode') {
+    if (node.type === "FilterNode") {
       experimentData.elements.push({
-        elementType: 'filter',
-        data: createFilterJson(node as FilterNode, nextMap)
-      })
+        elementType: "filter",
+        data: createFilterJson(node as FilterNode, nextMap),
+      });
     }
-    if (node.type === 'ExperimentNode') {
-      const cnode = node as ExperimentNode
+    if (node.type === "ExperimentNode") {
+      const cnode = node as ExperimentNode;
       const instance = await instantiateExperimentInProject(
         cnode.objectData.uuid,
         cnode.objectData.version,
         cnode.random.value,
         cnode.title
-      )
+      );
       instance.next = nextMap.get(cnode.outputs.next.id)
         ? nextMap.get(cnode.outputs.next.id)
-        : 'end'
-      instance.position = cnode.position
+        : "end";
+      instance.position = cnode.position;
       if (!(node as ExperimentNode).isStartNode()) {
-        experimentData.elements.push({ elementType: 'experiment', data: instance })
+        experimentData.elements.push({
+          elementType: "experiment",
+          data: instance,
+        });
       } else {
         // start Node needs to be the very first element. (maybe we change this later...)
-        experimentData.elements.splice(0, 0, { elementType: 'experiment', data: instance })
+        experimentData.elements.splice(0, 0, {
+          elementType: "experiment",
+          data: instance,
+        });
       }
     }
   }
-  return experimentData
+  return experimentData;
 }
 
-function createNextMap(nodes: readonly AbstractNode[], connections: readonly Connection[]) {
-  const previousMap = new Map<string, string>()
+function createNextMap(
+  nodes: readonly AbstractNode[],
+  connections: readonly Connection[]
+) {
+  const previousMap = new Map<string, string>();
   // first, we collect the previous Interface IDs and map them to Nodes.
   for (const node of nodes) {
-    previousMap.set(node.inputs.previous.id, node.title)
+    previousMap.set(node.inputs.previous.id, node.title);
   }
-  const nextMap = new Map<string, string>()
+  const nextMap = new Map<string, string>();
   for (const connection of connections) {
-    nextMap.set(connection.from.id, previousMap.get(connection.to.id) as string)
+    nextMap.set(
+      connection.from.id,
+      previousMap.get(connection.to.id) as string
+    );
   }
-  return nextMap
+  return nextMap;
 }
 
-function createTaskJson(cnode: TaskNode, nextMap: Map<string, string>): TaskInstance {
-  const test = {} as TaskInstance
-  test.codeType = cnode.codeType
+function createTaskJson(
+  cnode: TaskNode,
+  nextMap: Map<string, string>
+): TaskInstance {
+  const test = {} as TaskInstance;
+  test.codeType = cnode.codeType;
   const taskData = {
     UUID: cnode.objectData.uuid,
     version: cnode.objectData.version,
     tag: cnode.objectData.tag,
     outputs: cnode.nodeOutputs,
     instanceID: cnode.title,
-    next: nextMap.get(cnode.outputs.next.id) ? nextMap.get(cnode.outputs.next.id) : 'end',
+    next: nextMap.get(cnode.outputs.next.id)
+      ? nextMap.get(cnode.outputs.next.id)
+      : "end",
     codeType: cnode.codeType,
     name: cnode.objectData.name,
-    position: cnode.position
-  }
-  return taskData
+    position: cnode.position,
+  };
+  return taskData;
 }
 
-function createFilterJson(cnode: FilterNode, nextMap: Map<string, string>): FilterInstance {
-  const filters = new Array<{ name: string; filter: string; next: string }>()
+function createFilterJson(
+  cnode: FilterNode,
+  nextMap: Map<string, string>
+): FilterInstance {
+  const filters = new Array<{ name: string; filter: string; next: string }>();
   cnode.Filters.forEach((value, key) => {
-    console.log(key)
+    console.log(key);
     const current = {
       name: key,
       filter: value.filterstring,
-      next: nextMap.get(value.interfaceID) ? nextMap.get(value.interfaceID) : 'end'
-    }
-    filters.push(current)
-  })
+      next: nextMap.get(value.interfaceID)
+        ? nextMap.get(value.interfaceID)
+        : "end",
+    };
+    filters.push(current);
+  });
   const filterData = {
     instanceID: cnode.title,
     defaultOption: nextMap.get(cnode.outputs.default.id)
       ? nextMap.get(cnode.outputs.default.id)
-      : 'end',
+      : "end",
     options: filters,
-    position: cnode.position
-  }
-  return filterData
+    position: cnode.position,
+  };
+  return filterData;
 }

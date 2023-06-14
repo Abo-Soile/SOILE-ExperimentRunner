@@ -1,6 +1,10 @@
 <template>
   <Button icon="pi pi-folder-open" label="Load Study"></Button>
-  <Button icon="pi pi-plus" label="New Study" @click="creationDialogVisible = true"></Button>
+  <Button
+    icon="pi pi-plus"
+    label="New Study"
+    @click="creationDialogVisible = true"
+  ></Button>
   <StudyCreationDialog
     v-model:visible="creationDialogVisible"
     @selected="(event) => handleCreation(event)"

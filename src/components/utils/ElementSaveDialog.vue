@@ -3,11 +3,20 @@
     <div>
       <div class="flex align-items-center mb-2">
         <label for="tag">Please indicate a name for the version:</label>
-        <InputText :class="isTagNotOk ? 'p-invalid' : ''" id="tag" v-model="tag" />
+        <InputText
+          :class="isTagNotOk ? 'p-invalid' : ''"
+          id="tag"
+          v-model="tag"
+        />
       </div>
     </div>
     <template #footer>
-      <Button label="Cancel" icon="pi pi-times" @click="isVisible = false" text></Button>
+      <Button
+        label="Cancel"
+        icon="pi pi-times"
+        @click="isVisible = false"
+        text
+      ></Button>
       <Button
         label="Save Version"
         :disabled="isTagNotOk"
@@ -19,52 +28,52 @@
 </template>
 
 <script>
-import Dropdown from 'primevue/dropdown'
-import InputText from 'primevue/inputtext'
-import Checkbox from 'primevue/checkbox'
-import Dialog from 'primevue/dialog'
-import Button from 'primevue/button'
+import Dropdown from "primevue/dropdown";
+import InputText from "primevue/inputtext";
+import Checkbox from "primevue/checkbox";
+import Dialog from "primevue/dialog";
+import Button from "primevue/button";
 
-import { defineComponent } from 'vue'
+import { defineComponent } from "vue";
 export default defineComponent({
   components: { Dropdown, InputText, Button, Dialog, Checkbox },
   props: {
     visible: {
       type: Boolean,
-      required: true
+      required: true,
     },
     name: {
       type: String,
-      required: true
+      required: true,
     },
     currentTags: {
       type: Array,
-      required: true
-    }
+      required: true,
+    },
   },
-  emits: ['update:visible', 'submit'],
+  emits: ["update:visible", "submit"],
   data() {
     return {
-      tag: ''
-    }
+      tag: "",
+    };
   },
   methods: {
     submit() {
-      this.$emit('submit', this.tag)
-    }
+      this.$emit("submit", this.tag);
+    },
   },
   computed: {
     isTagNotOk() {
-      return this.tag === '' || this.currentTags.includes(this.tag)
+      return this.tag === "" || this.currentTags.includes(this.tag);
     },
     isVisible: {
       get() {
-        return this.visible
+        return this.visible;
       },
       set(newValue) {
-        this.$emit('update:visible', newValue)
-      }
-    }
-  }
-})
+        this.$emit("update:visible", newValue);
+      },
+    },
+  },
+});
 </script>
