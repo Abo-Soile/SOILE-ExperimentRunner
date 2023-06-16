@@ -74,7 +74,6 @@ import SoileExpRunner from "@/components/experimentlang/SoileExpRunner.vue";
 import PsychoJsRunner from "@/components/psychopy/PsychoJsRunner.vue";
 import { mapState } from "pinia";
 import { useErrorStore } from "@/stores";
-import { useUserStore } from "@/stores/users";
 import Button from "primevue/button";
 
 export default {
@@ -154,7 +153,6 @@ export default {
     async submitResults(results) {
       console.log(results);
       var TaskData = {};
-      const userStore = useUserStore();
       this.outputs = results.outputData ? results.outputData : [];
       this.results = results.resultData
         ? results.resultData
@@ -164,8 +162,7 @@ export default {
       this.uploadedFiles.push(fileName);
     },
     handleError(error) {
-      const errorStore = useErrorStore();
-      errorStore.raiseError(undefined, error);
+      this.errorStore.raiseError(undefined, error);
     },
   },
   mounted() {

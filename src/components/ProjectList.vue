@@ -40,10 +40,9 @@ import InputText from "primevue/inputtext";
 import Column from "primevue/column";
 
 import { router } from "@/helpers";
-import { useProjectStore, useUserStore, useAuthStore } from "@/stores";
+import { useProjectStore, useAuthStore } from "@/stores";
 const projectStore = useProjectStore();
 const authStore = useAuthStore();
-const userStore = useUserStore();
 const continueTokens = {};
 
 const props = defineProps({
@@ -55,13 +54,13 @@ const props = defineProps({
 async function runProject(index, event) {
   if (authStore.authed) {
     console.log("Rerouting to " + props.items[index].uuid);
-    await userStore.updateTaskSettings(props.items[index].uuid);
-    console.log(userStore.currentTaskSettings.id);
+    await projectStore.updateTaskSettings(props.items[index].uuid);
+    console.log(userSprojectStoretore.currentTaskSettings.id);
     router.push(
       "/exp/" +
         props.items[index].uuid +
         "/" +
-        userStore.currentTaskSettings.id +
+        projectStore.currentTaskSettings.id +
         "/"
     );
   } else {

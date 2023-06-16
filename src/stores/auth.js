@@ -4,6 +4,12 @@ import axios from "axios";
 import { router } from "@/helpers";
 
 import { useProjectStore } from "./project";
+import { useGraphStore } from "./graph";
+import { useUserStore } from "./users";
+import { useEditorStore } from "./editing";
+import { useElementStore } from "./elements";
+import { useStudyStore } from "./studies";
+
 import { useErrorStore } from "./errors";
 
 export const useAuthStore = defineStore({
@@ -24,7 +30,7 @@ export const useAuthStore = defineStore({
     },
     isAdmin() {
       if (this.isAuthed()) {
-        return this.roles.contains("Admin");
+        return this.roles.includes("Admin");
       } else {
         return false;
       }
@@ -92,14 +98,27 @@ export const useAuthStore = defineStore({
         this.setAccessToken(null);
         this.setProjectToken(null);
         this.setProjectToken(null);
-        const listStore = useProjectStore();
-        listStore.clearData();
         await this.updateLoginStatus();
-        await listStore.updateAvailableStudies();
+        this.cleanupStores();
         console.log("Logged Out");
       } catch (e) {
         this.processAxiosError(e);
       }
+    },
+    cleanupStores() {
+      const graphs = useGraphStore();
+      graphs.clearData();
+      const users = useUserStore();
+      users.clearData();
+      const editing = useEditorStore();
+      editing.clearData();
+      const listStore = useProjectStore();
+      listStore.clearData();
+      listStore.updateAvailableStudies();
+      const elements = useElementStore();
+      elements.clearData();
+      const studies = useStudyStore();
+      studies.clearData();
     },
 
     async updateUserData() {

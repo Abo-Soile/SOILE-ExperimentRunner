@@ -11,6 +11,11 @@ export const useStudyStore = defineStore({
     editableStudies: [],
   }),
   actions: {
+    clearData() {
+      this.currentEditedStudy = null;
+      this.researchStudies = [];
+      this.editableStudies = [];
+    },
     async updateResearchStudies() {
       try {
         const response = await axios.post("/study/list?access=read");
@@ -167,6 +172,26 @@ export const useStudyStore = defineStore({
         console.log(response.data);
         console.log(response);
         return response.data.downloadID;
+      } catch (error) {
+        this.processAxiosError(error);
+        return false;
+      }
+    },
+    async getCollaboratorsForStudy(uuid) {
+      try {
+        const response = await axios.post(`/study/${uuid}/collaborators`);
+        console.log(response.data);
+        console.log(response);
+        return response.data;
+      } catch (error) {
+        this.processAxiosError(error);
+        return false;
+      }
+    },
+    async getAllStudies() {
+      try {
+        const response = await axios.post(`/study/list?full=true`);
+        return response.data;
       } catch (error) {
         this.processAxiosError(error);
         return false;

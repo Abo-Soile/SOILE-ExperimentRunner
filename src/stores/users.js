@@ -1,3 +1,6 @@
+/**
+ * This is a store to handle user relevant actions. This also
+ */
 import { defineStore } from "pinia";
 import { useErrorStore } from "./errors";
 
@@ -7,29 +10,85 @@ export const useUserStore = defineStore({
   id: "user",
   state: () => ({
     // initialize state from session storage to enable user to stay logged in for the session (not using local store)
-    currentTaskSettings: {},
-    isRunningTask: false,
+    users: [],
   }),
   actions: {
-    async updateTaskSettings(projectID) {
-      console.log(projectID);
-      if (projectID) {
-        try {
-          const response = await axios.post(
-            "/study/" + projectID + "/getcurrenttaskinfo"
-          );
-          this.currentTaskSettings = response.data;
-        } catch (error) {
-          const errorStore = useErrorStore();
-          errorStore.processAxiosError(error);
-        }
+    clearData() {
+      this.users = [];
+    },
+    /**
+     * Fetch the user data
+     */
+    async fetchUserData() {
+      try {
+        const response = await axios.post("/user/list");
+        this.users = response.data;
+        return true;
+      } catch (error) {
+        this.processAxiosError(error);
+        return false;
       }
     },
-    setTaskActive() {
-      this.isRunningTask = true;
+    async updateRoleInStudy(username, newRole, studyID) {
+      try {
+        const permissionQuery = {
+          username: username,
+          command: "update",
+          permissionProperties: {
+            elementType: "STUDY",
+            permissionSettings: [
+              {
+                type: newRole,
+                target: studyID,
+              },
+            ],
+          },
+        };
+        await axios.post("/user/setpermissions", permissionQuery);
+        return true;
+      } catch (error) {
+        this.processAxiosError(error);
+        return false;
+      }
     },
-    setTaskNotRunning() {
-      this.isRunningTask = false;
+    async createUser(userdata, register) {
+      try {
+        if (register) {
+          await axios.post("/user/create", userdata);
+        } else {
+          await axios.post("/register", userdata);
+        }
+        await fetchUserData();
+      } catch (err) {
+        this.processAxiosError(err);
+      }
+    },
+    processAxiosError(err) {
+      const errorStore = useErrorStore();
+      errorStore.processAxiosError(err);
+    },
+
+    async getPermissions(user) {
+      try {
+        console.log("Getting permissions for " + user);
+        const response = await axios.post("/user/getaccess?username=" + user);
+        return response.data;
+      } catch (error) {
+        this.processAxiosError(error);
+        return false;
+      }
+    },
+    async changeUserRole(username, newRole) {
+      try {
+        await axios.post("/user/setrole", {
+          username: username,
+          role: newRole,
+        });
+        return true;
+      } catch (error) {
+        this.processAxiosError(error);
+        return false;
+      }
     },
   },
 });

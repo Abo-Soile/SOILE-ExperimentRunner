@@ -17,7 +17,7 @@
           '/exp/' +
           selectedProject.uuid +
           '/' +
-          userStore.currentTaskSettings.id +
+          projectStore.currentTaskSettings.id +
           '/'
         "
         custom
@@ -43,14 +43,13 @@
 
 <script setup>
 import Button from "primevue/button";
-import { useProjectStore, useAuthStore, useUserStore } from "@/stores";
+import { useProjectStore, useAuthStore } from "@/stores";
 import { storeToRefs } from "pinia";
 import { onMounted, watch } from "vue";
 
 var justSignedUp = {};
 const projectStore = useProjectStore();
 const authStore = useAuthStore();
-const userStore = useUserStore();
 
 const { signedUpStudies: signedUpStudies, selectedProject: selectedProject } =
   storeToRefs(projectStore);
@@ -71,7 +70,7 @@ async function signUp() {
     await authStore.refreshSession();
     console.log("Updating signed up projects");
     await projectStore.fetchSignedUpStudies();
-    await userStore.updateTaskSettings(selectedProject.value.uuid);
+    await projectStore.updateTaskSettings(selectedProject.value.uuid);
   } else {
     console.log("Signup was unsuccessful");
   }
@@ -79,7 +78,7 @@ async function signUp() {
 
 watch(projectStore.selectedProject, async (newID) => {
   console.log("selectedProject changed to: ");
-  await userStore.updateTaskSettings(newID.uuid);
+  await projectStore.updateTaskSettings(newID.uuid);
 });
 onMounted(async () => {
   //console.log("Signup Mounted: ")

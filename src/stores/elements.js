@@ -12,6 +12,12 @@ export const useElementStore = defineStore({
     elements: { task: {}, project: {}, experiment: {} },
   }),
   actions: {
+    clearData() {
+      this.availableTasks = [];
+      this.availableExperiments = [];
+      this.availableProjects = [];
+      this.elements = { task: {}, project: {}, experiment: {} };
+    },
     /**
      * Update the Projects available to the current user (i,.e where they have access to)
      */

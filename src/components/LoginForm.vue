@@ -37,7 +37,6 @@ import { useAuthStore } from "../stores";
 export default {
   name: "LoginForm",
   components: {
-    Card,
     InputText,
     Password,
     Checkbox,

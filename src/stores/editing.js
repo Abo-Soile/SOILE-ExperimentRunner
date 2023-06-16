@@ -49,6 +49,12 @@ export const useEditorStore = defineStore({
     activeElement: "",
   }),
   actions: {
+    clearData() {
+      this.experiments = { active: 0, elements: [] };
+      this.projects = { active: 0, elements: [] };
+      this.tasks = { active: 0, elements: [] };
+      this.activeElement = "";
+    },
     createElement(type) {
       const store = this.getStoreForType(type);
       const existentNames = store.elements.map((x) => x.name);

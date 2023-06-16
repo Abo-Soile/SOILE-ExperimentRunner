@@ -19,6 +19,13 @@ export const useGraphStore = defineStore({
     graphs: new Map<string, Graph>(),
   }),
   actions: {
+    clearData() {
+      this.nodePersistentInformation = new Map<string, Map<string, string[]>>();
+      this.nodeOutputInformation = new Map<string, Map<string, string[]>>();
+      this.nodeNames = new Map<string, Map<any, string>>();
+      this.startNodes = new Map<string, string>();
+      this.graphs = new Map<string, Graph>();
+    },
     processAxiosError(err: { response: { status: any; data: any } }) {
       const errorStore = useErrorStore();
       //console.log(err);

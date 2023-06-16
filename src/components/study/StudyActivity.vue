@@ -13,7 +13,7 @@
       ></Button>
 
       <Button
-        v-if="permanentToken != null && permanentToken != ''"
+        v-if="permanentToken == null || permanentToken === ''"
         label="Create Permanent Access Token"
         @click="$emit('createMasterToken')"
       />

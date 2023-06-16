@@ -12,11 +12,21 @@ export const useProjectStore = defineStore({
     ),
     signedUpStudies: [],
     availableProjectInstances: [],
+
+    currentTaskSettings: {},
+    isRunningTask: false,
   }),
   actions: {
+    clearData() {
+      this.selectedProject = "";
+      this.signedUpStudies = [];
+      this.availableProjectInstances = [];
+      this.currentTaskSettings = {};
+      this.isRunningTask = false;
+    },
     async updateAvailableStudies() {
       try {
-        const response = await axios.post("/study/list");
+        const response = await axios.post("/study/listrunning");
         console.log(response?.data);
         // update pinia state
         this.availableProjectInstances = response?.data;
@@ -60,6 +70,26 @@ export const useProjectStore = defineStore({
     processAxiosError(err) {
       const errorStore = useErrorStore();
       errorStore.processAxiosError(err);
+    },
+    async updateTaskSettings(projectID) {
+      console.log(projectID);
+      if (projectID) {
+        try {
+          const response = await axios.post(
+            "/study/" + projectID + "/getcurrenttaskinfo"
+          );
+          this.currentTaskSettings = response.data;
+        } catch (error) {
+          const errorStore = useErrorStore();
+          errorStore.processAxiosError(error);
+        }
+      }
+    },
+    setTaskActive() {
+      this.isRunningTask = true;
+    },
+    setTaskNotRunning() {
+      this.isRunningTask = false;
     },
   },
 });

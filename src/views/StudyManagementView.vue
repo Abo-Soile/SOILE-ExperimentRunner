@@ -26,12 +26,12 @@ export default {
   components: { Button, Dialog, StudyEditor },
   mounted() {
     console.log("Mounting Management View");
-    this.projectStore.updateEditableStudies();
-    this.projectStore.updateResearchStudies();
+    this.studyStore.updateEditableStudies();
+    this.studyStore.updateResearchStudies();
   },
   setup() {
-    const projectStore = useStudyStore();
-    return { projectStore };
+    const studyStore = useStudyStore();
+    return { studyStore };
   },
   data() {
     return {};

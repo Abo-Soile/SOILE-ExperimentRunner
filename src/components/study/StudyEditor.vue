@@ -4,7 +4,7 @@
     <div class="displaypart col-4 h-full">
       <h3>Project Properties</h3>
       <ObjectAndVersionSelectorWithProps
-        :dropDownClasses="isProjectEditable ? '' : 'p-disabled'"
+        :dropDownClasses="isStudyEditable ? '' : 'p-disabled'"
         v-model:element="sourceProject"
         v-model:version="sourceVersion"
         objectType="project"
@@ -29,6 +29,17 @@
         @createTokens="(event) => createAccessTokens(event)"
         @createMasterToken="createMasterToken"
       ></StudyActivity>
+      <UserEditor
+        v-if="isStudyEditable"
+        :showPermissions="false"
+        @updateUsers="updateCollaborators"
+        @updateRole="(event) => updateRole(event.newRole, event.index)"
+        :userList="collaborators"
+        title="Collaborators"
+        :roleOptions="['READ', 'READ_WRITE', 'FULL']"
+        roleColumn="access"
+      >
+      </UserEditor>
       <!-- Study properties-->
     </div>
     <div class="displaypart col-5">
@@ -44,12 +55,13 @@
 <script>
 import Dropdown from "primevue/dropdown";
 import ObjectAndVersionSelectorWithProps from "@/components/utils/ObjectAndVersionSelectorWithProps.vue";
-import { useStudyStore, useElementStore } from "@/stores";
+import { useStudyStore, useUserStore, useElementStore } from "@/stores";
 import { reactive } from "vue";
 
 import StudyProperties from "./StudyProperties.vue";
 import StudyActivity from "./StudyActivity.vue";
 import StudyDataSelector from "./StudyDataSelector.vue";
+import UserEditor from "@/components/UserEditor.vue";
 
 export default {
   components: {
@@ -58,6 +70,7 @@ export default {
     Dropdown,
     StudyProperties,
     StudyActivity,
+    UserEditor,
   },
   props: {
     editableStudies: {
@@ -76,6 +89,7 @@ export default {
       permanentAccessToken: null,
       usedTokens: [],
       availableData: {},
+      collaborators: [],
     };
   },
   setup(props) {
@@ -83,12 +97,13 @@ export default {
     const currentStudy = reactive(
       JSON.parse(JSON.stringify(props.selectedStudy))
     );
-    const projectStore = useStudyStore();
+    const studyStore = useStudyStore();
+    const userStore = useUserStore();
     const elementStore = useElementStore();
-    return { currentStudy, elementStore, projectStore };
+    return { currentStudy, elementStore, studyStore, userStore };
   },
   computed: {
-    isProjectEditable() {
+    isStudyEditable() {
       return (
         this.selectedStudy.UUID == null ||
         this.editableStudies
@@ -118,6 +133,13 @@ export default {
         }
       },
     },
+    currentStudyID() {
+      if (this.currentStudy != null && this.currentStudy.UUID) {
+        return this.currentStudy.UUID;
+      } else {
+        return null;
+      }
+    },
   },
   watch: {
     // on an updated project, we reparse it.
@@ -131,21 +153,36 @@ export default {
     async "currentStudy.active"(newValue) {
       console.log("Activity of current project changed");
       if (newValue) {
-        this.projectStore.activate(this.currentStudy.UUID);
+        this.studyStore.activate(this.currentStudy.UUID);
       } else {
-        this.projectStore.deactivate(this.currentStudy.UUID);
+        this.studyStore.deactivate(this.currentStudy.UUID);
       }
     },
   },
   methods: {
+    updateRole(newRole, index) {
+      const user = this.collaborators[index].user;
+      if (this.currentStudyID) {
+        userStore
+          .updateRoleInStudy(user, newRole, this.currentStudyID)
+          .then((res) => {
+            if (res) {
+              this.collaborators[index].role = newRole;
+            }
+          });
+      }
+    },
     updateData() {
       console.log("Updating Data for Study in Editor");
       this.updateTokenData();
       this.updateAvailableDLData();
+      if (this.isStudyEditable) {
+        this.updateCollaborators();
+      }
     },
     async updateTokenData() {
       console.log("Updating token data");
-      const tokenInformation = await this.projectStore.getTokenInformation(
+      const tokenInformation = await this.studyStore.getTokenInformation(
         this.currentStudy.UUID
       );
       this.usedTokens = tokenInformation.usedTokens || [];
@@ -153,16 +190,28 @@ export default {
       this.permanentAccessToken = tokenInformation.permanentAccessToken || "";
     },
     async updateAvailableDLData() {
-      this.availableData = await this.projectStore.getDownloadableData(
+      this.availableData = await this.studyStore.getDownloadableData(
         this.currentStudy.UUID
       );
     },
+    async updateCollaborators() {
+      if (this.currentStudyID) {
+        const collabs = await this.studyStore.getCollaboratorsForStudy(
+          this.currentStudyID
+        );
+        if (collabs) {
+          this.collaborators = collabs;
+        } else {
+          this.collaborators = [];
+        }
+      }
+    },
     async createAccessTokens(count) {
-      await this.projectStore.generateTokens(this.currentStudy.UUID, count);
+      await this.studyStore.generateTokens(this.currentStudy.UUID, count);
       await this.updateTokenData();
     },
     async createMasterToken() {
-      await this.projectStore.generateMasterToken(currentStudy);
+      await this.studyStore.generateMasterToken(currentStudy);
       await this.updateTokenData();
     },
   },

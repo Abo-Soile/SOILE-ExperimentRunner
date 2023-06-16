@@ -58,7 +58,7 @@ import SoileExpRunner from "../components/experimentlang/SoileExpRunner.vue";
 import PsychoJsRunner from "../components/psychopy/PsychoJsRunner.vue";
 import { mapState } from "pinia";
 import { useErrorStore } from "@/stores";
-import { useUserStore } from "@/stores/users";
+import { useProjectStore } from "@/stores/project";
 import Button from "primevue/button";
 
 export default {
@@ -70,25 +70,27 @@ export default {
       running: false,
     };
   },
+  setup() {
+    const projectStore = useProjectStore();
+    const errorStore = useErrorStore();
+    return { projectStore, errorStore };
+  },
   methods: {
     /**
      * Set the task to active
      */
     setTaskActive() {
       console.log("Activating task");
-      const userStore = useUserStore();
-      userStore.setTaskActive();
+      this.projectStore.setTaskActive();
     },
     runTask() {
-      const userStore = useUserStore();
-
       axios
         .get("/run/" + this.$route.params.id + "/" + this.$route.params.taskID)
         .then((response) => {
           this.code = response?.data;
         })
         .catch((error) => {
-          userStore.setTaskNotRunning();
+          this.projectStore.setTaskNotRunning();
           console.log(error);
         });
     },
@@ -105,8 +107,7 @@ export default {
     async submitResults(results) {
       console.log(results);
       var TaskData = {};
-      const userStore = useUserStore();
-      TaskData.taskID = userStore.currentTaskSettings.id;
+      TaskData.taskID = this.projectStore.currentTaskSettings.id;
       TaskData.outputData = results.outputData ? results.outputData : [];
       TaskData.resultData = results.resultData
         ? results.resultData
@@ -116,14 +117,14 @@ export default {
         .post("/study/" + this.$route.params.id + "/submit", TaskData)
         .then(async (response) => {
           if (response.status == 200) {
-            await userStore.updateTaskSettings(this.$route.params.id);
+            await this.projectStore.updateTaskSettings(this.$route.params.id);
             // start the next task.
             this.running = false;
             this.$router.push(
               "/exp/" +
                 this.$route.params.id +
                 "/" +
-                userStore.currentTaskSettings.id +
+                this.projectStore.currentTaskSettings.id +
                 "/"
             );
           } else {
@@ -138,7 +139,7 @@ export default {
           console.log(error);
         })
         .finally(() => {
-          userStore.setTaskNotRunning();
+          this.projectStore.setTaskNotRunning();
         });
     },
     uploadData(file, fileName, idCallBack, errorCallback) {
@@ -159,8 +160,7 @@ export default {
         });
     },
     handleError(error) {
-      const errorStore = useErrorStore();
-      errorStore.raiseError(undefined, error);
+      this.errorStore.raiseError(undefined, error);
     },
   },
   async beforeMount() {
@@ -173,7 +173,7 @@ export default {
     next();
   },
   computed: {
-    ...mapState(useUserStore, ["currentTaskSettings", "isRunningTask"]),
+    ...mapState(useProjectStore, ["currentTaskSettings", "isRunningTask"]),
   },
   mounted() {
     console.log("ExpView Mounted");

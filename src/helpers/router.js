@@ -4,16 +4,21 @@ import {
   ProjectEditingView,
   SignupView,
   ExperimentView,
-  ExperimentPreviewView,
   WelcomeView,
+  UserManagementView,
 } from "@/views";
-import { useUserStore } from "@/stores/users";
+import { useProjectStore } from "@/stores";
 
 const routes = [
   {
     path: "/",
     name: "Welcome",
     component: WelcomeView,
+  },
+  {
+    path: "/usermanagement",
+    name: "UserManagement",
+    component: UserManagementView,
   },
   {
     path: "/editing",
@@ -30,11 +35,6 @@ const routes = [
     path: "/management",
     name: "Study Management",
     component: StudyManagementView,
-  },
-  {
-    path: "/preview/:taskID/:taskVersion/",
-    name: "Preview",
-    component: ExperimentPreviewView,
   },
   {
     path: "/exp/:id/:taskID/",
@@ -58,9 +58,7 @@ export const router = createRouter({
 
 router.beforeEach(async (to) => {
   // redirect to login page if not logged in and trying to access a restricted page
-  console.log("Changing to: ");
-  console.log(to);
-  const userStore = useUserStore();
+  const projectStore = useProjectStore();
   // regardless on where we are, we are NOt currently running a task.
-  userStore.setTaskNotRunning();
+  projectStore.setTaskNotRunning();
 });

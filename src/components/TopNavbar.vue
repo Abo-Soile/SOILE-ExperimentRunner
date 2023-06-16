@@ -13,10 +13,12 @@
     <Login @submitted="showLoginDialog = false" />
   </Dialog>
   <StudyCreationDialog
+    v-if="creationDialogVisible"
     v-model:visible="creationDialogVisible"
     @selected="(event) => handleCreation(event)"
   ></StudyCreationDialog>
   <StudyLoadDialog
+    v-if="loadDialogVisible"
     v-model:visible="loadDialogVisible"
     :researchStudies="studyStore.researchStudies"
     @selected="(event) => handleLoad(event)"
@@ -83,6 +85,13 @@ export default {
                   to: "/management",
                 },
               ],
+            }
+          : {},
+        this.isAdmin
+          ? {
+              label: "User Management",
+              icon: "pi pi-user-edit",
+              to: "/usermanagement",
             }
           : {},
         {
