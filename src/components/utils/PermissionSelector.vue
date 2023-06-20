@@ -1,28 +1,25 @@
 <template>
-  <ProgressSpinner
-    v-if="availableElements == null || availableElements.length < 1"
-  ></ProgressSpinner>
   <PickList
-    v-else
     class="permissionDisplay"
     :showSourceControls="false"
     :showTargetControls="false"
     v-model="permissions"
-    listStyle="height:80vh; width:40vw;"
+    :listStyle="listStyle"
     dataKey="id"
+    v-model:selection="selection"
     @moveToTarget="elementRemovedFromPermissions"
     @moveToSource="elementPermissionAdded"
     @moveAllToTarget="allRemovedFromPermissions"
     @moveAllToSource="allElementsAdded"
   >
-    <template #sourceheader> Current Permissions </template>
-    <template #targetheader> Available Elements </template>
+    <template #sourceheader> {{ currentLabel }} </template>
+    <template #targetheader> {{ availableLabel }} </template>
     <template #item="slotProps">
       <PermissionElement
         :key="slotProps.index"
         :permissionOptions="availablePermissions"
         :originalPermission="slotProps.item.permission"
-        :elementName="slotProps.item.name"
+        :elementName="slotProps.item.id"
         @setPermission="(event) => permissionsSet(slotProps.item, event)"
         @removePermission="permissionRemoved(slotProps.item)"
       />
@@ -32,15 +29,18 @@
   </PickList>
   <Button
     class="mt-3"
-    label="Save Permissions"
+    :label="saveLabel"
     :disabled="!changed"
-    @click="$emit('savePermissions', permissions[0])"
+    @click="
+      $emit('savePermissions', permissions[0]);
+      changed = false;
+    "
   >
   </Button>
 </template>
 
 <script setup>
-import { ref, onMounted, watch, reactive } from "vue";
+import { ref, onMounted, watch, reactive, computed } from "vue";
 import PickList from "primevue/picklist";
 import ProgressSpinner from "primevue/progressspinner";
 import Button from "primevue/button";
@@ -68,14 +68,41 @@ const props = defineProps({
     type: String,
     default: "uuid",
   },
+  permissionField: {
+    type: String,
+    default: "type",
+  },
   defaultPermission: {
     type: String,
     default: "READ",
+  },
+  currentLabel: {
+    type: String,
+    default: "Current Permissions",
+  },
+  availableLabel: {
+    type: String,
+    default: "Available Permissions",
+  },
+  saveLabel: {
+    type: String,
+    default: "Save Permissions",
+  },
+  listStyle: {
+    type: String,
+    default: "height:80vh; width:40vw;",
   },
 });
 
 const permissions = ref(null);
 
+const selection = ref([reactive([]), reactive([])]);
+const emit = defineEmits(["savePermissions"]);
+
+/**
+ * Handle the removal of a permission item.
+ * @param {{id : string, permission: string, name: string}} item
+ */
 function permissionRemoved(item) {
   const elementIndex = permissions.value[0].indexOf(item);
   item.permission = null;
@@ -83,22 +110,82 @@ function permissionRemoved(item) {
     permissions.value[1].push(item);
     permissions.value[0].splice(elementIndex, 1);
   }
+  const selectionIndex = selection.value[0].indexOf(item);
+  if (selectionIndex >= 0) {
+    selection.value[0].splice(selectionIndex, 1);
+  }
+  console.log("Permissions Removed");
+  changed.value = true;
+}
+/**
+ * Handle settig a permission value
+ * @param {{id : string, permission: string, name: string}} item
+ * @param {string} newValue
+ */
+function permissionsSet(item, newValue) {
+  if (newValue != item.permission) {
+    const elementIndex = permissions.value[1].indexOf(item);
+    item.permission = newValue;
+    if (elementIndex >= 0) {
+      permissions.value[0].push(item);
+      permissions.value[1].splice(elementIndex, 1);
+    }
+    const selectionIndex = selection.value[1].indexOf(item);
+    if (selectionIndex >= 0) {
+      selection.value[1].splice(selectionIndex, 1);
+    }
+    changed.value = true;
+  }
+}
+/**
+ * PErmissions Removed from an element (move ti to the
+ * @param {*} event
+ */
+function elementRemovedFromPermissions(event) {
+  for (const element of event.items) {
+    element.permission = null;
+  }
+  console.log("Permissions Removed from element");
+  changed.value = true;
+}
+/**
+ * Permissions Added to Element (move over)
+ * @param {*} event
+ */
+function elementPermissionAdded(event) {
+  for (const element of event.items) {
+    element.permission = props.defaultPermission;
+  }
+  console.log("Permissions Added to Element");
   changed.value = true;
 }
 
-function permissionsSet(item, newValue) {
-  const elementIndex = permissions.value[1].indexOf(item);
-  console.log(newValue);
-  item.permission = newValue;
-  if (elementIndex >= 0) {
-    permissions.value[0].push(item);
-
-    permissions.value[1].splice(elementIndex, 1);
+/**
+ * All Elements removed
+ * @param {*} event
+ */
+function allRemovedFromPermissions(event) {
+  for (const element of event.items) {
+    element.permission = null;
+  }
+  changed.value = true;
+}
+/**
+ * All Elements added
+ * @param {*} event
+ */
+function allElementsAdded(event) {
+  for (const element of event.items) {
+    element.permission = props.defaultPermission;
   }
   changed.value = true;
 }
 
+/**
+ * Create the permissions arrays.
+ */
 function createPermissions() {
+  console.log(props.availableElements);
   const possiblePermissions = JSON.parse(
     JSON.stringify(props.availableElements)
   );
@@ -106,13 +193,14 @@ function createPermissions() {
   const current = [];
   for (const element of possiblePermissions) {
     const existing = props.currentPermissions.find(
-      (x) => x.target === element[props.idField]
+      (x) => x[props.idField] === element[props.idField]
     );
-    if (existing && existing.type != "EXECUTE") {
+    console.log(existing);
+    if (existing && existing[props.permissionField] != "EXECUTE") {
       current.push({
         id: element[props.idField],
         name: element[props.displayField],
-        permission: existing.type,
+        permission: existing[props.permissionField],
       });
     } else {
       available.push({
@@ -122,34 +210,8 @@ function createPermissions() {
       });
     }
   }
+  console.log([reactive(current), reactive(available)]);
   return reactive([reactive(current), reactive(available)]);
-}
-function elementRemovedFromPermissions(event) {
-  for (const element of event.items) {
-    element.permission = null;
-  }
-  changed.value = true;
-}
-
-function elementPermissionAdded(event) {
-  for (const element of event.items) {
-    element.permission = props.defaultPermission;
-  }
-  changed.value = true;
-}
-
-function allRemovedFromPermissions(event) {
-  for (const element of event.items) {
-    element.permission = null;
-  }
-  changed.value = true;
-}
-
-function allElementsAdded(event) {
-  for (const element of event.items) {
-    element.permission = props.defaultPermission;
-  }
-  changed.value = true;
 }
 
 const changed = ref(false);
@@ -161,7 +223,7 @@ watch(
 );
 
 onMounted(() => {
-  console.log(props.availableElements);
+  console.log("Selector Mounted");
   permissions.value = createPermissions();
   changed.value = false;
 });

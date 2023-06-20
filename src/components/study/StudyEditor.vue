@@ -20,7 +20,7 @@
         @update:valid="(event) => (dataValid = event)"
       />
     </div>
-    <div class="displaypart col-3">
+    <div class="displaypart col-4">
       <StudyActivity
         v-model:active="currentStudy.active"
         :accessTokens="accessTokens"
@@ -29,23 +29,30 @@
         @createTokens="(event) => createAccessTokens(event)"
         @createMasterToken="createMasterToken"
       ></StudyActivity>
-      <UserEditor
+      <!--<UserEditor
         v-if="isStudyEditable"
         :showPermissions="false"
         @updateUsers="updateCollaborators"
-        @updateRole="(event) => updateRole(event.newRole, event.index)"
+        @deleteUser="(event) => removeUser(event)"
+        @updateRole="(event) => updateRole(event.role, event.username)"
+        :showDetails="false"
         :userList="collaborators"
         title="Collaborators"
         :roleOptions="['READ', 'READ_WRITE', 'FULL']"
         roleColumn="access"
       >
-      </UserEditor>
-      <!-- Study properties-->
+      </UserEditor>-->
+      <CollaboratorManager
+        :availablePermissions="['READ', 'READ_WRITE', 'FULL']"
+        :currentCollaborators="collaborators"
+        :userList="userStore.users"
+        listStyle=""
+      ></CollaboratorManager>
     </div>
-    <div class="displaypart col-5">
-      Avaiable Data
+    <div class="displaypart col-4">
+      Available Data
       <StudyDataSelector
-        :projectID="selectedStudy.UUID"
+        :studyID="selectedStudy.UUID"
         :availableData="availableData"
       ></StudyDataSelector>
     </div>
@@ -54,14 +61,17 @@
 
 <script>
 import Dropdown from "primevue/dropdown";
+import Button from "primevue/button";
+
 import ObjectAndVersionSelectorWithProps from "@/components/utils/ObjectAndVersionSelectorWithProps.vue";
 import { useStudyStore, useUserStore, useElementStore } from "@/stores";
 import { reactive } from "vue";
 
 import StudyProperties from "./StudyProperties.vue";
 import StudyActivity from "./StudyActivity.vue";
+import CollaboratorManager from "./CollaboratorManager.vue";
 import StudyDataSelector from "./StudyDataSelector.vue";
-import UserEditor from "@/components/UserEditor.vue";
+import UserEditor from "@/components/user/UserEditor.vue";
 
 export default {
   components: {
@@ -71,6 +81,8 @@ export default {
     StudyProperties,
     StudyActivity,
     UserEditor,
+    Button,
+    CollaboratorManager,
   },
   props: {
     editableStudies: {
@@ -90,6 +102,7 @@ export default {
       usedTokens: [],
       availableData: {},
       collaborators: [],
+      showUserDialog: false,
     };
   },
   setup(props) {
@@ -132,6 +145,7 @@ export default {
           this.selectedStudy.version = undefined;
         }
       },
+      additionalUsersExist: {},
     },
     currentStudyID() {
       if (this.currentStudy != null && this.currentStudy.UUID) {
@@ -160,8 +174,8 @@ export default {
     },
   },
   methods: {
-    updateRole(newRole, index) {
-      const user = this.collaborators[index].user;
+    updateRole(newRole, username) {
+      const user = this.collaborators.find((x) => x.user === username);
       if (this.currentStudyID) {
         userStore
           .updateRoleInStudy(user, newRole, this.currentStudyID)
@@ -179,6 +193,7 @@ export default {
       if (this.isStudyEditable) {
         this.updateCollaborators();
       }
+      this.userStore.fetchUserData();
     },
     async updateTokenData() {
       console.log("Updating token data");

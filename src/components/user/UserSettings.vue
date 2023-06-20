@@ -52,16 +52,20 @@
         <div class="col">
           <Button type="submit" :label="submitLabel" />
         </div>
+        <div class="flex col justify-content-end">
+          <Button @click="dialogVisible = false" label="Cancel" />
+        </div>
       </div>
     </form>
   </div>
 </template>
-
 <script>
 import InputText from "primevue/inputtext";
 import Password from "primevue/password";
 import Button from "primevue/button";
+
 import { useErrorStore } from "@/stores";
+
 export default {
   props: {
     usernamefixed: {
@@ -87,13 +91,11 @@ export default {
       default: "Create",
     },
   },
-
   data() {
     return {
       settings: { ...this.initialSettings },
     };
   },
-  emits: ["updateSettings"],
   setup() {
     const errorStore = useErrorStore();
     return { errorStore };
@@ -101,16 +103,16 @@ export default {
   methods: {
     saveSettings() {
       if (
-        (this.showPassword &&
-          !(this.settings.confirmPassword === this.settings.password)) ||
-        this.settings.password.length < 10
+        this.showPassword &&
+        (!(this.settings.confirmPassword === this.settings.password) ||
+          this.settings.password.length < 10)
       ) {
         this.errorStore.raiseError(
           "error",
           "Passwords must match and must have a length of at least 10"
         );
       } else {
-        this.$emit("updateSettings", this.settings);
+        this.$emit("updateUser", this.settings);
       }
     },
   },
@@ -127,5 +129,6 @@ export default {
       this.settings = { ...newValue };
     },
   },
+  emits: ["updateUser", "update:visible"],
 };
 </script>

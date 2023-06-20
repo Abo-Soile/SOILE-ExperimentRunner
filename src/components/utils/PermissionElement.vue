@@ -38,24 +38,27 @@ export default {
   },
   computed: {
     options() {
-      return ["REMOVE"].concat(this.permissionOptions);
+      return this.currentPermission == null ||
+        this.currentPermission === "REMOVE"
+        ? this.permissionOptions
+        : ["REMOVE"].concat(this.permissionOptions);
     },
   },
   watch: {
     originalPermission(newValue) {
-      console.log("Getting new permission: " + newValue);
       this.currentPermission = newValue;
     },
     currentPermission(newValue) {
-      if (newValue === "REMOVE") {
-        this.$emit("removePermission");
-      } else {
-        this.$emit("setPermission", newValue);
+      if (!this.loading) {
+        if (newValue === "REMOVE") {
+          this.$emit("removePermission");
+        } else {
+          this.$emit("setPermission", newValue);
+        }
       }
     },
   },
   mounted() {
-    console.log("Setting currentPermission to " + this.originalPermission);
     this.currentPermission = this.originalPermission;
   },
 };

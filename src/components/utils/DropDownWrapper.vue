@@ -19,7 +19,7 @@ import Dropdown from "primevue/dropdown";
 export default {
   components: { Dropdown },
   name: "DropDownWrapper",
-  emits: ["change"],
+  emits: ["change", "update:value"],
   props: {
     options: {
       type: Array,

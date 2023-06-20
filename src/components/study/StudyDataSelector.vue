@@ -14,16 +14,35 @@
       </div>
     </template>
   </Tree>
-  <div v-if="!waitingForDL">
-    <Button
-      :disabled="!tasksSelected && !participantsSelected"
-      label="Download selected Data"
-      @click="downloadSelected"
-    ></Button>
-    <Button label="Download all Data" @click="downloadAll"></Button>
-  </div>
-  <div v-else>
-    <ProgressSpinner></ProgressSpinner>
+  <Button
+    :disabled="!tasksSelected && !participantsSelected"
+    label="Download selected Data"
+    @click="downloadSelected"
+  ></Button>
+  <Button label="Download all Data" @click="downloadAll"></Button>
+  <div class="grid" v-for="download in downloads">
+    <div class="col">{{ download.id }}</div>
+    <div class="col">
+      <ProgressSpinner
+        v-if="!download.ready"
+        style="width: 30px; height: 30px"
+      ></ProgressSpinner>
+      <Button
+        v-else-if="download.errors.length == 0"
+        icon="pi pi-download"
+        severity="success"
+        @click="studyStore.downloadResults(studyID, download.id)"
+      ></Button>
+      <div v-else>
+        <Button
+          icon="pi pi-times"
+          severity="danger"
+          rounded
+          @click="removeDowload(download)"
+          v-tooltip="download.errors"
+        />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -32,6 +51,8 @@ import Tree from "primevue/tree";
 import Button from "primevue/button";
 import ProgressSpinner from "primevue/progressspinner";
 
+import { useStudyStore } from "@/stores";
+import { reactive } from "vue";
 export default {
   components: { Tree, Button, ProgressSpinner },
   props: {
@@ -39,7 +60,7 @@ export default {
       type: Object,
       required: true,
     },
-    projectID: {
+    studyID: {
       type: String,
       required: true,
     },
@@ -49,9 +70,8 @@ export default {
       selectedData: {},
       selectedElements: null,
       selectedTasks: null,
-      downloadID: null,
-      waitingForDL: false,
-      downloadReady: false,
+      downloads: [],
+      errorInformation: [],
     };
   },
   computed: {
@@ -121,19 +141,19 @@ export default {
     },
   },
   watch: {
-    downloadReady(newValue) {
-      if (this.downloadID && newValue) {
+    studyID(newValue) {
+      if (newValue != this.studyID) {
+        this.downloads = [];
       }
     },
   },
   methods: {
     downloadSelected() {
-      this.waitingForDL = true;
       // download whatever was selected, either tasks or participants.
       const request = {};
       if ("Tasks" in this.selectedElements) {
         const tasks = [];
-        for (const task of this.selectedElements) {
+        for (const task of Object.keys(this.selectedElements)) {
           if (task != "Tasks") {
             tasks.push(task);
           }
@@ -141,8 +161,8 @@ export default {
         request.tasks = tasks;
       } else {
         const participants = [];
-        for (const participant of this.selectedElements) {
-          if (task != "Participants") {
+        for (const participant of Object.keys(this.selectedElements)) {
+          if (participant != "Participants") {
             participants.push(participant);
           }
         }
@@ -155,15 +175,59 @@ export default {
       this.download("all");
     },
     async download(request) {
-      this.downloadID = await this.studyStore.requestDownload(
-        this.projectID,
+      const downloadID = await this.studyStore.requestDownload(
+        this.studyID,
         request
       );
-      if (this.downloadID) {
-      } else {
-        this.waitingForDL = false;
+      if (downloadID) {
+        const currentDownload = reactive({
+          id: downloadID,
+          request: request,
+          ready: false,
+          errors: [],
+        });
+        this.downloads.push(currentDownload);
+        this.checkDownloadReady(currentDownload);
       }
     },
+    removeDownload(download) {
+      download.canceled = true;
+      const dlIndex = downloads.indexOf(download);
+      if (dlIndex >= 0) {
+        downloads.splice(dlIndex, 1);
+      }
+    },
+
+    checkDownloadReady(download) {
+      if (download.canceled) {
+        return;
+      }
+      this.studyStore
+        .requestDownloadStatus(this.studyID, download.id)
+        .then((response) => {
+          if (response) {
+            // download is ready. can now download it.
+            if (response.status === "downloadReady") {
+              download.ready = true;
+            } else {
+              // the download failed for some reason.
+              if (response.status === "failed") {
+                download.errors = response.problems;
+              } else {
+                // still collecting or setting up
+                setTimeOut(this.checkDownloadReady, 2000, download);
+              }
+            }
+          }
+        });
+    },
+    showError(errors) {
+      this.errorInformation = errors;
+    },
+  },
+  setup() {
+    const studyStore = useStudyStore();
+    return { studyStore };
   },
   mounted() {},
 };

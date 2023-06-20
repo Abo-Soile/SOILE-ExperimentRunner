@@ -95,7 +95,7 @@ export default {
             }
           : {},
         {
-          label: this.isLoggedIn ? "Profile" : "Login",
+          label: this.isLoggedIn ? "User" : "Login",
           icon: this.isLoggedIn ? "pi pi-user" : "pi pi-sign-in",
           items: this.isLoggedIn
             ? [

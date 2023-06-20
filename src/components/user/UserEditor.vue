@@ -20,7 +20,7 @@
               placeholder="Keyword Search"
             />
           </span>
-          <span v-if="showCreate" class="p-input-icon-left">
+          <span v-if="showUserEdit" class="p-input-icon-left">
             <Button
               @click="showUserDialog = true"
               icon="pi pi-user-plus"
@@ -86,23 +86,32 @@
     </Column>
     <Column v-if="showPermissions">
       <template #body="rowData">
-        <DropDownWrapper
-          :options="roleOptions"
-          :value="currentRoles[userList.indexOf(rowData.data)]"
-          @update:value="(event) => updateCurrentRole(event, rowData.data)"
-        ></DropDownWrapper>
-        <Button label="Change Role" @click="updateRole(rowData.data)"></Button>
+        <div class="flex">
+          <DropDownWrapper
+            :options="roleOptions"
+            :value="currentRoles[userList.indexOf(rowData.data)]"
+            @update:value="(event) => updateCurrentRole(event, rowData.data)"
+          ></DropDownWrapper>
+          <Button
+            label="Change Role"
+            @click="updateRole(rowData.data)"
+          ></Button>
+        </div>
       </template>
     </Column>
 
     <Column v-if="showDetails">
       <template #body="rowData">
-        <Button label="Show Details" @click="editPermissions(rowData)"></Button>
+        <Button label="Show Details" @click="openDetails(rowData)"></Button>
       </template>
     </Column>
     <Column>
       <template #body="rowData">
-        <Button label="Delete" @click="deleteUser(rowData)"></Button>
+        <Button
+          label="Delete"
+          :disabled="rowData.data.username === currentUser"
+          @click="deleteUser(rowData)"
+        ></Button>
       </template>
     </Column>
   </DataTable>
@@ -115,12 +124,36 @@
     </PermissionDialog>
   </div>
 
-  <div v-if="showCreate && showUserDialog">
-    <!-- Placeholder for the Permission settings dialog-->
-    <NewUserDialog
+  <div v-if="showUserEdit && showUserDialog">
+    <UserDialog
+      v-if="selectedUser"
       v-model:visible="showUserDialog"
-      @createUser="createUser"
-    ></NewUserDialog>
+      @updateUser="updateUser"
+      :showPassword="false"
+      :usernamefixed="true"
+      :initialSettings="selectedUser"
+      submitLabel="Update User"
+    ></UserDialog>
+    <UserDialog
+      v-else
+      v-model:visible="showUserDialog"
+      @updateUser="createUser"
+    >
+    </UserDialog>
+  </div>
+
+  <div v-if="confirmDeletion && needsConfirmDeletion">
+    <ConfirmDialog
+      v-model:isVisible="confirmDeletion"
+      message="Deleting a user will also delete all of their data in all Studies they participated in the"
+      confirm="Delete user and Files"
+      reject="Cancel"
+      @confirm="deleteUser"
+      @reject="
+        confirmDeletion = false;
+        selectedUser = null;
+      "
+    />
   </div>
 </template>
 
@@ -131,10 +164,11 @@ import Button from "primevue/button";
 import Column from "primevue/column";
 
 import PermissionDialog from "@/components/dialogs/PermissionDialog.vue";
+import ConfirmDialog from "@/components/dialogs/ConfirmDialog.vue";
 import DropDownWrapper from "@/components/utils/DropDownWrapper.vue";
-import NewUserDialog from "@/components/user/NewUserDialog.vue";
+import UserDialog from "@/components/dialogs/UserDialog.vue";
 
-import { useUserStore } from "@/stores";
+import { useUserStore, useAuthStore } from "@/stores";
 import { FilterMatchMode } from "primevue/api";
 import { ref, computed, reactive, defineProps, watch } from "vue";
 
@@ -174,7 +208,7 @@ const props = defineProps({
     type: String,
     default: "Delete User",
   },
-  showCreate: {
+  showUserEdit: {
     type: Boolean,
     default: false,
   },
@@ -182,18 +216,38 @@ const props = defineProps({
     type: String,
     default: "Create New User",
   },
+  needsConfirmDeletion: {
+    type: Boolean,
+    default: true,
+  },
 });
 
 const showPermissionDialog = ref(false);
-const selectedUser = ref(null);
-const emit = defineEmits(["updateRole", "deleteUser", "updateUsers"]);
-const userSettings = ref(null);
 const showUserDialog = ref(false);
+
+const selectedUser = ref(null);
+const confirmDeletion = ref(false);
+
+const emit = defineEmits([
+  "updateRole",
+  "deleteUser",
+  "updateUserInfo",
+  "updateUsers",
+  "createUser",
+]);
+const userSettings = ref(null);
+
 const currentRoles = ref(null);
 const userStore = useUserStore();
+const authStore = useAuthStore();
 
+const currentUser = ref(authStore.user);
 currentRoles.value = reactive(props.userList.map((x) => x[props.roleColumn]));
 console.log(props.userList);
+
+/**
+ * Watch the user list to update the presented data, if the list changes
+ */
 watch(
   () => props.userList,
   async (newList) => {
@@ -202,12 +256,20 @@ watch(
   }
 );
 
+/**
+ * Update the current (i.e. displayed) Role of the user. this is NOT the actual role, only the role that will get set.
+ * @param {String} newValue  the new role for the used
+ * @param {*} element the rowData representing the user.
+ */
 function updateCurrentRole(newValue, element) {
   console.log(newValue);
   console.log(element);
   currentRoles.value[props.userList.indexOf(element)] = newValue;
 }
 
+/**
+ * Obtain the names of the columns.
+ */
 const columns = computed(() => {
   if (props.columnHeaders) {
     console.log(props.columnHeaders.map((x) => x.name));
@@ -217,6 +279,9 @@ const columns = computed(() => {
   }
 });
 
+/**
+ * Build Filters for the columns. (TODO: activate)
+ */
 function createFilterObject() {
   const res = { global: { value: null, matchMode: FilterMatchMode.CONTAINS } };
   for (const column of columns.value) {
@@ -225,30 +290,85 @@ function createFilterObject() {
   return res;
 }
 
+// The filters for the columns
 const filters = ref(createFilterObject());
 
+/**
+ * Update the actual role of the user, emitting an updateRole event, that should also trigger the
+ * update of the data.
+ * @param {*} element
+ */
 function updateRole(element) {
   const newRole = currentRoles.value[props.userList.indexOf(element)];
   if (newRole != element[props.roleColumn]) {
-    emit("updateRole", { element, newRole });
+    emit("updateRole", { username: element.username, role: newRole });
+    //userStore.updateRole(element.username, newRole);
   }
 }
 
 function deleteUser(user) {
-  // Delete the user
-  const index = props.userList.indexOf(user);
-  if (index !== -1) {
-    // Perform additional actions on user deletion
-    console.log(index);
-    emit("deleteUser", index);
+  console.log("delete User called with");
+  console.log(user);
+  if (props.needsConfirmDeletion && user) {
+    selectedUser.value = user.data.username;
+    confirmDeletion.value = true;
+  } else {
+    if (user) {
+      selecteduser.value = user.data.username;
+    }
+    emit("deleteUser", selectedUser.value);
+    selectedUser.value = null;
+    confirmDeletion.value = false;
   }
 }
+/**
+ * Edit the permissions of the user represented by the given row.
+ * @param {*} rowData
+ */
 function editPermissions(rowData) {
   selectedUser.value = rowData.data.username;
   showPermissionDialog.value = true;
   console.log(rowData);
 }
 
+// Need to watch the visible state of the permissionsDialog, to clear the selected user when it closes.
+watch(showPermissionDialog, (newValue) => {
+  if (!newValue) {
+    console.log("resetting selected user");
+    selectedUser.value = null;
+  }
+});
+
+// Need to watch the visible state of the userDialog, to clear the selected user when it closes.
+watch(showUserDialog, (newValue) => {
+  if (!newValue) {
+    console.log("resetting selected user");
+    selectedUser.value = null;
+  }
+});
+/**
+ * Show the details of the User represented by the given column.
+ * @param {*} rowData
+ */
+async function openDetails(rowData) {
+  console.log(rowData);
+  selectedUser.value = rowData.data;
+  showUserDialog.value = true;
+}
+
+/**
+ * Update the user with the given data. must contain a username.
+ * @param {*} updateData
+ */
+function updateUser(updateData) {
+  emit("updateUserInfo", updateData);
+  showUserDialog.value = false;
+}
+
+/**
+ * Get the header column, if columnHeaders are provided.
+ * @param {*} columnName
+ */
 function getHeader(columnName) {
   if (props.columnHeaders != null) {
     return props.columnHeaders.find((column) => column.name === columnName)
@@ -260,6 +380,6 @@ function getHeader(columnName) {
 
 function createUser(userData) {
   showUserDialog.value = false;
-  userStore.createUser(userData, false);
+  emit("createUser", userData);
 }
 </script>

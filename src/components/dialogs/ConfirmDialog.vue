@@ -2,16 +2,11 @@
   <Dialog :visible="isVisible" header="Confirm ?" modal>
     {{ message }}
     <template #footer>
+      <Button :label="reject" icon="pi pi-times" @click="handleNoClick" text />
       <Button
         :label="confirm"
-        icon="pi pi-times"
-        @click="handleYesClick"
-        text
-      />
-      <Button
-        :label="reject"
         icon="pi pi-check"
-        @click="handleNoClick"
+        @click="handleYesClick"
         autofocus
       />
     </template>

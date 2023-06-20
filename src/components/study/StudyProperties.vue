@@ -42,7 +42,7 @@
       </div>
       <div>
         <small v-if="!shortCutValid" class="p-error" id="text-error"
-          >Shortcut can be max 15 characters and needs to be alphanumeric</small
+          >Shortcut can be max 20 characters and needs to be alphanumeric</small
         >
       </div>
     </div>
@@ -140,7 +140,7 @@ export default {
       const isValid =
         (this.shortCut.search(/^[0-9a-zA-Z]*$/) == 0 ||
           this.shortCut.length == 0) &&
-        this.shortCut.length <= 15;
+        this.shortCut.length <= 20;
       this.$emit("update:valid", isValid && this.nameValid);
       return isValid;
     },

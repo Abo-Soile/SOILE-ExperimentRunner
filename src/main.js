@@ -16,12 +16,14 @@ import "primevue/resources/themes/lara-light-indigo/theme.css";
 import "primevue/resources/primevue.min.css";
 import "primeicons/primeicons.css";
 import ToastService from "primevue/toastservice";
+import Tooltip from "primevue/tooltip";
 
 // primeflex for layouting
 import "primeflex/primeflex.css";
 
 const app = createApp(App);
 app
+  .directive("tooltip", Tooltip)
   .use(createPinia())
   .use(PrimeVue)
   .use(ToastService)

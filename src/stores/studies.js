@@ -109,7 +109,69 @@ export const useStudyStore = defineStore({
         this.processAxiosError(error);
       }
     },
+    /**
+     * Request a download, returns the downloadID to be used to re-query the back-end for
+     * the download status
+     * @param {*} uuid
+     * @param {*} request
+     */
+    async requestDownload(uuid, request) {
+      try {
+        const response = await axios.post(`/study/${uuid}/data`, request);
+        console.log(response.data);
+        console.log(response);
+        return response.data.downloadID;
+      } catch (error) {
+        this.processAxiosError(error);
+        return false;
+      }
+    },
 
+    /**
+     * RRequest the status of a download (i.e. whether it is ready and can be started available)
+     * @param {*} studyID the ID of the study the dowwnload is associated with
+     * @param {*} downloadID the download ID.
+     */
+    async requestDownloadStatus(studyID, downloadID) {
+      try {
+        const response = await axios.post(
+          `/study/${studyID}/download/${downloadID}/check`
+        );
+        return response.data;
+      } catch (error) {
+        this.processAxiosError(error);
+        return false;
+      }
+    },
+    async downloadResults(studyID, downloadID) {
+      /* const response = await axios.get(
+        `/study/${studyID}/download/${downloadID}`,
+        {
+          responseType: "stream",
+        }
+      );
+      const contentDispositionHeader = response.headers["content-disposition"];
+      const filename = contentDispositionHeader
+        ? contentDispositionHeader.split("filename=")[1]
+        : "file.txt";
+      console.log(response.headers);
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(new Blob([response.data]));
+      link.setAttribute("download", filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }*/
+      // This needs to use the session cookie for the download. Hopefully this works.
+      const fileUrl = `${axios.defaults.baseURL}/study/${studyID}/download/${downloadID}`;
+      const link = document.createElement("a");
+      link.href = fileUrl;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    },
     /**
      * Activate the project with the given id
      * @param {*} uuid
@@ -155,23 +217,16 @@ export const useStudyStore = defineStore({
         return false;
       }
     },
+    /**
+     * Select the currently edited Study.
+     * @param {*} uuid
+     */
     async selectCurrentStudy(uuid) {
       try {
         const response = await axios.post(`/study/${uuid}/get`);
         console.log(response.data);
         console.log(response);
         this.currentEditedStudy = response.data;
-      } catch (error) {
-        this.processAxiosError(error);
-        return false;
-      }
-    },
-    async requestDownload(uuid, request) {
-      try {
-        const response = await axios.post(`/study/${uuid}/data`, request);
-        console.log(response.data);
-        console.log(response);
-        return response.data.downloadID;
       } catch (error) {
         this.processAxiosError(error);
         return false;
