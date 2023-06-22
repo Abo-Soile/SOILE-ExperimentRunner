@@ -311,7 +311,7 @@ export async function BaklavaToSoileProjectJSON(
     if (node.type === "ExperimentNode") {
       const cnode = node as ExperimentNode;
       const instance = await instantiateExperimentInProject(
-        cnode.objectData.uuid,
+        cnode.objectData.UUID,
         cnode.objectData.version,
         cnode.random.value,
         cnode.title
@@ -382,7 +382,7 @@ export async function BaklavaToSoileExperimentJSON(
     if (node.type === "ExperimentNode") {
       const cnode = node as ExperimentNode;
       const instance = await instantiateExperimentInProject(
-        cnode.objectData.uuid,
+        cnode.objectData.UUID,
         cnode.objectData.version,
         cnode.random.value,
         cnode.title
@@ -434,7 +434,7 @@ function createTaskJson(
   const test = {} as TaskInstance;
   test.codeType = cnode.codeType;
   const taskData = {
-    UUID: cnode.objectData.uuid,
+    UUID: cnode.objectData.UUID,
     version: cnode.objectData.version,
     tag: cnode.objectData.tag,
     outputs: cnode.nodeOutputs,

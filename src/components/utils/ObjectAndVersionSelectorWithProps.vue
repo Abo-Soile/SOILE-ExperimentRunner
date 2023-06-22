@@ -88,7 +88,7 @@ export default defineComponent({
     selectedItem() {
       return {
         name: this.selectedElement?.name,
-        uuid: this.selectedElement?.uuid,
+        UUID: this.selectedElement?.UUID,
         version: this.selectedVersion?.version,
       };
     },
@@ -123,9 +123,9 @@ export default defineComponent({
     },
   },
   methods: {
-    async updateAvailableVersions(uuid) {
+    async updateAvailableVersions(UUID) {
       const versions = await this.elementStore.getOptionsForElement(
-        uuid,
+        UUID,
         this.objectType.toLowerCase()
       );
       this.availableVersions = versions
@@ -142,9 +142,9 @@ export default defineComponent({
       },
       deep: true,
     },
-    "selectedItem.uuid": {
+    "selectedItem.UUID": {
       async handler(newValue) {
-        console.log("SelectedItem uuid changed");
+        console.log("SelectedItem UUID changed");
         if (newValue) {
           this.updateAvailableVersions(newValue);
         }
@@ -161,8 +161,8 @@ export default defineComponent({
     this.availableItems = await this.elementStore.getListForType(
       this.objectType.toLowerCase()
     );
-    if (this.selectedItem.uuid) {
-      await this.updateAvailableVersions(this.selectedItem.uuid);
+    if (this.selectedItem.UUID) {
+      await this.updateAvailableVersions(this.selectedItem.UUID);
     }
     this.loading = false;
     this.currentElement = this.element;

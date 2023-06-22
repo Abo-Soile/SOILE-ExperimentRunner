@@ -120,18 +120,18 @@ export default {
       return (
         this.selectedStudy.UUID == null ||
         this.editableStudies
-          .map((x) => x.uuid)
+          .map((x) => x.UUID)
           .includes(this.selectedStudy.UUID)
       );
     },
     sourceProject: {
       get() {
         return this.elementStore.availableProjects.find(
-          (x) => x.uuid === this.selectedStudy.sourceUUID
+          (x) => x.UUID === this.selectedStudy.sourceUUID
         );
       },
       set(newValue) {
-        this.selectedStudy.sourceUUID = newValue.uuid;
+        this.selectedStudy.sourceUUID = newValue.UUID;
       },
     },
     sourceVersion: {

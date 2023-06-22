@@ -38,7 +38,7 @@ export default {
 <style scoped>
 .editor {
   font-family: Arial, sans-serif;
-  height: 100%;
+  height: 80vh;
   display: flex;
   flex-direction: column;
 }

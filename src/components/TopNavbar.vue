@@ -133,7 +133,7 @@ export default {
     async handleLoad(event) {
       this.loadDialogVisible = false;
       if (event) {
-        await this.studyStore.selectCurrentStudy(event.uuid);
+        await this.studyStore.selectCurrentStudy(event.UUID);
       }
     },
   },

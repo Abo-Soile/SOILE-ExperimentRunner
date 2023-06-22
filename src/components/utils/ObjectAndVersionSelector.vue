@@ -46,7 +46,7 @@ export default {
     selectedItem() {
       return {
         name: this.selectedElement?.name,
-        uuid: this.selectedElement?.uuid,
+        UUID: this.selectedElement?.UUID,
         version: this.selectedVersion?.version,
       };
     },
@@ -58,7 +58,7 @@ export default {
       },
       deep: true,
     },
-    "selectedItem.uuid": {
+    "selectedItem.UUID": {
       async handler(newValue) {
         this.availableVersions = await this.elementStore.getTagsForElement(
           newValue,

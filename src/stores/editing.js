@@ -98,8 +98,8 @@ export const useEditorStore = defineStore({
         );
       }
     },
-    async changeElementAtPosition(type, index, uuid, version) {
-      const data = await this.loadObject(type, uuid, version);
+    async changeElementAtPosition(type, index, UUID, version) {
+      const data = await this.loadObject(type, UUID, version);
       const store = this.getStoreForType(type);
       store.elements[index].data = data;
     },

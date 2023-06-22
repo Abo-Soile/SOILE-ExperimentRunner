@@ -3,7 +3,7 @@
     <h2>{{ selectedProject.name }}</h2>
     <p>{{ selectedProject.description }}</p>
     <!-- TODO: check whether already signed up if user is logged in or authed in a different way-->
-    <div v-if="signedUpStudies.includes(selectedProject.uuid)">
+    <div v-if="signedUpStudies.includes(selectedProject.UUID)">
       <div v-if="authStore.isAnonymous">
         <h2>Your token for this Project is:</h2>
         <p style="color: red">{{ authStore.projectToken }}</p>
@@ -15,17 +15,17 @@
       <router-link
         :to="
           '/exp/' +
-          selectedProject.uuid +
+          selectedProject.UUID +
           '/' +
           projectStore.currentTaskSettings.id +
           '/'
         "
         custom
         v-slot="{ navigate }"
-        @click="startProject(selectedProject.uuid)"
+        @click="startProject(selectedProject.UUID)"
       >
         <Button
-          v-if="justSignedUp[selectedProject.uuid]"
+          v-if="justSignedUp[selectedProject.UUID]"
           @click="navigate"
           role="link"
           >Start project</Button
@@ -56,21 +56,21 @@ const { signedUpStudies: signedUpStudies, selectedProject: selectedProject } =
 console.log(selectedProject);
 console.log(selectedProject.value);
 
-function startProject(uuid) {
-  justSignedUp[uuid] = false;
+function startProject(UUID) {
+  justSignedUp[UUID] = false;
 }
 
 async function signUp() {
-  console.log("Signing up to project " + selectedProject.value.uuid);
-  const signedUp = await authStore.signUp(selectedProject.value.uuid);
+  console.log("Signing up to project " + selectedProject.value.UUID);
+  const signedUp = await authStore.signUp(selectedProject.value.UUID);
   console.log(signedUp);
   if (signedUp) {
-    justSignedUp[selectedProject.value.uuid] = true;
+    justSignedUp[selectedProject.value.UUID] = true;
     console.log("Signup was successful");
     await authStore.refreshSession();
     console.log("Updating signed up projects");
     await projectStore.fetchSignedUpStudies();
-    await projectStore.updateTaskSettings(selectedProject.value.uuid);
+    await projectStore.updateTaskSettings(selectedProject.value.UUID);
   } else {
     console.log("Signup was unsuccessful");
   }
@@ -78,7 +78,7 @@ async function signUp() {
 
 watch(projectStore.selectedProject, async (newID) => {
   console.log("selectedProject changed to: ");
-  await projectStore.updateTaskSettings(newID.uuid);
+  await projectStore.updateTaskSettings(newID.UUID);
 });
 onMounted(async () => {
   //console.log("Signup Mounted: ")

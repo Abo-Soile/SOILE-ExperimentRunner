@@ -143,16 +143,16 @@ export default defineComponent({
     currentTask: {
       get() {
         return {
-          uuid: this.intf.data.objectData.uuid,
+          UUID: this.intf.data.objectData.UUID,
           name: this.intf.data.objectData.name,
         };
       },
       async set(newValue) {
-        if (newValue.uuid) {
-          this.currentNode.setElement(newValue.uuid, newValue.name);
+        if (newValue.UUID) {
+          this.currentNode.setElement(newValue.UUID, newValue.name);
           console.log({
             text: this.intf.data.objectData.name,
-            value: this.intf.data.objectData.uuid,
+            value: this.intf.data.objectData.UUID,
           });
         }
       },

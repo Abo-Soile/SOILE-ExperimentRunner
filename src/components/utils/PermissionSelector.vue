@@ -66,7 +66,7 @@ const props = defineProps({
   },
   idField: {
     type: String,
-    default: "uuid",
+    default: "UUID",
   },
   permissionField: {
     type: String,

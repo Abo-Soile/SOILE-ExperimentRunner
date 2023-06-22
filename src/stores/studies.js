@@ -43,11 +43,11 @@ export const useStudyStore = defineStore({
     },
     /**
      *
-     * @param {*} uuid the uuid of the project
+     * @param {*} UUID the UUID of the project
      */
-    async fetchProjectData(uuid) {
+    async fetchProjectData(UUID) {
       try {
-        const response = await axios.post("/study/" + uuid);
+        const response = await axios.post("/study/" + UUID);
         return response.data;
       } catch (error) {
         this.processAxiosError(error);
@@ -55,12 +55,12 @@ export const useStudyStore = defineStore({
     },
     /**
      * Generate a master token for the indicated project.
-     * @param {} uuid
+     * @param {} UUID
      */
-    async generateMasterToken(uuid) {
+    async generateMasterToken(UUID) {
       try {
         const response = await axios.post(
-          "/study/" + uuid + "/createtokens?unique=true"
+          "/study/" + UUID + "/createtokens?unique=true"
         );
         return response.data;
       } catch (error) {
@@ -70,11 +70,11 @@ export const useStudyStore = defineStore({
     /***
      * Generate access tokens for the given project.
      */
-    async generateTokens(uuid, count) {
+    async generateTokens(UUID, count) {
       try {
         const response = await axios.post(
           "/study/" +
-            uuid +
+            UUID +
             "/createtokens?count=" +
             count +
             "&" +
@@ -87,11 +87,11 @@ export const useStudyStore = defineStore({
     },
     /**
      * Get information about tokens for this project
-     * @param {*} uuid
+     * @param {*} UUID
      */
-    async getTokenInformation(uuid) {
+    async getTokenInformation(UUID) {
       try {
-        const response = await axios.post("/study/" + uuid + "/tokeninfo");
+        const response = await axios.post("/study/" + UUID + "/tokeninfo");
         return response.data;
       } catch (error) {
         this.processAxiosError(error);
@@ -99,11 +99,11 @@ export const useStudyStore = defineStore({
     },
     /**
      * Get information about tokens for this project
-     * @param {*} uuid
+     * @param {*} UUID
      */
-    async getDownloadableData(uuid) {
+    async getDownloadableData(UUID) {
       try {
-        const response = await axios.post("/study/" + uuid + "/data/list");
+        const response = await axios.post("/study/" + UUID + "/data/list");
         return response.data;
       } catch (error) {
         this.processAxiosError(error);
@@ -112,12 +112,12 @@ export const useStudyStore = defineStore({
     /**
      * Request a download, returns the downloadID to be used to re-query the back-end for
      * the download status
-     * @param {*} uuid
+     * @param {*} UUID
      * @param {*} request
      */
-    async requestDownload(uuid, request) {
+    async requestDownload(UUID, request) {
       try {
-        const response = await axios.post(`/study/${uuid}/data`, request);
+        const response = await axios.post(`/study/${UUID}/data`, request);
         console.log(response.data);
         console.log(response);
         return response.data.downloadID;
@@ -174,11 +174,11 @@ export const useStudyStore = defineStore({
     },
     /**
      * Activate the project with the given id
-     * @param {*} uuid
+     * @param {*} UUID
      */
-    async activate(uuid) {
+    async activate(UUID) {
       try {
-        const response = await axios.post("/study/" + uuid + "/start");
+        const response = await axios.post("/study/" + UUID + "/start");
         return true;
       } catch (error) {
         this.processAxiosError(error);
@@ -188,11 +188,11 @@ export const useStudyStore = defineStore({
 
     /**
      * Activate the project with the given id
-     * @param {*} uuid
+     * @param {*} UUID
      */
-    async deactivate(uuid) {
+    async deactivate(UUID) {
       try {
-        const response = await axios.post("/study/" + uuid + "/stop");
+        const response = await axios.post("/study/" + UUID + "/stop");
         return true;
       } catch (error) {
         this.processAxiosError(error);
@@ -219,11 +219,11 @@ export const useStudyStore = defineStore({
     },
     /**
      * Select the currently edited Study.
-     * @param {*} uuid
+     * @param {*} UUID
      */
-    async selectCurrentStudy(uuid) {
+    async selectCurrentStudy(UUID) {
       try {
-        const response = await axios.post(`/study/${uuid}/get`);
+        const response = await axios.post(`/study/${UUID}/get`);
         console.log(response.data);
         console.log(response);
         this.currentEditedStudy = response.data;
@@ -232,9 +232,9 @@ export const useStudyStore = defineStore({
         return false;
       }
     },
-    async getCollaboratorsForStudy(uuid) {
+    async getCollaboratorsForStudy(UUID) {
       try {
-        const response = await axios.post(`/study/${uuid}/collaborators`);
+        const response = await axios.post(`/study/${UUID}/collaborators`);
         console.log(response.data);
         console.log(response);
         return response.data;

@@ -78,7 +78,7 @@ export default {
         name: this.name,
         description: this.descriptionLong,
         shortDescription: this.descriptionShort,
-        sourceUUID: this.selected.uuid,
+        sourceUUID: this.selected.UUID,
         version: this.selected.version,
         shortcut: this.shortCut,
         private: this.private,
@@ -87,7 +87,7 @@ export default {
   },
   computed: {
     selectionValid() {
-      if (this.selected?.uuid && this.selected?.version && this.dataValid) {
+      if (this.selected?.UUID && this.selected?.version && this.dataValid) {
         return true;
       } else {
         return false;

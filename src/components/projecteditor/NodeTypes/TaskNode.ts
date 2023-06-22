@@ -65,7 +65,7 @@ export default class TaskNode extends SoileVersionedNode {
     this.inputs.taskVersion.value = "Version: " + tag;
   }
   isValid() {
-    return this.objectData.uuid != "" && this.objectData.version != "";
+    return this.objectData.UUID != "" && this.objectData.version != "";
   }
   public isDataNode() {
     return true;
@@ -77,7 +77,7 @@ export default class TaskNode extends SoileVersionedNode {
   public async setElementVersion(version: string, tag: string): Promise<void> {
     await super.setElementVersion(version, tag);
     const elementInfo = await this.elementStore.getElement(
-      this.objectData.uuid,
+      this.objectData.UUID,
       this.objectData.version,
       "task"
     );

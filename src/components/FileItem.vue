@@ -8,6 +8,12 @@
     >
       <i :class="getFileIconClass"></i>
       {{ file.label }}
+      <ContextMenu
+        v-if="!isDirectory"
+        global
+        ref="menu"
+        :model="menuOptions"
+      ></ContextMenu>
     </span>
     <ul v-if="isDirectory && file.open">
       <FileItem
@@ -18,13 +24,12 @@
         @file-double-click="
           (event) => reEmitWithUpdatedPath('file-double-click', event)
         "
-        @file-right-click="
-          (event) => reEmitWithUpdatedPath('file-right-click', event)
-        "
+        @deleteFile="(event) => reEmitWithUpdatedPath('deleteFile', event)"
         @createDirectory="
           (event) => reEmitWithUpdatedPath('createDirectory', event)
         "
         @createFile="(event) => reEmitWithUpdatedPath('createFile', event)"
+        @editFile="(event) => reEmitWithUpdatedPath('editFile', event)"
       />
       <FileAndDirectoryCreationItems
         @createDirectory="createDirectory"
@@ -35,9 +40,10 @@
 </template>
 
 <script>
-import Menu from "primevue/menu";
+import ContextMenu from "primevue/contextmenu";
 import FileAndDirectoryCreationItems from "@/components/utils/FileAndDirectoryCreationItems.vue";
-
+import mime from "mime";
+import { ref } from "vue";
 export default {
   props: {
     file: {
@@ -45,8 +51,30 @@ export default {
       required: true,
     },
   },
-  components: { FileAndDirectoryCreationItems },
+  data() {
+    return {
+      menuOptions: [
+        { label: "Rename(Not Implemented yet)", icon: "pi pi-fw pi-search" },
+        {
+          label: "Delete",
+          icon: "pi pi-fw pi-trash",
+          command: () => this.deleteFile(),
+        },
+      ],
+    };
+  },
+  components: { FileAndDirectoryCreationItems, ContextMenu },
   computed: {
+    mimeType() {
+      return mime.getType(this.file.label);
+    },
+    isText() {
+      return this.mimeType
+        ? this.mimeType.startsWith("text") ||
+            this.mimeType === "application/json" ||
+            this.mimeType === "application/javascript"
+        : false;
+    },
     getFileIconClass() {
       if (this.isDirectory) {
         if (this.file.open) {
@@ -55,18 +83,17 @@ export default {
           return "pi pi-folder"; // Replace with appropriate icon class for directories
         }
       } else {
-        // Determine file type and return corresponding icon class
-        const fileType = this.file.label.split(".").pop();
-        switch (fileType) {
-          case "jpg":
-          case "png":
-          case "gif":
-            return "pi pi-image"; // Replace with appropriate icon class for images
-          case "txt":
-            return "pi pi-file-alt"; // Replace with appropriate icon class for text files
-          default:
-            return "pi pi-file"; // Replace with default icon class for other file types
+        // Determine file type and return corresponding icon class (maybe we get some lib for this (later on))
+
+        if (this.mimeType) {
+          if (this.mimeType.startsWith("video")) {
+            return "pi pi-video";
+          }
+          if (this.mimeType.startsWith("image")) {
+            return "pi pi-image";
+          }
         }
+        return "pi pi-file";
       }
     },
     isDirectory() {
@@ -103,19 +130,50 @@ export default {
         folderName: event,
       });
     },
-    handleRightClick(event) {
+    deleteFile() {
+      console.log("delete Called");
       if (this.isDirectory) {
-        event.preventDefault();
-        this.$emit("file-right-click", {
+        // do nothing... for now, this will anyways be removed if empty
+      } else {
+        this.$emit("deleteFile", {
           file: this.file,
-          folder: this.file.label,
+          folder: this.isDirectory ? this.file.label + "/" : "",
         });
+      }
+    },
+    editFile() {
+      console.log("edit ");
+      if (this.isDirectory) {
+        // do nothing... for now, this will anyways be removed if empty
+      } else {
+        this.$emit("editFile", {
+          file: this.file,
+          folder: this.isDirectory ? this.file.label + "/" : "",
+        });
+      }
+    },
+    handleRightClick(event) {
+      if (!this.isDirectory) {
+        this.menu.show(event);
       }
     },
     reEmitWithUpdatedPath(eventID, data) {
       data.folder = this.file.label + "/" + data.folder;
       this.$emit(eventID, data);
     },
+  },
+  mounted() {
+    if (this.isText) {
+      this.menuOptions.push({
+        label: "Edit",
+        icon: "pi pi-fw pi-file-edit",
+        command: () => this.editFile(),
+      });
+    }
+  },
+  setup() {
+    const menu = ref();
+    return { menu };
   },
 };
 </script>

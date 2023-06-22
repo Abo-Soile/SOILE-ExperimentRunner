@@ -68,10 +68,10 @@ export default defineComponent({
     },
   },
   methods: {
-    async updateAvailableVersions(uuid) {
+    async updateAvailableVersions(UUID) {
       this.loading = true;
       const versions = await this.elementStore.getOptionsForElement(
-        uuid,
+        UUID,
         this.objectType.toLowerCase()
       );
       this.availableVersions = versions
@@ -83,9 +83,9 @@ export default defineComponent({
     },
   },
   watch: {
-    "element.uuid": {
+    "element.UUID": {
       async handler(newValue) {
-        console.log("SelectedItem uuid changed");
+        console.log("SelectedItem UUID changed");
         if (newValue) {
           this.updateAvailableVersions(newValue);
         }
@@ -94,8 +94,8 @@ export default defineComponent({
   },
   async mounted() {
     // TODO: heck whether this savely works with onMounted or whether this should be done with onDisplay
-    if (this.element.uuid) {
-      this.updateAvailableVersions(this.element.uuid);
+    if (this.element.UUID) {
+      this.updateAvailableVersions(this.element.UUID);
     }
   },
 });

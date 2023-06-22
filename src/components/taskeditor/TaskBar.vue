@@ -60,7 +60,7 @@ import Dropdown from "primevue/dropdown";
 import InputText from "primevue/inputtext";
 import Button from "primevue/button";
 import ObjectAndVersionSelectorWithProps from "@/components/utils/ObjectAndVersionSelectorWithProps.vue";
-import SelectNewVersionDialog from "@/components/utils/SelectNewVersionDialog.vue";
+import SelectNewVersionDialog from "@/components/dialogs/SelectNewVersionDialog.vue";
 
 export default {
   name: "TaskBar",

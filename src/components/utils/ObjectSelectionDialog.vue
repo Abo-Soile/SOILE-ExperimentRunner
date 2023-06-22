@@ -58,7 +58,7 @@ export default {
   },
   computed: {
     selectionValid() {
-      if (this.selected?.uuid && this.selected?.version) {
+      if (this.selected?.UUID && this.selected?.version) {
         return true;
       } else {
         return false;

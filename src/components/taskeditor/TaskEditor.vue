@@ -19,12 +19,21 @@
       <FileBrowser
         @fileSelected="preview"
         @createFile="createFile"
+        @deleteFile="deleteFile"
+        @editFile="editFile"
         :fileStructure="files"
       />
       <FilePreview v-if="previewFile" :file="previewFile"></FilePreview>
     </div>
     <div class="col-6">
-      <CodeEditor v-model:inputText="currentObject.code"></CodeEditor>
+      <DataEditor
+        v-model:sourceCode="currentObject.code"
+        :tabs="editedFiles"
+        @saveFile="saveEditedFile"
+        @closeFile="closeEditedFile"
+        @updateData="updateEditedFile"
+        v-model:selectedFile="activeFile"
+      ></DataEditor>
     </div>
     <div class="col-4 h-full">
       <CodePreview
@@ -40,27 +49,43 @@
     </div>
   </div>
   <ElementSaveDialog
+    v-if="showSave"
     v-model:visible="showSave"
     :name="this.currentObject.name"
     :currentTags="currentTags"
     @submit="saveTask"
   />
+  <ConfirmDialog
+    v-if="confirmClose"
+    v-model:isVisible="confirmClose"
+    message="This will discard any changes made since the file was last changed. Do you want to close the file anyways?"
+    @reject="
+      confirmClose = false;
+      currentClose = undefined;
+    "
+    @confirm="closeFile(currentClose)"
+  />
 </template>
 
 <script>
 import Menu from "primevue/menu";
+
 import FileBrowser from "@/components/FileBrowser.vue";
 import FilePreview from "@/components/utils/FilePreview.vue";
 import CodeEditor from "./CodeEditor.vue";
 import CodePreview from "./CodePreview.vue";
 import TaskBar from "./TaskBar.vue";
+import DataEditor from "./DataEditor.vue";
 import ElementSaveDialog from "@/components/utils/ElementSaveDialog.vue";
+import ConfirmDialog from "@/components/dialogs/ConfirmDialog.vue";
 
 import { useElementStore, useErrorStore, useEditorStore } from "@/stores";
+
 import { reactive } from "vue";
 export default {
   data() {
     return {
+      editedFiles: reactive([]),
       files: [],
       previewFile: undefined,
       codeOptions: {
@@ -78,6 +103,9 @@ export default {
       isValid: false,
       currentTags: [],
       showSave: false,
+      confirmClose: false,
+      currentClose: undefined,
+      activeFile: 0,
     };
   },
   setup(props) {
@@ -96,6 +124,8 @@ export default {
     FilePreview,
     CodeEditor,
     TaskBar,
+    DataEditor,
+    ConfirmDialog,
   },
   props: {
     target: {
@@ -140,6 +170,68 @@ export default {
     },
   },
   methods: {
+    updateEditedFile(event) {
+      this.editedFiles[event.index].data = event.value;
+      this.editedFiles[event.index].modified = true;
+    },
+    saveEditedFile(file) {
+      if (file.modified) {
+        const fileBlob = new Blob([file.data]);
+        const updatedFile = new File([fileBlob], file.filename, {
+          type: file.type,
+        });
+        console.log({ targetName: file.fullpath, file: file });
+        this.createFile({ targetName: file.fullpath, file: updatedFile });
+        file.modified = false;
+      }
+    },
+    /**
+     * Load the file indicated by the filename. The filename has to be absolute wrt the
+     * resource folder of the edited task.
+     */
+    editFile(filePath) {
+      const itemIndex = this.editedFiles.findIndex(
+        (x) => x.fullpath == filePath
+      );
+      if (itemIndex < 0) {
+        const parts = filePath.split("/");
+        const filename = parts[parts.length - 1];
+        this.elementStore
+          .getResourceFile(this.target.UUID, this.target.version, filePath)
+          .then((data) => {
+            //console.log(data);
+            this.previewFile = data;
+            this.editedFiles.push({
+              data: data.data,
+              filename: filename,
+              modified: false,
+              type: data.type,
+              fullpath: filePath,
+            });
+            this.activeFile = this.editedFiles.length;
+          });
+      } else {
+        this.activeFile = itemIndex + 1;
+      }
+    },
+    closeEditedFile(file) {
+      if (file.modified && !this.confirmClose) {
+        this.currentClose = file;
+        this.confirmClose = true;
+      } else {
+        this.closeFile(file);
+      }
+    },
+    /**
+     * Close (i.e. remove it from the list) the indicated file
+     * @param {*} file
+     */
+    closeFile(file) {
+      const closedIndex = this.editedFiles.indexOf(file);
+      this.editedFiles.splice(closedIndex, 1);
+      this.activeFile = closedIndex; // this is the one to the left
+      this.confirmClose = false;
+    },
     updateFiles(target) {
       console.log("Updating files");
       if (!this.newElement) {
@@ -155,8 +247,19 @@ export default {
       }
     },
     updateFields(newValue) {
-      this.currentObject = reactive(JSON.parse(JSON.stringify(newValue)));
-      this.currentObject.codeType = reactive(this.currentObject.codeType);
+      Object.keys(newValue).forEach((x) => {
+        if (x != "codeType") {
+          this.currentObject[x] = newValue[x];
+        } else {
+          Object.keys(newValue[x]).forEach((cx) => {
+            this.currentObject[x][cx] = newValue[x][cx];
+          });
+        }
+      });
+      //this.currentObject = reactive(JSON.parse(JSON.stringify(newValue)));
+      //this.currentObject.codeType = reactive(this.currentObject.codeType);
+      console.log("Forcing update");
+      console.log(this.currentObject);
       this.$forceUpdate();
     },
     createFile(event) {
@@ -170,13 +273,27 @@ export default {
       console.log(event);
       this.elementStore
         .addFileToTask(
-          this.target.UUID,
-          this.target.version,
+          this.currentObject.UUID,
+          this.currentObject.version,
           event.targetName,
           event.file
         )
         .then((newVersion) => {
           this.currentVersion = newVersion;
+          this.updateFiles(this.currentObject);
+        });
+    },
+    deleteFile(event) {
+      console.log(event);
+      this.elementStore
+        .removeFileFromTask(
+          this.currentObject.UUID,
+          this.currentObject.version,
+          event.targetName
+        )
+        .then((newVersion) => {
+          this.currentVersion = newVersion;
+          this.updateFiles(this.currentObject);
         });
     },
     preview(event) {

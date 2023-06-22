@@ -75,7 +75,7 @@ export default defineComponent({
       this.editorStore.loadElement(
         this.objectType,
         this.currentTask.name,
-        this.currentTask.uuid,
+        this.currentTask.UUID,
         this.currentVersion.version
       );
     },
@@ -83,7 +83,7 @@ export default defineComponent({
   computed: {
     isInValid() {
       return (
-        this.currentTask.uuid == null || this.currentVersion.version == null
+        this.currentTask.UUID == null || this.currentVersion.version == null
       );
     },
     currentNode(): ExperimentNode {
@@ -92,16 +92,16 @@ export default defineComponent({
     currentTask: {
       get() {
         return {
-          uuid: this.intf.data.objectData.uuid,
+          UUID: this.intf.data.objectData.UUID,
           name: this.intf.data.objectData.name,
         };
       },
       async set(newValue) {
-        if (newValue.uuid) {
-          this.currentNode.setElement(newValue.uuid, newValue.name);
+        if (newValue.UUID) {
+          this.currentNode.setElement(newValue.UUID, newValue.name);
           console.log({
             text: this.intf.data.objectData.name,
-            value: this.intf.data.objectData.uuid,
+            value: this.intf.data.objectData.UUID,
           });
         }
       },

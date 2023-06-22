@@ -61,10 +61,7 @@
                   @updateCurrentVersion="
                     (event) => updateCurrentTaskVersion(event, index, 'task')
                   "
-                  @saveTask="
-                    (event) =>
-                      updateElement({ index: index, data: event, type: 'task' })
-                  "
+                  @saveTask="(event) => updateElement(event, index, 'task')"
                 ></TaskEditor>
               </div>
             </TabPanel>
@@ -296,7 +293,7 @@ function openSelectionTab(element) {
     editorStore.loadElement(
       elementType.value,
       element.name,
-      element.uuid,
+      element.UUID,
       element.version
     );
     showSelector.value = false;

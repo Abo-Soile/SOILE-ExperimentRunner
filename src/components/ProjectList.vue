@@ -7,7 +7,7 @@
           <div>
             <router-link
               v-if="!isSignedUp(data)"
-              :to="'/signup/' + data.uuid"
+              :to="'/signup/' + data.UUID"
               @click="projectStore.selectProject(index)"
               >Start</router-link
             >
@@ -53,12 +53,12 @@ const props = defineProps({
 
 async function runProject(index, event) {
   if (authStore.authed) {
-    console.log("Rerouting to " + props.items[index].uuid);
-    await projectStore.updateTaskSettings(props.items[index].uuid);
+    console.log("Rerouting to " + props.items[index].UUID);
+    await projectStore.updateTaskSettings(props.items[index].UUID);
     console.log(userSprojectStoretore.currentTaskSettings.id);
     router.push(
       "/exp/" +
-        props.items[index].uuid +
+        props.items[index].UUID +
         "/" +
         projectStore.currentTaskSettings.id +
         "/"
@@ -81,7 +81,7 @@ async function continueProject(index, event) {
 }
 
 function isSignedUp(data) {
-  console.log(projectStore.signedUpStudies.includes(data.uuid));
-  return projectStore.signedUpStudies.includes(data.uuid);
+  console.log(projectStore.signedUpStudies.includes(data.UUID));
+  return projectStore.signedUpStudies.includes(data.UUID);
 }
 </script>

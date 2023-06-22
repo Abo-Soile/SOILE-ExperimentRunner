@@ -9,6 +9,8 @@
         @file-click="handleFileClick"
         @file-double-click="handleDoubleClick"
         @createFile="createFile"
+        @deleteFile="deleteFile"
+        @editFile="editFile"
         @createDirectory="createDirectory"
       />
       <FileAndDirectoryCreationItems
@@ -83,6 +85,17 @@ export default {
       this.$emit("createFile", {
         targetName: source.folder + source.addedFile.name,
         file: source.addedFile,
+      });
+      console.log(source);
+    },
+    editFile(source) {
+      this.$emit("editFile", source.folder + source.file.label);
+      console.log(source);
+    },
+    deleteFile(source) {
+      console.log(source);
+      this.$emit("deleteFile", {
+        targetName: source.folder + source.file.label,
       });
       console.log(source);
     },

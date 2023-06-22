@@ -80,8 +80,7 @@ export const useProjectStore = defineStore({
           );
           this.currentTaskSettings = response.data;
         } catch (error) {
-          const errorStore = useErrorStore();
-          errorStore.processAxiosError(error);
+          this.processAxiosError(error);
         }
       }
     },
@@ -90,6 +89,17 @@ export const useProjectStore = defineStore({
     },
     setTaskNotRunning() {
       this.isRunningTask = false;
+    },
+    async updaloadData(studyID, DataBlobb) {
+      try {
+        const response = await axios.post(
+          `/study/${studyID}/uploaddata`,
+          DataBlobb
+        );
+        this.fileID = response.data.id;
+      } catch (error) {
+        this.processAxiosError(error);
+      }
     },
   },
 });

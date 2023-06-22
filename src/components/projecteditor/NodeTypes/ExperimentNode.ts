@@ -71,13 +71,13 @@ export default class ExperimentNode extends SoileVersionedNode {
   public async setElementVersion(version: string, tag: string): Promise<void> {
     await super.setElementVersion(version, tag);
     this.canRandom = await this.elementStore.canExperimentBeRandomized(
-      this.objectData.uuid,
+      this.objectData.UUID,
       this.objectData.version,
       "experiment"
     );
   }
   isValid() {
-    return this.objectData.uuid != "" && this.objectData.version != "";
+    return this.objectData.UUID != "" && this.objectData.version != "";
   }
   public isDataNode() {
     return true;

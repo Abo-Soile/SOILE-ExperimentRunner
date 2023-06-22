@@ -15,7 +15,7 @@
       <Button
         label="Cancel"
         icon="pi pi-times"
-        @click="$emit('selected', false)"
+        @click="$emit('update:visible', false)"
         text
       />
       <Button
@@ -32,7 +32,7 @@
 <script>
 import Dialog from "primevue/dialog";
 import Button from "primevue/button";
-import VersionSelector from "./VersionSelector.vue";
+import VersionSelector from "@/components/utils/VersionSelector.vue";
 
 export default {
   components: { Button, Dialog, VersionSelector },

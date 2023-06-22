@@ -66,11 +66,11 @@ export const useElementStore = defineStore({
     },
     /**
      * Get the available versions for a specific task
-     * @param {string} uuid the UUID of the task
+     * @param {string} UUID the UUID of the task
      */
-    async getTaskOptions(uuid) {
+    async getTaskOptions(UUID) {
       try {
-        const response = await axios.post("/task/" + uuid + "/list");
+        const response = await axios.post("/task/" + UUID + "/list");
         return response?.data;
       } catch (e) {
         console.log("Error" + e);
@@ -79,11 +79,11 @@ export const useElementStore = defineStore({
     },
     /**
      * Get the available versions for a specific project
-     * @param {string} uuid the UUID of the project
+     * @param {string} UUID the UUID of the project
      */
-    async getProjectOptions(uuid) {
+    async getProjectOptions(UUID) {
       try {
-        const response = await axios.post("/project/" + uuid + "/list");
+        const response = await axios.post("/project/" + UUID + "/list");
         return response?.data;
       } catch (e) {
         console.log("Error" + e);
@@ -92,11 +92,11 @@ export const useElementStore = defineStore({
     },
     /**
      * Get the available versions for a specific experiment
-     * @param {string} uuid the UUID of the experiment
+     * @param {string} UUID the UUID of the experiment
      */
-    async getExperimentOptions(uuid) {
+    async getExperimentOptions(UUID) {
       try {
-        const response = await axios.post("/experiment/" + uuid + "/list");
+        const response = await axios.post("/experiment/" + UUID + "/list");
         return response?.data;
       } catch (e) {
         console.log("Error" + e);
@@ -119,36 +119,36 @@ export const useElementStore = defineStore({
     },
     /**
      * Get the list of options/versions for the given element.
-     * @param {string} uuid  the uuid of the element
+     * @param {string} UUID  the UUID of the element
      * @param {string} type type of element ('task','experiment' or 'project' )
      */
-    async getOptionsForElement(uuid, type) {
+    async getOptionsForElement(UUID, type) {
       switch (type) {
         case "task":
-          return await this.getTaskOptions(uuid);
+          return await this.getTaskOptions(UUID);
         case "project":
-          return await this.getProjectOptions(uuid);
+          return await this.getProjectOptions(UUID);
         case "experiment":
-          return await this.getExperimentOptions(uuid);
+          return await this.getExperimentOptions(UUID);
       }
     },
     /**
      * Get the list of tags for the specified items
-     * @param {string} uuid  the uuid of the element
+     * @param {string} UUID  the UUID of the element
      * @param {string} type type of element ('task','experiment' or 'project' )
      */
-    async getTagsForElement(uuid, type) {
+    async getTagsForElement(UUID, type) {
       var options;
       const usedType = type.toLowerCase();
       switch (usedType) {
         case "task":
-          options = await this.getTaskOptions(uuid);
+          options = await this.getTaskOptions(UUID);
           break;
         case "project":
-          options = await this.getProjectOptions(uuid);
+          options = await this.getProjectOptions(UUID);
           break;
         case "experiment":
-          options = await this.getExperimentOptions(uuid);
+          options = await this.getExperimentOptions(UUID);
           break;
       }
       return options
@@ -159,33 +159,33 @@ export const useElementStore = defineStore({
     },
     /**
      * Get an element, either load (if not yet loaded) or take from memory.
-     * @param {*} uuid the uuid of the object
+     * @param {*} UUID the UUID of the object
      * @param {*} version  the version of the object
      * @param {*} type the type (element, task or project) of the object
      */
-    async getElement(uuid, version, type) {
+    async getElement(UUID, version, type) {
       const usedType = type.toLowerCase();
       try {
-        const element = this.elements[usedType][uuid]
-          ? this.elements[usedType][uuid][version]
+        const element = this.elements[usedType][UUID]
+          ? this.elements[usedType][UUID][version]
           : undefined;
         if (element) {
           return element;
         } else {
-          if (!this.elements[usedType][uuid]) {
-            this.elements[usedType][uuid] = {};
+          if (!this.elements[usedType][UUID]) {
+            this.elements[usedType][UUID] = {};
           }
           const response = await axios.get(
-            "/" + type.toLowerCase() + "/" + uuid + "/" + version + "/get"
+            "/" + type.toLowerCase() + "/" + UUID + "/" + version + "/get"
           );
-          this.elements[usedType][uuid][version] = response.data;
-          if (!this.elements[usedType][uuid][version].tag) {
+          this.elements[usedType][UUID][version] = response.data;
+          if (!this.elements[usedType][UUID][version].tag) {
             const response = await axios.get(
-              "/" + type.toLowerCase() + "/" + uuid + "/" + version + "/gettag"
+              "/" + type.toLowerCase() + "/" + UUID + "/" + version + "/gettag"
             );
-            this.elements[usedType][uuid][version].tag = response.data.tag;
+            this.elements[usedType][UUID][version].tag = response.data.tag;
           }
-          return this.elements[usedType][uuid][version];
+          return this.elements[usedType][UUID][version];
         }
       } catch (err) {
         this.processAxiosError(err);
@@ -193,23 +193,23 @@ export const useElementStore = defineStore({
     },
     /**
      * Write an element and return th new version.
-     * @param {*} uuid the uuid of the object
+     * @param {*} UUID the UUID of the object
      * @param {*} version  the version of the object this version is derived from.
-     * @param {*} data the data of the elment (including version and uuid)
+     * @param {*} data the data of the elment (including version and UUID)
      * @param {*} type the type (element, task or project) of the object
      * @return The new Version of the element;
      */
-    async updateElement(uuid, version, data, type) {
+    async updateElement(UUID, version, data, type) {
       try {
         const response = await axios.post(
-          "/" + type.toLowerCase() + "/" + uuid + "/" + version + "/post",
+          "/" + type.toLowerCase() + "/" + UUID + "/" + version + "/post",
           data
         );
         data.version = response.data.version;
-        if (!this.elements[type.toLowerCase()][uuid]) {
-          this.elements[type.toLowerCase()][uuid] = {};
+        if (!this.elements[type.toLowerCase()][UUID]) {
+          this.elements[type.toLowerCase()][UUID] = {};
         }
-        this.elements[type.toLowerCase()][uuid][data.version] = data;
+        this.elements[type.toLowerCase()][UUID][data.version] = data;
         return response.data.version;
       } catch (err) {
         this.processAxiosError(err);
@@ -217,19 +217,29 @@ export const useElementStore = defineStore({
     },
     /**
      * Write an element and return th new version.
-     * @param {*} uuid the uuid of the object
+     * @param {*} UUID the UUID of the object
      * @param {*} version  the version of the object this version is derived from.
-     * @param {*} data the data of the elment (including version and uuid)
+     * @param {*} data the data of the elment (including version and UUID)
      * @param {*} type the type (element, task or project) of the object
      * @return The new Version of the element;
      */
     async createElement(name, data, type) {
       try {
+        let params;
+        if (type.toLowerCase() === "task") {
+          params = {
+            name: name,
+            codeType: data.codeType.language,
+            codeVersion: data.codeType.version,
+          };
+        } else {
+          params = { name: name };
+        }
         const response = await axios.post(
           "/" + type.toLowerCase() + "/create",
           null,
           {
-            params: { name: name },
+            params: params,
           }
         );
         data.UUID = response.data.UUID;
@@ -248,11 +258,11 @@ export const useElementStore = defineStore({
     },
     /**
      * Get the persistent data for a given task.
-     * @param {*} uuid
+     * @param {*} UUID
      * @param {*} version
      */
-    async getPersistentDataForTask(uuid, version) {
-      const element = await this.getElement(uuid, version, "task");
+    async getPersistentDataForTask(UUID, version) {
+      const element = await this.getElement(UUID, version, "task");
       if (element.codeType.language === "elang") {
         const outputRegexp = /savevariable\( *"([^"]+)"/g;
         return [...element.code.matchAll(outputRegexp)].map((x) => x[1]);
@@ -260,8 +270,8 @@ export const useElementStore = defineStore({
         return [];
       }
     },
-    async getPersistentDataForExperiment(uuid, version) {
-      const experiment = await this.getElement(uuid, version, "experiment");
+    async getPersistentDataForExperiment(UUID, version) {
+      const experiment = await this.getElement(UUID, version, "experiment");
       return this.getPersistentDataForExperimentInstance(experiment);
     },
     async getPersistentDataForExperimentInstance(instance) {
@@ -269,7 +279,7 @@ export const useElementStore = defineStore({
       for (const element of instance.elements) {
         if (element.type === "task") {
           const codeData = await this.getPersistentDataForTask(
-            element.data.uuid,
+            element.data.UUID,
             element.data.version
           );
           const instanceData = element.data.persistent;
@@ -290,12 +300,12 @@ export const useElementStore = defineStore({
       }
       return Array.from(persistentElements);
     },
-    async getPersistentDataForElement(uuid, version, type) {
+    async getPersistentDataForElement(UUID, version, type) {
       switch (type) {
         case "task":
-          return await this.getPersistentDataForTask(uuid, version);
+          return await this.getPersistentDataForTask(UUID, version);
         case "experiment":
-          return await this.getPersistentDataForExperiment(uuid, version);
+          return await this.getPersistentDataForExperiment(UUID, version);
       }
     },
     async updateAvailableOptions(type) {
@@ -312,12 +322,12 @@ export const useElementStore = defineStore({
       const errorStore = useErrorStore();
       errorStore.processAxiosError(err);
     },
-    async getTagForVersion(type, uuid, version) {
-      const currentElement = await this.getElement(uuid, version, type);
+    async getTagForVersion(type, UUID, version) {
+      const currentElement = await this.getElement(UUID, version, type);
       return currentElement.tag;
     },
-    async canExperimentBeRandomized(uuid, version) {
-      const currentElement = await this.getElement(uuid, version, "experiment");
+    async canExperimentBeRandomized(UUID, version) {
+      const currentElement = await this.getElement(UUID, version, "experiment");
       for (const current of currentElement.elements) {
         // cannot be randomized if there are filters in the Experiment.
         if (current.type === "filter") {
@@ -332,24 +342,35 @@ export const useElementStore = defineStore({
       this.availableProjects = [];
       this.elements = { task: {}, project: {}, experiment: {} };
     },
-    async getFilesForTask(uuid, version) {
+    /**
+     * Get the list of Files for the task with the given UUID and version
+     * @param {*} UUID
+     * @param {*} version
+     */
+    async getFilesForTask(UUID, version) {
       try {
         const response = await axios.get(
-          "/task/" + uuid + "/" + version + "/filelist"
+          "/task/" + UUID + "/" + version + "/filelist"
         );
-        console.log(response?.data);
         return response.data;
       } catch (e) {
         console.log("Error" + e);
         this.processAxiosError(e);
       }
     },
-    async addFileToTask(uuid, version, filename, file) {
+    /**
+     * Add a file to the given version of the given task.
+     * @param {*} UUID
+     * @param {*} version
+     * @param {*} filename
+     * @param {*} file
+     */
+    async addFileToTask(UUID, version, filename, file) {
       try {
         const formData = new FormData();
         formData.append("file", file);
         const response = await axios.post(
-          "/task/" + uuid + "/" + version + "/resource/" + filename,
+          "/task/" + UUID + "/" + version + "/resource/" + filename,
           formData
         );
         return response.data.version;
@@ -359,11 +380,40 @@ export const useElementStore = defineStore({
         return null;
       }
     },
-    async getResourceFile(uuid, version, filename) {
+    /**
+     * Remove the specified filename from the given task
+     * @param {*} UUID
+     * @param {*} version
+     * @param {*} filename
+     */
+    async removeFileFromTask(UUID, version, filename) {
       try {
-        const url = "/task/" + uuid + "/" + version + "/resource/" + filename;
+        const response = await axios.post(
+          "/task/" +
+            UUID +
+            "/" +
+            version +
+            "/resource/" +
+            filename +
+            "?delete=true"
+        );
+        return response.data.version;
+      } catch (e) {
+        console.log("Error" + e);
+        this.processAxiosError(e);
+        return null;
+      }
+    },
+    /**
+     * Get a Resource file for the given task represented by the file name
+     * @param {*} UUID
+     * @param {*} version
+     * @param {*} filename
+     */
+    async getResourceFile(UUID, version, filename) {
+      try {
+        const url = "/task/" + UUID + "/" + version + "/resource/" + filename;
         const response = await axios.get(url);
-        console.log(response);
         return {
           url: url,
           data: response.data,

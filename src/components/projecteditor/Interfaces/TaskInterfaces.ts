@@ -1,5 +1,5 @@
 export interface TaskOption {
-  uuid: string;
+  UUID: string;
   name: string;
 }
 

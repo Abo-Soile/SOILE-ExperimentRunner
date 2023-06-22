@@ -9,7 +9,7 @@ export default abstract class SoileVersionedNode
   public nodeOutputs = reactive(new Array<string>());
 
   public abstract objectType: string;
-  public objectData = reactive({ uuid: "", name: "", version: "", tag: "" });
+  public objectData = reactive({ UUID: "", name: "", version: "", tag: "" });
 
   public nodePersistent = reactive(new Array<string>());
 
@@ -26,9 +26,9 @@ export default abstract class SoileVersionedNode
     this.graphStore.removePersistantData(this, dataName);
   }
 
-  public setElement(uuid: string, name: string) {
-    if (this.objectData.uuid != uuid) {
-      this.objectData.uuid = uuid;
+  public setElement(UUID: string, name: string) {
+    if (this.objectData.UUID != UUID) {
+      this.objectData.UUID = UUID;
       this.objectData.name = name;
       this.objectData.version = "";
       this.objectData.tag = "";
@@ -40,7 +40,7 @@ export default abstract class SoileVersionedNode
     let currentTag = tag;
     this.objectData.version = version;
     const persistent = await this.elementStore.getPersistentDataForElement(
-      this.objectData.uuid,
+      this.objectData.UUID,
       this.objectData.version,
       this.objectType
     );
@@ -52,7 +52,7 @@ export default abstract class SoileVersionedNode
     } else {
       currentTag = await this.elementStore.getTagForVersion(
         this.objectType,
-        this.objectData.uuid,
+        this.objectData.UUID,
         this.objectData.version
       );
       this.objectData.tag = currentTag;
