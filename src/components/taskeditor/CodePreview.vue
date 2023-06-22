@@ -43,9 +43,14 @@
           @handleSubmit="(event) => submitResults(event)"
           @handleError="(error) => handleError(error)"
         ></SoileQuestionnaire>
+        <JsRunner
+          v-if="codeType == 'javascript'"
+          :preview="true"
+          :code="code"
+          studyID="temp"
+        ></JsRunner>
       </div>
       <div>
-        <!--<JsRunner v-if="type == 'javascript'"></JSRunner>-->
         <Button @click="stopTask">Stop Task</Button>
       </div>
     </div>
@@ -72,13 +77,21 @@ import axios from "axios";
 import SoileQuestionnaire from "@/components/questionnaire/SoileQuestionnaire.vue";
 import SoileExpRunner from "@/components/experimentlang/SoileExpRunner.vue";
 import PsychoJsRunner from "@/components/psychopy/PsychoJsRunner.vue";
+import JsRunner from "@/components/jsrunner/JsRunner.vue";
+
 import { mapState } from "pinia";
 import { useErrorStore } from "@/stores";
 import Button from "primevue/button";
 
 export default {
   name: "CodePreview",
-  components: { SoileQuestionnaire, SoileExpRunner, PsychoJsRunner, Button },
+  components: {
+    SoileQuestionnaire,
+    SoileExpRunner,
+    PsychoJsRunner,
+    Button,
+    JsRunner,
+  },
   props: {
     sourceCode: {
       type: String,

@@ -5,6 +5,8 @@
 </template>
 
 <script>
+import { useProjectStore } from "@/stores";
+
 export default {
   props: {
     code: {
@@ -14,6 +16,10 @@ export default {
     preview: {
       type: Boolean,
       default: false,
+    },
+    studyID: {
+      type: String,
+      required: true,
     },
   },
   data() {
@@ -48,10 +54,20 @@ export default {
         this.$emit("handleError", error.message);
       }
     },
-    async submitFile(fileName, format, fileBlob) {
+    async submitFile(fileName, fileFormat, file) {
       if (this.preview) {
-        this.files.push({ file });
+        this.files.push({
+          filename: fileName,
+          targetid: "temp",
+          fileformat: fileFormat,
+        });
       } else {
+        const fileID = await this.projectStore.uploadData(this.studyID, file);
+        this.files.push({
+          filename: fileName,
+          targetid: fileID,
+          fileformat: fileFormat,
+        });
       }
     },
     /**
@@ -65,7 +81,7 @@ export default {
       }
       return {
         outputData: [],
-        resultData: { fileData: [], jsonData: jsonResults },
+        resultData: { fileData: this.files, jsonData: jsonResults },
       };
     },
   },
@@ -74,6 +90,10 @@ export default {
     iframeWindow.submitFile = this.submitFile;
     iframeWindow.reportResult = this.handleData;
     iframeWindow.submitResults = this.submit;
+  },
+  setup() {
+    const projectStore = useProjectStore();
+    return { projectStore };
   },
 };
 </script>

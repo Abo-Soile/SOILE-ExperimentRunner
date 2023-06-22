@@ -35,6 +35,10 @@ export const useProjectStore = defineStore({
         this.processAxiosError(e);
       }
     },
+    /**
+     * Selet the active project
+     * @param {*} index
+     */
     selectProject(index) {
       console.log("Selecting Project");
       this.selectedProject = this.availableProjectInstances[index];
@@ -45,6 +49,9 @@ export const useProjectStore = defineStore({
         JSON.stringify(this.selectedProject)
       );
     },
+    /**
+     * Clear all data
+     */
     clearData() {
       this.selectedProject = {};
       sessionStorage.setItem(
@@ -53,6 +60,9 @@ export const useProjectStore = defineStore({
       );
       this.signedUpStudies = [];
     },
+    /**
+     * Fetch the studies the current user is signed up to.
+     */
     async fetchSignedUpStudies() {
       try {
         console.log("Updating signed up projects");
@@ -90,13 +100,15 @@ export const useProjectStore = defineStore({
     setTaskNotRunning() {
       this.isRunningTask = false;
     },
-    async updaloadData(studyID, DataBlobb) {
+    async updaloadData(studyID, file) {
       try {
+        const formData = new FormData();
+        formData.append("file", file);
         const response = await axios.post(
           `/study/${studyID}/uploaddata`,
-          DataBlobb
+          formData
         );
-        this.fileID = response.data.id;
+        return response.data.id;
       } catch (error) {
         this.processAxiosError(error);
       }

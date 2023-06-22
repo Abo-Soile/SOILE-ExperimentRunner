@@ -7,7 +7,7 @@
         </template>
         <CodeEditor
           :inputText="sourceCode"
-          @update:inputText="$emit('update:sourceCode', $event.target.value)"
+          @update:inputText="$emit('update:sourceCode', $event)"
         />
       </TabPanel>
       <TabPanel v-for="(tab, index) in tabs" :key="index">
@@ -57,7 +57,13 @@ export default {
       required: true,
     },
   },
-  emits: ["updateData", "closeFile", "saveFile", "update:selectedFile"],
+  emits: [
+    "update:sourceCode",
+    "updateData",
+    "closeFile",
+    "saveFile",
+    "update:selectedFile",
+  ],
   computed: {
     activeIndex: {
       set(newValue) {
