@@ -34,6 +34,9 @@ export const useAuthStore = defineStore({
         return false;
       }
     },
+    /**
+     * Check whether the current session is a session of a researcher
+     */
     isResearcher() {
       if (this.isAuthed()) {
         console.log(this.roles);
@@ -44,6 +47,9 @@ export const useAuthStore = defineStore({
         return false;
       }
     },
+    /**
+     * Refresh the current session.
+     */
     async refreshSession() {
       if (this.jwtToken) {
         this.setAccessToken(this.jwtToken);

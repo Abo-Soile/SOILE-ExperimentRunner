@@ -70,7 +70,7 @@ export default {
         if (this.isText) {
           return this.file.data;
         } else {
-          return "/api/" + this.file.url;
+          return this.file.filename;
         }
       }
     },

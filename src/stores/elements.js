@@ -416,6 +416,7 @@ export const useElementStore = defineStore({
         const response = await axios.get(url);
         return {
           url: url,
+          filename: filename,
           data: response.data,
           type: response.headers["content-type"],
         };
