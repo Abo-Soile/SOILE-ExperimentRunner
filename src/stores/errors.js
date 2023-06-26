@@ -45,7 +45,7 @@ export const useErrorStore = defineStore({
             ")"
         );
       } else if (err.response?.status === 409) {
-        this.raiseError("error", "Conflict: " + err.response?.data);
+        this.raiseError("error", "Conflict: " + err.response?.statusText);
       } else {
         this.raiseError(
           "error",

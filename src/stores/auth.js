@@ -1,7 +1,6 @@
 import { defineStore } from "pinia";
 
 import axios from "axios";
-import { router } from "@/helpers";
 
 import { useProjectStore } from "./project";
 import { useGraphStore } from "./graph";
@@ -63,6 +62,12 @@ export const useAuthStore = defineStore({
         }
       }
     },
+    /**
+     * Log a user into the system.
+     * @param {*} username
+     * @param {*} password
+     * @param {*} remember
+     */
     async login(username, password, remember) {
       var loginData = {
         username,
@@ -81,7 +86,6 @@ export const useAuthStore = defineStore({
         // store user details and jwt in local storage to keep user logged in between page refreshes
         await this.updateUserData();
         // redirect to previous url or default to home page
-        router.push(this.returnUrl || "/");
       } catch (e) {
         this.processAxiosError(e);
       }

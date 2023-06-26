@@ -24,22 +24,19 @@ export default {
   },
   data() {
     return {
-      results: null,
+      results: {},
       files: [],
     };
   },
   methods: {
     /**
      *
-     * @param {*} filename (unused)
      * @param {*} data the data of the experiment.
-     * @param {*} mimetype (unused)
      */
-    handleData(filename, data, mimetype) {
-      console.log(filename);
+    handleData(data) {
       console.log(data);
-      console.log(mimetype);
-      this.results = data;
+      // merge the two.
+      this.results = { ...this.resuls, ...data };
     },
     /**
      * Submit data
@@ -60,6 +57,7 @@ export default {
           filename: fileName,
           targetid: "temp",
           fileformat: fileFormat,
+          file: file,
         });
       } else {
         const fileID = await this.projectStore.uploadData(this.studyID, file);

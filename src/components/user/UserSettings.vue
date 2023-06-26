@@ -1,12 +1,12 @@
 <template>
   <div>
-    <h1>User Settings</h1>
+    <h1>{{ title }}</h1>
     <form @submit.prevent="saveSettings">
       <div class="grid">
-        <div class="col">
+        <div class="col flex align-items-center">
           <label for="username">Username</label>
         </div>
-        <div class="col">
+        <div class="col flex align-items-center">
           <InputText
             id="username"
             v-model="settings.username"
@@ -15,35 +15,43 @@
         </div>
       </div>
       <div class="grid">
-        <div class="col">
+        <div class="col flex align-items-center">
           <label for="email">Email</label>
         </div>
-        <div class="col">
+        <div class="col flex align-items-center">
           <InputText id="email" v-model="settings.email" />
         </div>
       </div>
       <div class="grid">
-        <div class="col">
+        <div class="col flex align-items-center">
           <label for="fullname">Full Name</label>
         </div>
-        <div class="col">
+        <div class="col flex align-items-center">
           <InputText id="fullname" v-model="settings.fullname" />
+        </div>
+      </div>
+      <div v-if="settings.role != null && settings.role != ''" class="grid">
+        <div class="col flex align-items-center">
+          <label for="role">Role</label>
+        </div>
+        <div class="col flex align-items-center">
+          <InputText disabled id="role" v-model="settings.role" />
         </div>
       </div>
       <div v-if="showPassword">
         <div class="grid">
-          <div class="col">
+          <div class="col flex align-items-center">
             <label for="password">Password</label>
           </div>
-          <div class="col">
+          <div class="col flex align-items-center">
             <Password id="password" v-model="settings.password" />
           </div>
         </div>
         <div class="grid">
-          <div class="col">
+          <div class="col flex align-items-center">
             <label for="confirmPassword">Confirm Password</label>
           </div>
-          <div class="col">
+          <div class="col flex align-items-center">
             <Password id="confirmPassword" v-model="settings.confirmPassword" />
           </div>
         </div>
@@ -52,8 +60,8 @@
         <div class="col">
           <Button type="submit" :label="submitLabel" />
         </div>
-        <div class="flex col justify-content-end">
-          <Button @click="dialogVisible = false" label="Cancel" />
+        <div v-if="showCancel" class="flex col justify-content-end">
+          <Button @click="$emit('cancel')" label="Cancel" />
         </div>
       </div>
     </form>
@@ -68,6 +76,10 @@ import { useErrorStore } from "@/stores";
 
 export default {
   props: {
+    title: {
+      type: String,
+      default: "User Settings",
+    },
     usernamefixed: {
       type: Boolean,
       default: false,
@@ -84,11 +96,16 @@ export default {
         password: "",
         confirmPassword: "",
         fullname: "",
+        role: "",
       },
     },
     submitLabel: {
       type: String,
       default: "Create",
+    },
+    showCancel: {
+      type: Boolean,
+      default: false,
     },
   },
   data() {
@@ -129,6 +146,6 @@ export default {
       this.settings = { ...newValue };
     },
   },
-  emits: ["updateUser", "update:visible"],
+  emits: ["updateUser", "cancel"],
 };
 </script>

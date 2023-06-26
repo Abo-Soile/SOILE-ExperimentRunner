@@ -8,10 +8,10 @@
         </router-link>
       </div>
     </template>
+    <template #end>
+      <Button icon="pi pi-question-circle" @click="showHelp = true"></Button>
+    </template>
   </Menubar>
-  <Dialog v-model:visible="showLoginDialog" header="Login">
-    <Login @submitted="showLoginDialog = false" />
-  </Dialog>
   <StudyCreationDialog
     v-if="creationDialogVisible"
     v-model:visible="creationDialogVisible"
@@ -23,6 +23,7 @@
     :researchStudies="studyStore.researchStudies"
     @selected="(event) => handleLoad(event)"
   ></StudyLoadDialog>
+  <HelpDialog v-if="showHelp" v-model:visible="showHelp"></HelpDialog>
 </template>
 
 <script>
@@ -35,6 +36,7 @@ import Login from "./LoginForm.vue";
 import { useAuthStore, useStudyStore } from "@/stores";
 import StudyCreationDialog from "@/components/study/StudyCreationDialog.vue";
 import StudyLoadDialog from "@/components/study/StudyLoadDialog.vue";
+import HelpDialog from "@/components/dialogs/HelpDialog.vue";
 
 export default {
   name: "TopNavbar",
@@ -46,76 +48,87 @@ export default {
     Dialog,
     StudyCreationDialog,
     StudyLoadDialog,
+    HelpDialog,
   },
   data() {
     return {
       creationDialogVisible: false,
       loadDialogVisible: false,
+      showHelp: false,
     };
   },
   computed: {
+    editingMenu() {
+      return {
+        label: "Project Editing",
+        icon: "pi pi-wrench",
+        to: "/editing",
+      };
+    },
+    studyMenu() {
+      return {
+        label: "Study Management",
+        icon: "pi pi-file-edit",
+        to:
+          !this.isInManagement && this.studyStore.editingActive()
+            ? "/management"
+            : null,
+        items: [
+          {
+            label: "Create Study",
+            icon: "pi pi-plus",
+            command: () => (this.creationDialogVisible = true),
+            to: "/management",
+          },
+          {
+            label: "Load Study",
+            icon: "pi pi-wrench",
+            command: () => (this.loadDialogVisible = true),
+            to: "/management",
+          },
+        ],
+      };
+    },
+    userMenu() {
+      return {
+        label: this.isLoggedIn ? "User" : "Login",
+        icon: this.isLoggedIn ? "pi pi-user" : "pi pi-sign-in",
+        items: this.isLoggedIn
+          ? [
+              {
+                label: "Profile",
+                icon: "pi pi-user",
+                to: "/profile",
+              },
+              {
+                label: "Logout",
+                icon: "pi pi-fw pi-power-off",
+                command: async () => await this.authStore.logout(),
+              },
+            ]
+          : undefined,
+        to: this.isLoggedIn ? undefined : "/login",
+      };
+    },
+    userManagementMenu() {
+      return {
+        label: "User Management",
+        icon: "pi pi-user-edit",
+        to: "/usermanagement",
+      };
+    },
+
     menuItems() {
-      return [
-        this.isResearcher
-          ? {
-              label: "Project Editing",
-              icon: "pi pi-wrench",
-              to: "/editing",
-            }
-          : {},
-        this.isResearcher
-          ? {
-              label: "Study Management",
-              icon: "pi pi-file-edit",
-              to:
-                !this.isInManagement && this.studyStore.editingActive()
-                  ? "/management"
-                  : null,
-              items: [
-                {
-                  label: "Create Study",
-                  icon: "pi pi-plus",
-                  command: () => (this.creationDialogVisible = true),
-                  to: "/management",
-                },
-                {
-                  label: "Load Study",
-                  icon: "pi pi-wrench",
-                  command: () => (this.loadDialogVisible = true),
-                  to: "/management",
-                },
-              ],
-            }
-          : {},
-        this.isAdmin
-          ? {
-              label: "User Management",
-              icon: "pi pi-user-edit",
-              to: "/usermanagement",
-            }
-          : {},
-        {
-          label: this.isLoggedIn ? "User" : "Login",
-          icon: this.isLoggedIn ? "pi pi-user" : "pi pi-sign-in",
-          items: this.isLoggedIn
-            ? [
-                {
-                  label: "Profile",
-                  icon: "pi pi-user",
-                  routerLink: "/user",
-                },
-                {
-                  label: "Logout",
-                  icon: "pi pi-fw pi-power-off",
-                  command: async () => await this.authStore.logout(),
-                },
-              ]
-            : undefined,
-          command: this.isLoggedIn
-            ? undefined
-            : () => (this.showLoginDialog = true),
-        },
-      ];
+      const menus = [];
+      if (this.isResearcher) {
+        menus.push(this.editingMenu);
+        menus.push(this.studyMenu);
+      }
+      if (this.isAdmin) {
+        menus.push(this.userManagementMenu);
+      }
+      menus.push(this.userMenu);
+      return menus;
     },
     isInManagement() {
       return this.$route.name === "Study Management";

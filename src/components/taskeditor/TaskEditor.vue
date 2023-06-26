@@ -162,7 +162,7 @@ export default {
       },
       set(newValue) {
         this.currentObject.version = newValue;
-        this.$emit("updateCurrentVersion", { version: newValue });
+        this.$emit("updateCurrentVersion", newValue);
       },
     },
     canRun() {
@@ -202,7 +202,10 @@ export default {
             //console.log(data);
             this.previewFile = data;
             this.editedFiles.push({
-              data: data.data,
+              data:
+                data.type === "application/json"
+                  ? JSON.stringify(data.data, null, 2)
+                  : data.data,
               filename: filename,
               modified: false,
               type: data.type,

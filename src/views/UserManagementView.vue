@@ -8,12 +8,30 @@
     :showUserEdit="true"
     :showDetails="true"
     :columnHeaders="columnHeaders"
-    @updateUserInfo="(updateData) => userStore.setUserInfo(updateData)"
-    @deleteUser="(userToDelete) => userStore.deleteUser(userToDelete, true)"
-    @updateRole="
-      (roleData) => userStore.changeUserRole(roleData.username, roleData.role)
+    @updateUserInfo="
+      (updateData) =>
+        userStore
+          .setUserInfo(updateData)
+          .then((res) => userStore.fetchUserData())
     "
-    @createUser="(userDetails) => userStore.createUser(userData, false)"
+    @deleteUser="
+      (userToDelete) =>
+        userStore
+          .deleteUser(userToDelete, true)
+          .then((res) => userStore.fetchUserData())
+    "
+    @updateRole="
+      (roleData) =>
+        userStore
+          .changeUserRole(roleData.username, roleData.role)
+          .then((res) => userStore.fetchUserData())
+    "
+    @createUser="
+      (userDetails) =>
+        userStore
+          .createUser(userData, false)
+          .then((res) => userStore.fetchUserData())
+    "
     @updateUsers="userStore.fetchUsers()"
   />
 </template>

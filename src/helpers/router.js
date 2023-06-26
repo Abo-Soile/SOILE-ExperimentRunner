@@ -6,6 +6,9 @@ import {
   ExperimentView,
   WelcomeView,
   UserManagementView,
+  RegisterView,
+  LoginView,
+  ProfileView,
 } from "@/views";
 import { useProjectStore } from "@/stores";
 
@@ -47,6 +50,21 @@ const routes = [
     name: "Signup",
     component: SignupView,
     props: true,
+  },
+  {
+    path: "/register",
+    name: "User Registeration",
+    component: RegisterView,
+  },
+  {
+    path: "/login",
+    name: "Login",
+    component: LoginView,
+  },
+  {
+    path: "/profile",
+    name: "Profile",
+    component: ProfileView,
   },
 ];
 

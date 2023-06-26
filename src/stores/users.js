@@ -52,22 +52,44 @@ export const useUserStore = defineStore({
       }
     },
     /**
-     * Create a User, and indicate which endpoint to use
+     * Create a User
      * @param {*} userdata the data for the user
-     * @param {*} register Whether to use the register end-point or the administrative end-point
      */
-    async createUser(userdata, register) {
+    async createUser(userdata) {
       try {
         if (register) {
           await axios.post("/user/create", userdata);
+          return false;
         } else {
           await axios.post("/register", userdata);
         }
-        await fetchUserData();
+        return true;
       } catch (err) {
         this.processAxiosError(err);
       }
     },
+    /**
+     * Register a User
+     * @param {*} userdata the data for the user
+     */
+    async registerUser(userdata) {
+      console.log(userdata);
+      try {
+        console.log("Posting Axios request.");
+        const response = await axios.post("/register", userdata);
+        console.log("Received response");
+        console.log(response);
+        return true;
+      } catch (err) {
+        this.processAxiosError(err);
+        return false;
+      }
+    },
+
+    /**
+     * Process an error that was raised from a call to axios.
+     * @param {*} err
+     */
     processAxiosError(err) {
       const errorStore = useErrorStore();
       errorStore.processAxiosError(err);
@@ -163,7 +185,6 @@ export const useUserStore = defineStore({
           username: username,
           role: newRole,
         });
-        this.fetchUserData();
         return true;
       } catch (error) {
         this.processAxiosError(error);
@@ -180,7 +201,6 @@ export const useUserStore = defineStore({
           username: username,
           deleteFiles: deleteFiles ? true : false, // yes, we need to check here, since it can be undefined.
         });
-        await this.fetchUserData();
         return true;
       } catch (error) {
         this.processAxiosError(error);
@@ -209,8 +229,21 @@ export const useUserStore = defineStore({
     async setUserInfo(userData) {
       try {
         await axios.post("/user/setinfo", userData);
-        // need to update the data after setting new information.
-        await this.fetchUserData();
+        return true;
+      } catch (error) {
+        this.processAxiosError(error);
+        return false;
+      }
+    },
+    /**
+     * Set the password for a user
+     * @param {String} password the new password
+     * @param {String} username the new password
+     * TODO: Verify with old password
+     */
+    async setUserPassword(password, username) {
+      try {
+        await axios.post("/user/setpassword", { username, password });
         return true;
       } catch (error) {
         this.processAxiosError(error);

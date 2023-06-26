@@ -48,6 +48,8 @@
           :preview="true"
           :code="code"
           studyID="temp"
+          @handleSubmit="(event) => submitResults(event)"
+          @handleError="(error) => handleError(error)"
         ></JsRunner>
       </div>
       <div>
