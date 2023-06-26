@@ -243,6 +243,9 @@ export const useStudyStore = defineStore({
         return false;
       }
     },
+    /**
+     * Get all available studies, irrespective of access rights (only callable by admins).
+     */
     async getAllStudies() {
       try {
         const response = await axios.post(`/study/list?full=true`);

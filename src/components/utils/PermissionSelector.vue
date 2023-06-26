@@ -19,7 +19,7 @@
         :key="slotProps.index"
         :permissionOptions="availablePermissions"
         :originalPermission="slotProps.item.permission"
-        :elementName="slotProps.item.id"
+        :elementName="slotProps.item[displayField]"
         @setPermission="(event) => permissionsSet(slotProps.item, event)"
         @removePermission="permissionRemoved(slotProps.item)"
       />

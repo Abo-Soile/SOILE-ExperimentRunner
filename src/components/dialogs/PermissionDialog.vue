@@ -33,8 +33,8 @@
         <PermissionSelector
           :currentPermissions="currentPermissions?.permissions?.instances"
           :availablePermissions="availablePermissions"
-          :availableElements="researchStudies"
-          @savePermissions="(event) => savePermissions(event, 'INSTANCE')"
+          :availableElements="availableStudies"
+          @savePermissions="(event) => savePermissions(event, 'STUDY')"
         >
         </PermissionSelector>
       </TabPanel>
@@ -76,6 +76,7 @@ export default {
       //TODO: refactor to remove instances
       currentPermissions: null,
       availablePermissions: ["READ", "READ_WRITE", "FULL"],
+      availableStudies: [],
     };
   },
   methods: {
@@ -127,12 +128,9 @@ export default {
     const studyStore = useStudyStore();
     const userStore = useUserStore();
     const elementStore = useElementStore();
-    const { researchStudies } = storeToRefs(studyStore);
     const { availableTasks, availableExperiments, availableProjects } =
       storeToRefs(elementStore);
-
     return {
-      researchStudies,
       availableTasks,
       availableExperiments,
       availableProjects,
@@ -148,7 +146,7 @@ export default {
     },
   },
   async mounted() {
-    await this.studyStore.updateResearchStudies();
+    this.availableStudies = await this.studyStore.getAllStudies();
     await this.elementStore.updateAvailableProjects();
     await this.elementStore.updateAvailableTasks();
     await this.elementStore.updateAvailableExperiments();
