@@ -1,11 +1,11 @@
 import axios from "axios";
 axios.defaults.withCredentials = true;
 
-axios.defaults.baseURL = import.meta.env.BACKENDDOMAIN
+axios.defaults.baseURL = import.meta.env.VITE_BACKENDDOMAIN
   ? "https://" +
-    import.meta.env.BACKENDDOMAIN +
+    import.meta.env.VITE_BACKENDDOMAIN +
     ":" +
-    import.meta.env.BACKENDPORT
+    import.meta.env.VITE_BACKENDPORT
   : "https://localhost:8081";
 
 console.log("Setting baseurl to:" + axios.defaults.baseURL);
