@@ -7,7 +7,7 @@
     :availableElements="userList"
     @savePermissions="(event) => addUsers(event)"
     idField="username"
-    displayField="username"
+    displayField="name"
     permissionField="permission"
     currentLabel="Current Collaborators"
     availableLabel="Possible Collaborators"
