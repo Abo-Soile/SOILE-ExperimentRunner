@@ -1,15 +1,40 @@
 <template>
   <div>
     <DataTable :value="items" :editable="true">
-      <Column field="name" header="Name"></Column>
-      <Column header="Start">
+      <template #header>
+        <div
+          class="flex flex-wrap align-items-center justify-content-between gap-2"
+        >
+          <span class="text-xl text-900 font-bold">Available Studies</span>
+          <span v-if="!authStore.user">
+            <InputText
+              v-model="continueToken"
+              placeholder="User Identification Token"
+              v-tooltip="
+                'If you have already signed up to this project use the token you were provided to continue'
+              "
+            ></InputText>
+            <Button
+              label="Set token"
+              @click="
+                authStore.setProjectToken(continueToken);
+                authStore.updateLoginStatus();
+                authStore.updateUserData();
+              "
+            />
+          </span>
+        </div>
+      </template>
+      <Column field="name" header="Name">
+        <template #body="{ data, index }" let-index="index">
+          <span v-tooltip="data.shortDescription">{{ data.name }}</span>
+        </template></Column
+      >
+      <Column header="Sign Up to Study">
         <template #body="{ data, index }" let-index="index">
           <div>
-            <router-link
-              v-if="!isSignedUp(data)"
-              :to="'/signup/' + data.UUID"
-              @click="projectStore.selectProject(index)"
-              >Start</router-link
+            <router-link v-if="!isSignedUp(data)" :to="'/signup/' + data.UUID"
+              >Sign Up</router-link
             >
           </div>
         </template>
@@ -17,10 +42,6 @@
       <Column header="Continue">
         <template #body="{ data, index }" let-index="index">
           <div>
-            <InputText
-              v-if="!authStore.user"
-              v-model="continueTokens[index]"
-            ></InputText>
             <Button
               v-if="isSignedUp(data)"
               label="Continue"
@@ -41,9 +62,12 @@ import Column from "primevue/column";
 
 import { router } from "@/helpers";
 import { useProjectStore, useAuthStore } from "@/stores";
+
+import { ref } from "vue";
+
 const projectStore = useProjectStore();
 const authStore = useAuthStore();
-const continueTokens = {};
+const continueToken = ref(undefined);
 
 const props = defineProps({
   items: {
@@ -55,7 +79,6 @@ async function runProject(index, event) {
   if (authStore.authed) {
     console.log("Rerouting to " + props.items[index].UUID);
     await projectStore.updateTaskSettings(props.items[index].UUID);
-    console.log(userSprojectStoretore.currentTaskSettings.id);
     router.push(
       "/exp/" +
         props.items[index].UUID +
@@ -70,13 +93,6 @@ async function runProject(index, event) {
 
 async function continueProject(index, event) {
   event.preventDefault();
-  const continueToken = continueTokens[index];
-  console.log("Continuing project: Setting Project token");
-  await authStore.setProjectToken(continueToken);
-  console.log("Updating login status");
-  await authStore.updateLoginStatus();
-  console.log("Running project");
-
   runProject(index);
 }
 

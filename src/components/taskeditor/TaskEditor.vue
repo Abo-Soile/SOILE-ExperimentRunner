@@ -10,6 +10,11 @@
         :codeTypeOptions="codeOptions"
         :newTask="newElement"
         @save="updateTagsAndShowSave"
+        @changeTaskVersion="
+          (event) =>
+            $emit('changeTask', { version: event, UUID: currentObject.UUID })
+        "
+        @reload="reload"
       >
       </TaskBar>
     </div>
@@ -116,7 +121,7 @@ export default {
     currentObject.codeType = reactive(currentObject.codeType);
     return { errorStore, elementStore, currentObject, editorStore };
   },
-  emits: ["updateName", "updateCurrentVersion", "saveTask"],
+  emits: ["updateName", "updateCurrentVersion", "saveTask", "changeTask"],
   components: {
     ElementSaveDialog,
     CodePreview,
@@ -322,6 +327,14 @@ export default {
       } else {
         this.currentTags = [];
       }
+    },
+    reload(version) {
+      this.$emit("changeTask", {
+        version: version,
+        UUID: this.currentObject.UUID,
+      });
+      this.updateFiles(this.target);
+      this.updateFields(this.target);
     },
     async updateTagsAndShowSave() {
       await this.updateCurrentTags();

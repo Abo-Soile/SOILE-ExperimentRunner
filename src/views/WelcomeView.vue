@@ -1,6 +1,6 @@
 <template>
   <div>
-    <ProjectList :items="availableProjectInstances"></ProjectList>
+    <ProjectList :items="availableStudies"></ProjectList>
   </div>
 </template>
 
@@ -10,6 +10,5 @@ import { useProjectStore } from "@/stores";
 import { storeToRefs } from "pinia";
 const projectStore = useProjectStore();
 console.log(storeToRefs(projectStore));
-const { availableProjectInstances: availableProjectInstances } =
-  storeToRefs(projectStore);
+const { availableStudies: availableStudies } = storeToRefs(projectStore);
 </script>

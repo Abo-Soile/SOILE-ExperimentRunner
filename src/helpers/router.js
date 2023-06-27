@@ -10,7 +10,7 @@ import {
   LoginView,
   ProfileView,
 } from "@/views";
-import { useProjectStore } from "@/stores";
+import { useProjectStore, useAuthStore } from "@/stores";
 
 const routes = [
   {
@@ -20,7 +20,7 @@ const routes = [
   },
   {
     path: "/usermanagement",
-    name: "UserManagement",
+    name: "User Management",
     component: UserManagementView,
   },
   {

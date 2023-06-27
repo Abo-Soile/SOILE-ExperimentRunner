@@ -7,57 +7,36 @@ export const useProjectStore = defineStore({
   id: "projects",
   state: () => ({
     // initialize the state. We don't update from the local storage, because this could contain privilegded data
-    selectedProject: JSON.parse(
-      sessionStorage.getItem("soile-selectedproject")
-    ),
     signedUpStudies: [],
-    availableProjectInstances: [],
-
+    availableStudies: [],
     currentTaskSettings: {},
     isRunningTask: false,
   }),
   actions: {
     clearData() {
-      this.selectedProject = "";
       this.signedUpStudies = [];
-      this.availableProjectInstances = [];
+      this.availableStudies = [];
       this.currentTaskSettings = {};
       this.isRunningTask = false;
     },
+    /**
+     * Update the studies available to the current user.
+     */
     async updateAvailableStudies() {
       try {
         const response = await axios.post("/study/listrunning");
         console.log(response?.data);
         // update pinia state
-        this.availableProjectInstances = response?.data;
+        this.availableStudies = response?.data;
       } catch (e) {
         console.log("Error" + e);
         this.processAxiosError(e);
       }
     },
     /**
-     * Selet the active project
-     * @param {*} index
-     */
-    selectProject(index) {
-      console.log("Selecting Project");
-      this.selectedProject = this.availableProjectInstances[index];
-      console.log("Selected Project: ");
-      console.log(this.selectedProject);
-      sessionStorage.setItem(
-        "soile-selectedproject",
-        JSON.stringify(this.selectedProject)
-      );
-    },
-    /**
      * Clear all data
      */
     clearData() {
-      this.selectedProject = {};
-      sessionStorage.setItem(
-        "soile-selectedproject",
-        JSON.stringify(this.selectedProject)
-      );
       this.signedUpStudies = [];
     },
     /**
@@ -75,6 +54,20 @@ export const useProjectStore = defineStore({
           console.log(error);
           this.processAxiosError(error);
         }
+      }
+    },
+    /**
+     * Fetch study data
+     */
+    async fetchStudyData(path) {
+      try {
+        const response = await axios.post(`/study/${path}/get`);
+        return response.data;
+      } catch (error) {
+        // unauthenticated is an expected error here, that we will ignore, but any other error should be resolved.
+        console.log(error);
+        this.processAxiosError(error);
+        return false;
       }
     },
     processAxiosError(err) {
@@ -112,6 +105,11 @@ export const useProjectStore = defineStore({
       } catch (error) {
         this.processAxiosError(error);
       }
+    },
+    getStudyDetails(UUIDorShortcut) {
+      return this.availableStudies.find(
+        (x) => x.shortcut === UUIDorShortcut || x.UUID === UUIDorShortcut
+      );
     },
   },
 });

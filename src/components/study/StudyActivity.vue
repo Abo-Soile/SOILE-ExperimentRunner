@@ -18,19 +18,21 @@
         @click="$emit('createMasterToken')"
       />
       <div v-else>Permanent Access token is : {{ permanentToken }}</div>
-
-      <Button
-        label="Create Access Tokens"
-        @click="showCreateTokensDialog = true"
-      />
       <div v-if="accessTokens != null && accessTokens.length > 0">
+        <h3>Access Tokens</h3>
         <ScrollPanel :style="{ width: '100%', height: maxSignupSize + 'rem' }">
           <ul>
             <li v-for="token in accessTokens">{{ token }}</li>
           </ul>
         </ScrollPanel>
       </div>
+      <Button
+        class="w-4 mt-3 mb-3"
+        label="Create Access Tokens"
+        @click="showCreateTokensDialog = true"
+      />
       <div v-if="usedTokens != null && usedTokens.length > 0">
+        <h3>Used Access tokens</h3>
         <ScrollPanel :style="{ width: '100%', height: maxUsedSize + 'rem' }">
           <ul>
             <li v-for="token in usedTokens">{{ token }}</li>
@@ -109,8 +111,8 @@ function createTokens() {
   tokenCount.value = 10;
 }
 
-const maxSignupSize = computed(() => math.max(accessTokens.length, 10));
-const maxUsedSize = computed(() => math.max(usedtokens.length, 10));
+const maxSignupSize = computed(() => Math.max(props.accessTokens.length, 10));
+const maxUsedSize = computed(() => Math.max(props.usedtokens.length, 10));
 
 //TODO: Deactivate project.
 </script>

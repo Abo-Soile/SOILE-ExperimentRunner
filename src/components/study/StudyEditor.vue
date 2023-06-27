@@ -226,7 +226,7 @@ export default {
       await this.updateTokenData();
     },
     async createMasterToken() {
-      await this.studyStore.generateMasterToken(currentStudy);
+      await this.studyStore.generateMasterToken(this.currentStudy.UUID);
       await this.updateTokenData();
     },
   },

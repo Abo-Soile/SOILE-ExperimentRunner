@@ -124,6 +124,20 @@ export const useEditorStore = defineStore({
       store.active = store.elements.length - 1;
       this.activeElement = type;
     },
+    /**
+     * Change an element to represent a specific UUID and version
+     * @param {String} type the type of the element
+     * @param {*} index
+     * @param {*} UUID
+     * @param {*} version
+     */
+    async changeElement(type, UUID, version, index) {
+      console.log(type);
+      const store = this.getStoreForType(type);
+      // not present, so we need to actually load it.
+      const data = await this.loadObject(type, UUID, version);
+      store.elements[index].data = data;
+    },
     getStoreForType(type) {
       const currentType = type.toLowerCase();
       switch (currentType) {

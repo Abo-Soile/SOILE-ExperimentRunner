@@ -1,0 +1,43 @@
+<div>
+  The project and experiment editors provide a drag and drop creation for
+  Projects. Avalable Nodes are Task Nodes (which can represent any task), Filter
+  Nodes, which represent filters for steps in an experiment or Project and
+  Experiment Nodes, which represent self-contained subunits of a project. Task
+  nodes can have outputs and persistant data.
+  <ul>
+    <li>
+      Persistant data is data that can be accessed in other tasks (needs to be
+      implemented for Javascript tasks)
+    </li>
+    <li>
+      Output data is data that can be used by filters to determine the path of a
+      participant through the project
+    </li>
+  </ul>
+  <p>
+    Filter nodes allow setting up filtes that lead the participant to different
+    follow up nodes. A filter needs a mathematical expression based on the
+    outputs of !previous! Tasks. If the expression evaluates to 0 the option
+    will not be taken, if it evaluates to another value it will be taken. Make
+    sure, that filter expressions are mutually exclusive, as the otherwise no
+    guarantee is made as to which path is taken.
+  </p>
+  <p>An example:</p>
+  <ul>
+    <li>
+      Task FirstTask has the output Smoker, which can have the values 1 or 0
+    </li>
+    <li>
+      Task SecondTask has the output Workout which can have the values 0, 1, 2,
+      3
+    </li>
+    <li>
+      We want to all non smoking active people to go to Task ThirdTask, and all
+      others to FourthTask
+    </li>
+    <li>
+      The Filter would then be:
+      <code>FirstTask.Smoker = 0 & SecondTask.Workout > 1</code>
+    </li>
+  </ul>
+</div>

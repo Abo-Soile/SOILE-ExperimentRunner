@@ -9,7 +9,7 @@
     <VersionSelector
       :object-type="objectType"
       :element="element"
-      @update-selection="setSelected"
+      @update:version="setSelected"
     />
     <template #footer>
       <Button
@@ -21,7 +21,10 @@
       <Button
         label="Select"
         icon="pi pi-check"
-        @click="$emit('selected', selectionValid ? selectedVersion : false)"
+        @click="
+          $emit('selected', selectionValid ? selectedVersion : false);
+          dialogVisible = false;
+        "
         autofocus
         :disabled="!selectionValid"
       />
@@ -59,7 +62,7 @@ export default {
   methods: {
     setSelected(selected) {
       console.log(selected);
-      this.selected = selected;
+      this.selectedVersion = selected.version;
     },
   },
   computed: {

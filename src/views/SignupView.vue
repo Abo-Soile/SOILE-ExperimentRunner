@@ -24,64 +24,96 @@
         v-slot="{ navigate }"
         @click="startProject(selectedProject.UUID)"
       >
-        <Button
-          v-if="justSignedUp[selectedProject.UUID]"
-          @click="navigate"
-          role="link"
+        <Button v-if="justSignedUp" @click="navigate" role="link"
           >Start project</Button
         >
         <Button v-else @click="navigate" role="link">Continue project</Button>
       </router-link>
     </div>
     <div v-else>
-      <Button v-if="authStore.user" @click="signUp()">Sign up as user</Button>
-      <Button v-else @click="signUp()">Sign up</Button>
+      <Button v-if="authStore.user" @click="signUp(selectedProject.UUID)"
+        >Sign up as user</Button
+      >
+      <Button v-else @click="signUp(selectedProject.UUID)">Sign up</Button>
     </div>
   </div>
   <router-link v-else to="/">Back to Start</router-link>
 </template>
 
-<script setup>
+<script>
 import Button from "primevue/button";
 import { useProjectStore, useAuthStore } from "@/stores";
 import { storeToRefs } from "pinia";
 import { onMounted, watch } from "vue";
 
-var justSignedUp = {};
-const projectStore = useProjectStore();
-const authStore = useAuthStore();
+export default {
+  data() {
+    return {
+      selectedProject: undefined,
+      justSignedUp: false,
+    };
+  },
+  computed: {
+    isSignedUp() {
+      if (this.selectedProject) {
+        if (
+          this.signedUpStudies.find((x) => x.UUID === this.selectedProject.UUID)
+        ) {
+          return true;
+        }
+      }
+      return false;
+    },
+  },
+  methods: {
+    startProject(uuid) {
+      this.justSignedUp = false;
+    },
+    signUp(UUID, token) {
+      console.log("Trying to auth with " + UUID + "/" + token);
+      this.authStore.signUp(UUID, token).then(async (res) => {
+        if (res) {
+          this.justSignedUp = true;
+          await this.authStore.refreshSession();
+          await this.projectStore.fetchSignedUpStudies();
+          await this.projectStore.updateTaskSettings(UUID);
 
-const { signedUpStudies: signedUpStudies, selectedProject: selectedProject } =
-  storeToRefs(projectStore);
-console.log(selectedProject);
-console.log(selectedProject.value);
+          if (token) {
+            await this.projectStore.updateAvailableStudies();
+            this.selectedProject = await this.projectStore.getStudyDetails(
+              this.$router.currentRoute.value.params.id
+            );
+          }
+        } else {
+          console.log("Signup unsuccessful");
+        }
+      });
+    },
+  },
+  components: { Button },
+  async beforeRouteEnter(to) {},
+  setup() {
+    const authStore = useAuthStore();
+    const projectStore = useProjectStore();
+    const { signedUpStudies: signedUpStudies } = storeToRefs(projectStore);
+    return { authStore, projectStore, signedUpStudies };
+  },
+  async mounted() {
+    this.justSignedUp = !this.isSignedUp;
+    const currentRoute = this.$router.currentRoute.value;
+    const token = currentRoute.query.token;
+    if (token) {
+      // we have a signup with a token. Directly sign up to this project with the token, and display retrieved information.
+      await this.signUp(currentRoute.params.id, token);
 
-function startProject(UUID) {
-  justSignedUp[UUID] = false;
-}
-
-async function signUp() {
-  console.log("Signing up to project " + selectedProject.value.UUID);
-  const signedUp = await authStore.signUp(selectedProject.value.UUID);
-  console.log(signedUp);
-  if (signedUp) {
-    justSignedUp[selectedProject.value.UUID] = true;
-    console.log("Signup was successful");
-    await authStore.refreshSession();
-    console.log("Updating signed up projects");
-    await projectStore.fetchSignedUpStudies();
-    await projectStore.updateTaskSettings(selectedProject.value.UUID);
-  } else {
-    console.log("Signup was unsuccessful");
-  }
-}
-
-watch(projectStore.selectedProject, async (newID) => {
-  console.log("selectedProject changed to: ");
-  await projectStore.updateTaskSettings(newID.UUID);
-});
-onMounted(async () => {
-  //console.log("Signup Mounted: ")
-  //console.log(projectStore.selectedProject)
-});
+      // need to do this here, since otherwise it cannot be accessed.
+    } else {
+      await this.projectStore.updateAvailableStudies();
+      await this.projectStore.fetchSignedUpStudies();
+      this.selectedProject = this.projectStore.getStudyDetails(
+        currentRoute.params.id
+      );
+    }
+  },
+};
 </script>

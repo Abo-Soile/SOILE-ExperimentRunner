@@ -90,23 +90,28 @@ export default {
       };
     },
     userMenu() {
+      const items = [];
+      if (this.isLoggedIn) {
+        if (!this.isAnonymous) {
+          items.push({
+            label: "Profile",
+            icon: "pi pi-user",
+            to: "/profile",
+          });
+        }
+        items.push({
+          label: "Logout",
+          icon: "pi pi-fw pi-power-off",
+          command: async () => {
+            await this.authStore.logout();
+            this.$router.push("/");
+          },
+        });
+      }
       return {
         label: this.isLoggedIn ? "User" : "Login",
         icon: this.isLoggedIn ? "pi pi-user" : "pi pi-sign-in",
-        items: this.isLoggedIn
-          ? [
-              {
-                label: "Profile",
-                icon: "pi pi-user",
-                to: "/profile",
-              },
-              {
-                label: "Logout",
-                icon: "pi pi-fw pi-power-off",
-                command: async () => await this.authStore.logout(),
-              },
-            ]
-          : undefined,
+        items: items,
         to: this.isLoggedIn ? undefined : "/login",
       };
     },
@@ -154,6 +159,7 @@ export default {
     const authStore = useAuthStore();
     const showLoginDialog = ref(false);
     const isLoggedIn = computed(() => authStore.authed);
+    const isAnonymous = computed(() => authStore.isAnonymous);
     const isAdmin = computed(() => authStore.isAdmin());
     const isResearcher = computed(() => authStore.isResearcher());
     const studyStore = useStudyStore();
@@ -164,6 +170,7 @@ export default {
       isResearcher,
       isAdmin,
       studyStore,
+      isAnonymous,
     };
   },
 };

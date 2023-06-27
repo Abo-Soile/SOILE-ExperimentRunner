@@ -15,7 +15,7 @@ const errorStore = useErrorStore();
 const authStore = useAuthStore();
 const projectStore = useProjectStore();
 const userStore = useUserStore();
-authStore.updateLoginStatus();
+authStore.refreshSession();
 projectStore.updateAvailableStudies();
 projectStore.fetchSignedUpStudies();
 const { latestError } = storeToRefs(errorStore);

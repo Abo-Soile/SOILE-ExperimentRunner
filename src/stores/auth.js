@@ -18,7 +18,7 @@ export const useAuthStore = defineStore({
     user: JSON.parse(sessionStorage.getItem("soile-user")),
     roles: JSON.parse(sessionStorage.getItem("soile-userroles")),
     jwtToken: JSON.parse(sessionStorage.getItem("soile-jwtToken")),
-    projectToken: JSON.parse(sessionStorage.getItem("soile-projectToken")),
+    projectToken: "",
     isAnonymous: JSON.parse(sessionStorage.getItem("soile-anonymous")),
     returnUrl: null,
     authed: false,
@@ -107,7 +107,6 @@ export const useAuthStore = defineStore({
         this.authed = false;
         this.setAccessToken(null);
         this.setProjectToken(null);
-        this.setProjectToken(null);
         await this.updateLoginStatus();
         this.cleanupStores();
         console.log("Logged Out");
@@ -138,11 +137,14 @@ export const useAuthStore = defineStore({
       await listStore.fetchSignedUpStudies();
     },
     async signUp(projectID, accessToken) {
-      const params = accessToken ? { params: { token: accessToken } } : {};
+      const params = accessToken ? { token: accessToken } : {};
       try {
         const response = await axios.post(
           "/study/" + projectID + "/signup",
-          params
+          null,
+          {
+            params: params,
+          }
         );
         this.setProjectToken(response?.data.token);
         console.log("Signup was successful");
@@ -185,6 +187,7 @@ export const useAuthStore = defineStore({
       if (user) {
         sessionStorage.setItem("soile-user", JSON.stringify(user));
       } else {
+        this.isAnonymous = true;
         sessionStorage.removeItem("soile-user");
       }
     },
@@ -210,18 +213,9 @@ export const useAuthStore = defineStore({
     setProjectToken(token) {
       console.log("Setting Project token");
       if (!this.user) {
+        console.log("This is not a user, so we are setting the projectToken");
         this.projectToken = token;
-        if (token) {
-          sessionStorage.setItem(
-            "soile-projectToken",
-            JSON.stringify(this.projectToken)
-          );
-        } else {
-          sessionStorage.removeItem("soile-projectToken");
-        }
         axios.defaults.headers.common["Authorization"] = token;
-        //
-        console.log("This is an anonymous use for token:" + token);
         this.isAnonymous = true;
       }
     },

@@ -62,6 +62,7 @@
                     (event) => updateCurrentTaskVersion(event, index, 'task')
                   "
                   @saveTask="(event) => updateElement(event, index, 'task')"
+                  @changeTask="(event) => changeElement(event, index, 'task')"
                 ></TaskEditor>
               </div>
             </TabPanel>
@@ -249,6 +250,16 @@ async function updateElement(data, index, type) {
   console.log(data);
   const newVersion = await editorStore.saveObject(type, data, index);
 }
+
+async function changeElement(newObjectInfo, index, type) {
+  editorStore.changeElement(
+    type,
+    newObjectInfo.UUID,
+    newObjectInfo.version,
+    index
+  );
+}
+
 function updateName(name, index, type) {
   console.log(
     "Updating name for index " + index + " for type " + type + " to " + name

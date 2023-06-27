@@ -92,6 +92,8 @@ export default {
         .catch((error) => {
           this.projectStore.setTaskNotRunning();
           console.log(error);
+          this.$router.push("/");
+          this.errorStore.processAxiosError(error);
         });
     },
     /**

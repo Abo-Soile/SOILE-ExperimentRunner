@@ -36,22 +36,37 @@
       ></Button>
     </div>
     <div v-if="!newTask" class="taskbarfield">
-      <Button class="taskbarfield" label="Reload" @click="reload"></Button>
+      <Button
+        class="taskbarfield"
+        label="Reload"
+        @click="showReloadConfirm = true"
+      ></Button>
     </div>
     <div v-if="!newTask" class="taskbarfield">
       <Button
         class="taskbarfield"
         label="Change Version"
         @click="showChangeVersion = true"
-        @select="changeTaskVersion"
       ></Button>
     </div>
     <SelectNewVersionDialog
+      v-if="changeTaskVersion"
       @selected="changeTaskVersion"
       objectType="task"
       :element="task"
       v-model:visible="showChangeVersion"
     ></SelectNewVersionDialog>
+    <ConfirmDialog
+      v-if="showReloadConfirm"
+      @confirm="
+        reload;
+        showReloadConfirm = false;
+      "
+      @reject="showReloadConfirm = false"
+      message="This will reset all changes made since the last save"
+      v-model:isVisible="showReloadConfirm"
+      confirm="Reload Task"
+    ></ConfirmDialog>
   </div>
 </template>
 
@@ -61,6 +76,7 @@ import InputText from "primevue/inputtext";
 import Button from "primevue/button";
 import ObjectAndVersionSelectorWithProps from "@/components/utils/ObjectAndVersionSelectorWithProps.vue";
 import SelectNewVersionDialog from "@/components/dialogs/SelectNewVersionDialog.vue";
+import ConfirmDialog from "@/components/dialogs/ConfirmDialog.vue";
 
 export default {
   name: "TaskBar",
@@ -98,6 +114,7 @@ export default {
     return {
       currentType: null,
       showChangeVersion: false,
+      showReloadConfirm: false,
     };
   },
   computed: {
@@ -170,7 +187,7 @@ export default {
 
     reload() {
       // Perform reload logic here
-      this.$emit("changeTaskVersion", taskVersion);
+      this.$emit("reload", this.taskVersion.version);
     },
     changeTaskVersion(updated) {
       if (updated) {
@@ -178,12 +195,14 @@ export default {
       }
     },
   },
+  emits: ["reload", "changeTaskVersion"],
   components: {
     Dropdown,
     Button,
     ObjectAndVersionSelectorWithProps,
     InputText,
     SelectNewVersionDialog,
+    ConfirmDialog,
   },
 };
 </script>
