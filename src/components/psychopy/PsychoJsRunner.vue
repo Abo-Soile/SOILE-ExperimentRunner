@@ -1,5 +1,10 @@
 <template>
-  <iframe style="width: 100%" ref="psychoJSWindow" :srcdoc="code">
+  <iframe
+    style="width: 100%; height: 100%"
+    ref="psychoJSWindow"
+    allowfullscreen
+    :srcdoc="code"
+  >
     <div id="root"></div>
   </iframe>
 </template>
@@ -39,8 +44,15 @@ export default {
         this.$emit("handleSubmit", submitJson);
       } catch (error) {
         console.log(error);
-        this.$emit("handleError", error.message);
+        this.$emit("handleError", error);
       }
+    },
+    /**
+     * Handle an error that happened here.
+     * @param {Error} error
+     */
+    handleError(error) {
+      this.$emit("handleError", error);
     },
     /**
      * @return a json object that can be submitted to the SOILE backend
@@ -60,7 +72,8 @@ export default {
   mounted() {
     const iframeWindow = this.$refs.psychoJSWindow.contentWindow;
     iframeWindow.reportResult = this.handleData;
-    iframeWindow.submitResults = this.submit;
+    iframeWindow.submitResult = this.submit;
+    iframeWindow.handleError = this.handleError;
   },
 };
 </script>

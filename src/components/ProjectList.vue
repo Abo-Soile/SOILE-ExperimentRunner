@@ -11,7 +11,7 @@
               v-model="continueToken"
               placeholder="User Identification Token"
               v-tooltip="
-                'If you have already signed up to this project use the token you were provided to continue'
+                'If you have already signed up to a project use the token you were provided to continue'
               "
             ></InputText>
             <Button

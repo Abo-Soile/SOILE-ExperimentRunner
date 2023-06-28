@@ -1,57 +1,56 @@
 <template>
   <div v-if="canRun">
-    <div v-if="isRunningTask">
-      <div>
-        <SoileExpRunner
-          v-if="codeType == 'elang'"
-          :code="code"
-          :outputs="currentTaskSettings.outputs"
-          @handleSubmit="(event) => submitResults(event)"
-          @handleError="(error) => handleError(error)"
-          @handleUpload="
-            (event) =>
-              uploadFile(
-                event.file,
-                event.fileName,
-                event.idCallBack,
-                event.errorCallBack
-              )
-          "
-        >
-        </SoileExpRunner>
-        <PsychoJsRunner
-          v-if="codeType == 'psychopy'"
-          :code="code"
-          :psychoJSVersion="codeTypeVersion"
-          @handleSubmit="(event) => submitResults(event)"
-          @handleError="(error) => handleError(error)"
-          @handleUpload="
-            (event) =>
-              handleUploadData(
-                event.file,
-                event.fileName,
-                event.idCallBack,
-                event.errorCallBack
-              )
-          "
-        >
-        </PsychoJsRunner>
-        <SoileQuestionnaire
-          v-if="codeType == 'qmarkup'"
-          :code="code"
-          :outputs="currentTaskSettings.outputs"
-          @handleSubmit="(event) => submitResults(event)"
-          @handleError="(error) => handleError(error)"
-        ></SoileQuestionnaire>
-        <JsRunner
-          v-if="codeType == 'javascript'"
-          :preview="true"
-          :code="code"
-          studyID="temp"
-          @handleSubmit="(event) => submitResults(event)"
-          @handleError="(error) => handleError(error)"
-        ></JsRunner>
-      </div>
+    <div class="h-screen" v-if="isRunningTask">
+      <SoileExpRunner
+        v-if="codeType == 'elang'"
+        :code="code"
+        :outputs="currentTaskSettings.outputs"
+        @handleSubmit="(event) => submitResults(event)"
+        @handleError="(error) => handleError(error)"
+        @handleUpload="
+          (event) =>
+            uploadFile(
+              event.file,
+              event.fileName,
+              event.idCallBack,
+              event.errorCallBack
+            )
+        "
+      >
+      </SoileExpRunner>
+      <PsychoJsRunner
+        v-if="codeType == 'psychopy'"
+        :code="code"
+        :psychoJSVersion="codeTypeVersion"
+        @handleSubmit="(event) => submitResults(event)"
+        @handleError="(error) => handleError(error)"
+        @handleUpload="
+          (event) =>
+            handleUploadData(
+              event.file,
+              event.fileName,
+              event.idCallBack,
+              event.errorCallBack
+            )
+        "
+      >
+      </PsychoJsRunner>
+      <SoileQuestionnaire
+        v-if="codeType == 'qmarkup'"
+        :code="code"
+        :outputs="currentTaskSettings.outputs"
+        @handleSubmit="(event) => submitResults(event)"
+        @handleError="(error) => handleError(error)"
+      ></SoileQuestionnaire>
+      <JsRunner
+        v-if="codeType == 'javascript'"
+        :preview="true"
+        :code="code"
+        studyID="temp"
+        @handleSubmit="(event) => submitResults(event)"
+        @handleError="(error) => handleError(error)"
+      ></JsRunner>
+
       <div>
         <Button @click="stopTask">Stop Task</Button>
       </div>
@@ -61,13 +60,13 @@
     </div>
     <div class="results">
       <div v-if="Object.keys(outputs).length > 0" class="outputs">
-        Outputs: {{ outputs }}
+        Outputs: <JsonViewer :value="outputs"></JsonViewer>
       </div>
       <div v-if="Object.keys(results).length > 0" class="results">
-        Results: {{ results }}
+        Results: <JsonViewer :value="results"></JsonViewer>
       </div>
       <div v-if="uploadedFiles.length > 0" class="uploadedFiles">
-        Uploaded Files: {{ uploadedFiles }}
+        Uploaded Files: <JsonViewer :value="uploadedFiles"></JsonViewer>
       </div>
     </div>
   </div>
@@ -75,15 +74,16 @@
 </template>
 
 <script>
-import axios from "axios";
 import SoileQuestionnaire from "@/components/questionnaire/SoileQuestionnaire.vue";
 import SoileExpRunner from "@/components/experimentlang/SoileExpRunner.vue";
 import PsychoJsRunner from "@/components/psychopy/PsychoJsRunner.vue";
 import JsRunner from "@/components/jsrunner/JsRunner.vue";
+import { useErrorStore } from "@/stores";
 
 import { mapState } from "pinia";
-import { useErrorStore } from "@/stores";
+import axios from "axios";
 import Button from "primevue/button";
+import JsonViewer from "vue-json-viewer";
 
 export default {
   name: "CodePreview",
@@ -93,6 +93,7 @@ export default {
     PsychoJsRunner,
     Button,
     JsRunner,
+    JsonViewer,
   },
   props: {
     sourceCode: {
@@ -172,6 +173,8 @@ export default {
       this.results = results.resultData
         ? results.resultData
         : { resultData: [], fileData: [] };
+      // Also, turn of the preview.
+      this.isRunningTask = false;
     },
     handleUploadData(file, fileName, idCallBack, errorCallback) {
       this.uploadedFiles.push(fileName);

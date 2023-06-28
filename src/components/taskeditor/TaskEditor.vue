@@ -40,9 +40,9 @@
         v-model:selectedFile="activeFile"
       ></DataEditor>
     </div>
-    <div class="col-4 h-full">
+    <div class="col-4 h-screen">
       <CodePreview
-        class="h-full preview"
+        class="h-screen preview"
         :sourceCode="currentObject.code"
         :codeType="currentObject.codeType.language"
         :codeTypeVersion="currentObject.codeType.version"

@@ -19,8 +19,6 @@
 </template>
 
 <script>
-import xlsx from "node-xlsx";
-
 export default {
   props: {
     file: {
@@ -28,24 +26,7 @@ export default {
     },
   },
   data() {
-    return {
-      excelData: [],
-    };
-  },
-  methods: {
-    // Maybe we can do some excel preview in the future and this is somewhat of a start for it...
-    processExcelFile(fileData) {
-      const workbook = xlsx.parse(fileData);
-      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-      const excelData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-      console.log(excelData);
-      this.excelData = excelData;
-    },
-    convertToBase64(data, format) {
-      var base64 = btoa(unescape(encodeURIComponent(data)));
-      console.log(base64);
-      return `data:${format};base64,${base64}`;
-    },
+    return {};
   },
   computed: {
     // TODO: We could provide an editor for text files.

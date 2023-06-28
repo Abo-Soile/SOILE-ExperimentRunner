@@ -32,6 +32,29 @@
     in the future. It is entirely possible, that some functionality of PsychoJS 
     is not yet fully supported, and we will have to slightly modify the 
     PsychoJS library in order to provide full support for tasks.
+    <h4>Necessary changes for SOILE</h4>
+    <p> You need the following changes made in your .js files:
+      <ul>
+        <li> You need a configuration file (e.g. config.json) which contains the following code:<br> <p><code>{ "SOILE" : true } </code>  </p></li>
+        <li> The <code> psychoJS.start </code> call needs an additional parameter pointing to the file from the first step. Look for the element <code> psychoJS.start( ... )</code> in your tasks .js file from the builder and add the line <code>configURL : "psychojsconfig.json", </code>
+          The resulting call should look something like this:
+          <pre>
+            psychoJS.start({
+              expName : expName,
+              configURL: "psychojsconfig.json",
+              ...,            
+            })
+          </pre>
+        </li>
+        <li>
+          We don't need to indicate a participant or session, so we need to change the startup dialog as follows:
+          <p>Under the comment "schedule the experiment" replace <code> dictionary : expInfo </code> width <code>dictionary : {}</code></p>
+        </li>
+        <li> 
+          Do this for both the normal and the *-legacy-browser.js file. 
+        </li>
+      </ul>
+    </p>
   </p>
   <h3> JavaScript</h3>
   <p>
@@ -43,6 +66,7 @@
     <li> <code>window.submitFile(fileName : string, fileFormat : string, file : File)</code> : This function submits a file with the given mime type that will be added to the results of the given task.</li>
     <li> <code>window.reportResults(data : Object)</code> : This function will add Data in a JSON format to the results data for this task. NOTE: existing fields will not be merged but overwritten.</li>
     <li> <code>window.submitResults()</code> : This function submits the data to the database. Without calling it, all other data will not be stored.</li>
+    <li> <code>window.handleError(error)</code> : This function will raise an error, indicating a problem to the user.</li>
     </ul>
   </p>
   <h3>Editing Tasks</h3>

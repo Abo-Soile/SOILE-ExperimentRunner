@@ -44,7 +44,14 @@
       @handleSubmit="(event) => submitResults(event)"
       @handleError="(error) => handleError(error)"
     ></SoileQuestionnaire>
-    <!--<JsRunner v-if="type == 'javascript'"></JSRunner>-->
+    <JsRunner
+      v-if="codeType == 'javascript'"
+      :preview="false"
+      :code="code"
+      :studyID="$route.params.id"
+      @handleSubmit="(event) => submitResults(event)"
+      @handleError="(error) => handleError(error)"
+    ></JsRunner>
   </div>
   <div v-else>
     <Button @click="setTaskActive">Start Next Task</Button>
@@ -56,6 +63,7 @@ import axios from "axios";
 import SoileQuestionnaire from "../components/questionnaire/SoileQuestionnaire.vue";
 import SoileExpRunner from "../components/experimentlang/SoileExpRunner.vue";
 import PsychoJsRunner from "../components/psychopy/PsychoJsRunner.vue";
+import JsRunner from "../components/jsrunner/JsRunner.vue";
 import { mapState } from "pinia";
 import { useErrorStore } from "@/stores";
 import { useProjectStore } from "@/stores/project";

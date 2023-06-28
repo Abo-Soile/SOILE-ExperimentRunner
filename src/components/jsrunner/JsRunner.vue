@@ -1,5 +1,10 @@
 <template>
-  <iframe style="width: 100%" ref="JSWindow" :srcdoc="code">
+  <iframe
+    style="width: 100%; height: 100%"
+    ref="JSWindow"
+    allowfullscreen
+    :srcdoc="code"
+  >
     <div id="root"></div>
   </iframe>
 </template>
@@ -48,7 +53,7 @@ export default {
         this.$emit("handleSubmit", submitJson);
       } catch (error) {
         console.log(error);
-        this.$emit("handleError", error.message);
+        this.$emit("handleError", error);
       }
     },
     async submitFile(fileName, fileFormat, file) {
@@ -82,12 +87,16 @@ export default {
         resultData: { fileData: this.files, jsonData: jsonResults },
       };
     },
+    handleError(error) {
+      this.$emit("handleError", error);
+    },
   },
   mounted() {
     const iframeWindow = this.$refs.JSWindow.contentWindow;
     iframeWindow.submitFile = this.submitFile;
     iframeWindow.reportResult = this.handleData;
-    iframeWindow.submitResults = this.submit;
+    iframeWindow.submitResult = this.submit;
+    iframeWindow.handleError = this.handleError;
   },
   setup() {
     const projectStore = useProjectStore();
