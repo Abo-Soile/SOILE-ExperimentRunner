@@ -53,6 +53,9 @@
         <li> 
           Do this for both the normal and the *-legacy-browser.js file. 
         </li>
+        <li> 
+          Finally, add the <code>hosts: ["about:srcdoc"]</code> to the PsychoJS constructor. Since the experiments are run in an iframe with the source provided as srcdoc, this is the browsers href that psychoJS uses to check, whether it is on a specific host and can retrieve a config file. 
+          </li>
       </ul>
     </p>
   </p>
