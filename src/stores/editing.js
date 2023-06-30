@@ -43,9 +43,9 @@ export const useEditorStore = defineStore({
   id: "editing",
   state: () => ({
     // initialize the state. We don't update from the local storage, because this could contain privilegded data
-    experiments: { active: 0, elements: [] },
-    projects: { active: 0, elements: [] },
-    tasks: { active: 0, elements: [] },
+    experiments: { active: 0, elements: [], id: "experiment" },
+    projects: { active: 0, elements: [], id: "project" },
+    tasks: { active: 0, elements: [], id: "task" },
     activeElement: "",
   }),
   actions: {

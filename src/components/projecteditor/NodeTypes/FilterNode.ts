@@ -14,7 +14,6 @@ export default class FilterNode extends SoileNode {
   public name = "Filter";
   public twoColumn = true;
   defaultOption = "";
-  myTitle = this.type;
   Filters = new Map<string, { filterstring: string; interfaceID: string }>();
   public inputs = {
     previous: new NodeInterface("Previous", []).use(allowMultipleConnections),
@@ -42,6 +41,7 @@ export default class FilterNode extends SoileNode {
 
   constructor() {
     super();
+    this.myTitle = this.type;
     this.initializeIo();
   }
 

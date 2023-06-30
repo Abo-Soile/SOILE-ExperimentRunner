@@ -13,11 +13,12 @@ import SoileVersionedNode from "./SoileVersionedNode";
 export default class ExperimentNode extends SoileVersionedNode {
   public type = "ExperimentNode";
   public objectType = "experiment";
-  myTitle = this.type;
   public random = ref(false);
   public canRandom = ref(true);
   public constructor() {
     super();
+    this.myTitle = this.type;
+
     this.id = "Experiment " + uuidv4();
     this.initializeIo();
   }

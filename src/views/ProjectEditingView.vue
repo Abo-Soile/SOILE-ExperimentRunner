@@ -131,7 +131,7 @@ import TabPanel from "primevue/tabpanel";
 import Button from "primevue/button";
 import PanelMenu from "primevue/panelmenu";
 
-import { useElementStore, useEditorStore } from "@/stores";
+import { useElementStore, useEditorStore, useGraphStore } from "@/stores";
 import { router } from "@/helpers";
 import Editor from "@/components/projecteditor/Editor.vue";
 
@@ -143,6 +143,7 @@ import ObjectSelectionDialog from "../components/utils/ObjectSelectionDialog.vue
 
 const elementStore = useElementStore();
 const editorStore = useEditorStore();
+const graphStore = useGraphStore();
 //const experiments = reactive({ active: 0, elements: [] });
 //const projects = reactive({ active: 0, elements: [] });
 //const editorStore.tasks = reactive({ active: 0, elements: [] });
@@ -282,8 +283,16 @@ function confirmation(close) {
   console.log("Getting confirmation with value " + close);
   console.log(currentTarget);
   if (close) {
+    const currentElement =
+      currentTarget.value.target.elements[currentTarget.value.index].data;
     currentTarget.value.target.elements.splice(currentTarget.value.index, 1);
     currentTarget.value.active = currentTarget.value.index - 1;
+    const element = {
+      UUID: currentElement.UUID,
+      version: currentElement.version,
+      type: currentTarget.value.target.id,
+    };
+    graphStore.removeGraphForElement(element);
   }
   currentTarget.value = {};
   showConfirm.value = false;

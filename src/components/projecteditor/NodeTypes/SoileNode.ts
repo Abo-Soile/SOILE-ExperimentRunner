@@ -34,7 +34,7 @@ export default abstract class SoileNode
   public elementStore = useElementStore();
   public position = { x: 0, y: 0, width: 200, height: 400 };
   public abstract type: string;
-  abstract myTitle: string;
+  public myTitle: string;
   public constructor() {
     super();
   }
@@ -44,8 +44,13 @@ export default abstract class SoileNode
   template: GraphTemplate;
   subgraph: Graph;
   public set title(newTitle: string) {
+    console.log("Updating title " + this.title);
+    console.log("Updating title to" + newTitle);
+    console.log("MyTitle: " + this.myTitle);
+    console.log("Type: " + this.type);
     //console.log("Setting title")
     if (this.graphStore.isNameOk(this, newTitle)) {
+      console.log("Name was ok, changing");
       //console.log("updating title to" + newTitle);
       const changedTitle = this.graphStore.updateName(
         this,
@@ -69,15 +74,21 @@ export default abstract class SoileNode
   public abstract isValid(): boolean;
 
   onPlaced(): void {
+    console.log("Placing node " + this.title);
+    console.log("MyTitle: " + this.myTitle);
+    console.log("Type: " + this.type);
+
     this.graphStore.setupNode(this);
     if (this.title === this.type) {
       this.myTitle = this.graphStore.getUniqueName(this);
     }
   }
   onDestroy() {
+    console.log("Removing Node");
     this.graphStore.removeNode(this);
   }
   load(state: INodeState<any, any>): void {
     // nothing to be done here.
+    console.log(state);
   }
 }

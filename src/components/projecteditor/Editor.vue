@@ -54,7 +54,7 @@ import {
 import { checkConnection } from "./events/graphEvents.ts";
 import { useGraphStore, useElementStore, useErrorStore } from "@/stores";
 
-import { reactive } from "vue";
+import { reactive, ref } from "vue";
 
 const BaklavaNode = Components.Node;
 
@@ -107,11 +107,21 @@ export default {
       (c) => checkConnection(c.from, c.to)
     );
     if (props.data) {
-      if (props.type === "project") {
-        loadSoileProjectToBaklava(props.baklava, props.data);
-      }
-      if (props.type === "experiment") {
-        loadSoileExperimentToBaklava(props.baklava, props.data);
+      const currentElement = ref({
+        UUID: props.data.UUID,
+        type: props.type,
+        version: props.data.version,
+      });
+      const existingGraph = graphStore.getGraphForElement(currentElement.value);
+      if (existingGraph == null) {
+        // only load the graph if it isn't loaded already.
+        graphStore.setupGraph(props.baklava.editor.graph, currentElement.value);
+        if (props.type === "project") {
+          loadSoileProjectToBaklava(props.baklava, props.data);
+        }
+        if (props.type === "experiment") {
+          loadSoileExperimentToBaklava(props.baklava, props.data);
+        }
       }
       objectOptions.name = props.data.name;
       objectOptions.private = props.data.private;

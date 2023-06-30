@@ -19,7 +19,7 @@ interface Outputs {
 
 export default class TaskNode extends SoileVersionedNode {
   public type = "TaskNode";
-  myTitle = this.type;
+
   public objectType = "task";
   public codeType = reactive({ language: "", version: "string" });
 
@@ -87,7 +87,10 @@ export default class TaskNode extends SoileVersionedNode {
   }
   public constructor() {
     super();
+    console.log(this);
     this.id = "Task " + uuidv4();
+    console.log("TaskNode Constructed: " + this.id);
+    this.myTitle = this.type;
     this.initializeIo();
   }
 }

@@ -8,6 +8,12 @@ import {
 import * as diacritics from "diacritics";
 //var removeDiacritics = require('diacritics').remove;
 
+type Element = {
+  type: String;
+  UUID: String;
+  version: String;
+};
+
 export const useGraphStore = defineStore({
   id: "graphs",
   state: () => ({
@@ -17,6 +23,7 @@ export const useGraphStore = defineStore({
     nodeNames: new Map<string, Map<any, string>>(),
     startNodes: new Map<string, string>(),
     graphs: new Map<string, Graph>(),
+    graphsForElements: new Map<String, Graph>(),
   }),
   actions: {
     clearData() {
@@ -34,7 +41,7 @@ export const useGraphStore = defineStore({
     isNameOk(node: SoileBaseNode, name: string) {
       //console.log("Checking name: " + name)
       const graph = node.graph;
-      this.setupGraph(graph);
+      //this.setupGraph(graph);
       return ![...this.nodeNames.get(graph?.id).values()].some(
         (v) => v === this.refineName(name)
       );
@@ -56,12 +63,33 @@ export const useGraphStore = defineStore({
     },
     isStartNode(node: SoileBaseNode): boolean {
       const graph = node.graph;
-      this.setupGraph(graph);
       return this.startNodes.get(graph?.id) === node.id;
     },
-    setupGraph(graph: Graph) {
+    /**
+     * Get the graph for a specific element.
+     * @param element
+     */
+
+    getGraphForElement(element: Element): Graph | null {
+      if (!this.graphsForElements.has(this.getElementString(element))) {
+        console.log("Found nothing for:");
+        console.log(element);
+        return null;
+      } else {
+        console.log("Graph exists:");
+        console.log(element);
+        return this.graphsForElements.get(this.getElementString(element));
+      }
+    },
+    getElementString(element: Element) {
+      return element.UUID + "|" + element.version + "|" + element.type;
+    },
+    setupGraph(graph: Graph, element: Element) {
+      console.log("Setting up" + graph.id + " for:");
+      console.log(element);
       if (!(graph.id in this.graphs)) {
         this.graphs.set(graph.id, graph);
+        this.graphsForElements.set(this.getElementString(element), graph);
         const nodeNameMap = new Map<any, string>();
         for (const node of graph.nodes) {
           nodeNameMap.set(node, node.title);
@@ -72,11 +100,15 @@ export const useGraphStore = defineStore({
       }
     },
     // Remove a graph from the
-    removeGraph(graph: Graph) {
+    removeGraphForElement(element: Element) {
+      console.log(element);
+      const graph = this.getGraphForElement(element);
       const id = graph.id;
       this.graphs.delete(id);
       this.nodeNames.delete(id);
-      this.outputInformation.delete(id);
+      this.graphsForElements.delete(this.getElementString(element));
+      this.nodeOutputInformation.delete(id);
+      this.nodePersistentInformation.delete(id);
       this.startNodes.delete(id);
     },
     refineName(name: string) {
@@ -88,7 +120,7 @@ export const useGraphStore = defineStore({
     getUniqueName(node: SoileBaseNode) {
       const graph = node.graph;
       const nodeID = node.id;
-      this.setupGraph(graph);
+      //this.setupGraph(graph);
       //console.log(graph?.id);
 
       const nodeNames = this.nodeNames.get(graph?.id);
@@ -107,7 +139,7 @@ export const useGraphStore = defineStore({
       return this.refineName(node.type + " " + i);
     },
     setupNode(node: SoileBaseNode) {
-      this.setupGraph(node.graph);
+      //this.setupGraph(node.graph);
 
       if (node.isDataNode()) {
         // we know this is a data node.
