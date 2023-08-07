@@ -55,13 +55,13 @@ function sendData(d) {
       jsonData.push({ name: field, value: d.exp[field] });
     }
   }
-  const persistantData = [];
-  for (const field in window.persistantFields) {
-    persistantData.push({ name: field, value: d.exp[field] });
+  const persistentData = [];
+  for (const field in d.persistentData) {
+    persistentData.push({ name: field, value: d.persistentData[field] });
   }
   window.handleSubmit({
     outputData: outputData,
-    persistantData: persistantData,
+    persistentData: persistentData,
     resultData: { fileData: [], jsonData: jsonData },
   });
 }
@@ -70,7 +70,7 @@ function startFunc() {
   console.log("Starting!!!");
 }
 
-function end(expdata, duration, score, persistantData) {
+function end(expdata, duration, score, persistentData) {
   console.log("Test over");
   console.log(expdata);
 
@@ -79,7 +79,7 @@ function end(expdata, duration, score, persistantData) {
   d.exp = expdata;
   d.exp.duration = duration;
   d.exp.score = score;
-  d.persistantData = persistantData;
+  d.persistentData = persistentData;
   //Showing loadingscreen at the end when sending data.
   SOILE2.util.enableLoadScreen();
 
@@ -88,8 +88,9 @@ function end(expdata, duration, score, persistantData) {
 
 function startSoile(data) {
   console.log("Starting soile");
+  console.log(window.persistentData)
   SOILE2.util.enableLoadScreen();
-  SOILE2.util.setPersistantData(window.persistantData);
+  SOILE2.util.setPersistantData(window.persistentData);
   SOILE2.util.setDebug((event) => {
     console.log(event);
   });
@@ -99,7 +100,6 @@ function startSoile(data) {
     }*/
 
   SOILE2.util.setStartFunction(startFunc);
-  console.log(data);
   console.log(SOILE2);
   SOILE2.util.eval(data);
   SOILE2.util.setEndFunction(end);

@@ -35,6 +35,7 @@
         v-model:sourceCode="currentObject.code"
         :tabs="editedFiles"
         @saveFile="saveEditedFile"
+        @saveSource="updateTagsAndShowSave"
         @closeFile="closeEditedFile"
         @updateData="updateEditedFile"
         v-model:selectedFile="activeFile"
@@ -75,8 +76,8 @@
 <script>
 import Menu from "primevue/menu";
 
-import FileBrowser from "@/components/FileBrowser.vue";
-import FilePreview from "@/components/utils/FilePreview.vue";
+import FileBrowser from "@/components/utils/filebrowser/FileBrowser.vue";
+import FilePreview from "@/components/utils/filebrowser/FilePreview.vue";
 import CodeEditor from "./CodeEditor.vue";
 import CodePreview from "./CodePreview.vue";
 import TaskBar from "./TaskBar.vue";
@@ -278,13 +279,18 @@ export default {
         );
         return;
       }
+      console.log(event.files.length);
+      for (const f of event.files) {
+        console.log(f);
+      }
       console.log(event);
+
       this.elementStore
         .addFileToTask(
           this.currentObject.UUID,
           this.currentObject.version,
           event.targetName,
-          event.file
+          event.files
         )
         .then((newVersion) => {
           this.currentVersion = newVersion;
@@ -306,7 +312,7 @@ export default {
     },
     preview(event) {
       this.elementStore
-        .getResourceFile(this.target.UUID, this.target.version, event)
+        .getResourceFile(this.target.UUID, this.currentObject.version, event)
         .then((data) => {
           console.log(data);
           this.previewFile = data;

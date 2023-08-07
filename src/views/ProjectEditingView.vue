@@ -292,7 +292,9 @@ function confirmation(close) {
       version: currentElement.version,
       type: currentTarget.value.target.id,
     };
-    graphStore.removeGraphForElement(element);
+    if (currentTarget.type == "project") {
+      graphStore.removeGraphForElement(element);
+    }
   }
   currentTarget.value = {};
   showConfirm.value = false;

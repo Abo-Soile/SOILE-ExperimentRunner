@@ -4,17 +4,36 @@
       <TabPanel>
         <template #header>
           <span> Source Code </span>
+          <Button
+            size="small"
+            :disabled="!sourceChanged"
+            icon="pi pi-save"
+            @click="
+              $emit('saveSource');
+              sourceChanged = false;
+            "
+          />
         </template>
         <CodeEditor
           :inputText="sourceCode"
-          @update:inputText="$emit('update:sourceCode', $event)"
+          @update:inputText="
+            $emit('update:sourceCode', $event);
+            sourceChanged = true;
+          "
         />
       </TabPanel>
       <TabPanel v-for="(tab, index) in tabs" :key="index">
         <template #header>
-          <span v-tooltip="tab.fullpath"> {{ tab.filename }} </span>
-          <Button icon="pi pi-times" @click="$emit('closeFile', tab)" />
+          <span v-tooltip="tab.fullpath">
+            {{ tab.filename }}
+          </span>
           <Button
+            size="small"
+            icon="pi pi-times"
+            @click="$emit('closeFile', tab)"
+          />
+          <Button
+            size="small"
             :disabled="!tab.modified"
             icon="pi pi-save"
             @click="$emit('saveFile', tab)"
@@ -57,11 +76,17 @@ export default {
       required: true,
     },
   },
+  data() {
+    return {
+      sourceChanged: false,
+    };
+  },
   emits: [
     "update:sourceCode",
     "updateData",
     "closeFile",
     "saveFile",
+    "saveSource",
     "update:selectedFile",
   ],
   computed: {

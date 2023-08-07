@@ -19,10 +19,13 @@ export default {
       required: true,
       type: Array,
     },
+    persistentData: {
+      required: true,
+      type: Object,
+    },
   },
   data() {
     return {
-      persistentData: {},
       active: false,
       needToSetHandeler: false,
       soileContentWindow: undefined,
@@ -53,7 +56,7 @@ export default {
     this.soileContentWindow.handleError = this.handleError;
     this.soileContentWindow.levenshtein = this.levenshtein;
     this.soileContentWindow.outputs = this.outputs;
-
+    this.soileContentWindow.persistentData = { ...this.persistentData };
     iFrame.onload = function () {
       var iFrameDocument =
         iFrame.contentDocument || iFrame.contentWindow.document;

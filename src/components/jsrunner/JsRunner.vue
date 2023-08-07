@@ -26,11 +26,16 @@ export default {
       type: String,
       required: true,
     },
+    persistentData: {
+      required: true,
+      type: Object,
+    },
   },
   data() {
     return {
       results: {},
       files: [],
+      persistent: {},
     };
   },
   methods: {
@@ -42,6 +47,16 @@ export default {
       console.log(data);
       // merge the two.
       this.results = { ...this.resuls, ...data };
+    },
+    /**
+     *
+     * @param {*} data the data of the experiment.
+     */
+    saveData(key, value) {
+      console.log(key);
+      console.log(value);
+      // merge the two.
+      this.persistent[key] = value;
     },
     /**
      * Submit data
@@ -85,6 +100,7 @@ export default {
       return {
         outputData: [],
         resultData: { fileData: this.files, jsonData: jsonResults },
+        persistentData: this.persistentData,
       };
     },
     handleError(error) {
@@ -93,6 +109,7 @@ export default {
   },
   mounted() {
     const iframeWindow = this.$refs.JSWindow.contentWindow;
+    iframeWindow.persistentData = this.persistentData;
     iframeWindow.submitFile = this.submitFile;
     iframeWindow.reportResult = this.handleData;
     iframeWindow.submitResult = this.submit;

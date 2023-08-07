@@ -5,6 +5,7 @@
       v-if="currentTaskSettings.codeType.language == 'elang'"
       :code="code"
       :outputs="currentTaskSettings.outputs"
+      :persistentData="persistentData"
       @handleSubmit="(event) => submitResults(event)"
       @handleError="(error) => handleError(error)"
       @handleUpload="
@@ -49,6 +50,7 @@
       :preview="false"
       :code="code"
       :studyID="$route.params.id"
+      :persistentData="persistentData"
       @handleSubmit="(event) => submitResults(event)"
       @handleError="(error) => handleError(error)"
     ></JsRunner>
@@ -75,6 +77,7 @@ export default {
   data() {
     return {
       code: undefined,
+      persistentData: {},
       running: false,
     };
   },
@@ -93,9 +96,22 @@ export default {
     },
     runTask() {
       axios
-        .get("/run/" + this.$route.params.id + "/" + this.$route.params.taskID)
-        .then((response) => {
-          this.code = response?.data;
+        .post("/study/" + this.$route.params.id + "/getpersistent")
+        .then((persistentresponse) => {
+          this.persistentData = persistentresponse?.data;
+          axios
+            .get(
+              "/run/" + this.$route.params.id + "/" + this.$route.params.taskID
+            )
+            .then((response) => {
+              this.code = response?.data;
+            })
+            .catch((error) => {
+              this.projectStore.setTaskNotRunning();
+              console.log(error);
+              this.$router.push("/");
+              this.errorStore.processAxiosError(error);
+            });
         })
         .catch((error) => {
           this.projectStore.setTaskNotRunning();

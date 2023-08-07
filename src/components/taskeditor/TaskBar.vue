@@ -10,28 +10,33 @@
     <div v-else class="flex taskbarfield p-field">
       <h2>{{ currentName }}</h2>
     </div>
-    <div class="taskbarfield p-field">
-      <Dropdown
-        v-model="selectedCodeType"
-        :options="codeOptions"
-        placeholder="Select Code Style"
-        label="Code Style"
-      />
-    </div>
-    <div class="taskbarfield p-field">
-      <Dropdown
-        v-model="selectedVersion"
-        :options="codeTypeVersions"
-        :disabled="!selectedCodeType"
-        label="Code Style Version"
-        placeholder="Select Code Version"
-      />
+
+    <div v-if="!isValid || !task.UUID">
+      <!-- We leave this in only if we have a new task that is not saved yet -->
+      <div class="taskbarfield p-field">
+        <Dropdown
+          v-model="selectedCodeType"
+          :options="codeOptions"
+          placeholder="Select Code Style"
+          label="Code Style"
+        />
+      </div>
+      <div class="taskbarfield p-field">
+        <Dropdown
+          v-model="selectedVersion"
+          :options="codeTypeVersions"
+          :disabled="!selectedCodeType"
+          label="Code Style Version"
+          placeholder="Select Code Version"
+        />
+      </div>
     </div>
     <div class="taskbarfield">
       <Button
         class="taskbarfield"
         :disabled="!isValid"
         :label="saveLabel"
+        icon="pi pi-save"
         @click="save"
       ></Button>
     </div>
@@ -39,14 +44,24 @@
       <Button
         class="taskbarfield"
         label="Reload"
+        icon="pi pi-refresh"
         @click="showReloadConfirm = true"
       ></Button>
     </div>
     <div v-if="!newTask" class="taskbarfield">
       <Button
         class="taskbarfield"
-        label="Change Version"
+        label="Select Version"
+        icon="pi pi-pencil"
         @click="showChangeVersion = true"
+      ></Button>
+    </div>
+    <div v-if="!newTask" class="taskbarfield">
+      <Button
+        class="taskbarfield"
+        label="Manage Versions"
+        icon="pi pi-wrench"
+        @click="showReloadConfirm = true"
       ></Button>
     </div>
     <SelectNewVersionDialog
@@ -195,7 +210,7 @@ export default {
       }
     },
   },
-  emits: ["reload", "changeTaskVersion"],
+  emits: ["reload", "changeTaskVersion", "update:valid"],
   components: {
     Dropdown,
     Button,
@@ -208,12 +223,9 @@ export default {
 </script>
 
 <style scoped>
-.p-field {
-  margin-bottom: 1rem;
-}
-
 .taskbar {
   width: 100%;
+  align-items: center;
 }
 
 .taskbarfield {

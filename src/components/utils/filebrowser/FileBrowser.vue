@@ -1,40 +1,43 @@
 <template>
   <div class="filebrowser">
-    File Browser
-    <ul class="borderless">
-      <FileItem
-        v-for="file in files.children"
-        :key="file.id"
-        :file="file"
-        @file-click="handleFileClick"
-        @file-double-click="handleDoubleClick"
-        @createFile="createFile"
-        @deleteFile="deleteFile"
-        @editFile="editFile"
-        @createDirectory="createDirectory"
-      />
-      <FileAndDirectoryCreationItems
-        @createDirectory="
-          (event) =>
-            createDirectory({
-              folder: '',
-              file: fileStructure,
-              folderName: event,
-            })
-        "
-        @createFile="
-          (event) =>
-            createFile({ folder: '', file: fileStructure, addedFile: event })
-        "
-      />
-    </ul>
+    <ScrollPanel style="width: 100%; height: 100%">
+      File Browser
+      <ul class="borderless">
+        <FileItem
+          v-for="file in files.children"
+          :key="file.id"
+          :file="file"
+          @file-click="handleFileClick"
+          @file-double-click="handleDoubleClick"
+          @createFile="createFile"
+          @deleteFile="deleteFile"
+          @editFile="editFile"
+          @createDirectory="createDirectory"
+        />
+        <FileAndDirectoryCreationItems
+          @createDirectory="
+            (event) =>
+              createDirectory({
+                folder: '',
+                file: fileStructure,
+                folderName: event,
+              })
+          "
+          @createFile="
+            (event) =>
+              createFile({ folder: '', file: fileStructure, addedFiles: event })
+          "
+        />
+      </ul>
+    </ScrollPanel>
   </div>
 </template>
 
 <script>
 import FileItem from "./FileItem.vue";
 import Inputtext from "primevue/inputtext";
-import FileAndDirectoryCreationItems from "@/components/utils/FileAndDirectoryCreationItems.vue";
+import ScrollPanel from "primevue/scrollpanel";
+import FileAndDirectoryCreationItems from "./FileAndDirectoryCreationItems.vue";
 
 export default {
   props: {
@@ -83,8 +86,8 @@ export default {
     },
     createFile(source) {
       this.$emit("createFile", {
-        targetName: source.folder + source.addedFile.name,
-        file: source.addedFile,
+        targetName: source.folder,
+        files: source.addedFiles,
       });
       console.log(source);
     },

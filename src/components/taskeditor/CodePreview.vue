@@ -5,6 +5,7 @@
         v-if="codeType == 'elang'"
         :code="code"
         :outputs="currentTaskSettings.outputs"
+        :persistentData="persistentData"
         @handleSubmit="(event) => submitResults(event)"
         @handleError="(error) => handleError(error)"
         @handleUpload="
@@ -46,6 +47,7 @@
         v-if="codeType == 'javascript'"
         :preview="true"
         :code="code"
+        :persistentData="persistentData"
         studyID="temp"
         @handleSubmit="(event) => submitResults(event)"
         @handleError="(error) => handleError(error)"
@@ -111,6 +113,10 @@ export default {
     canRun: {
       type: Boolean,
       required: true,
+    },
+    persistentData: {
+      type: Object,
+      default: {},
     },
   },
   setup() {

@@ -363,23 +363,57 @@ export const useElementStore = defineStore({
      * @param {*} UUID
      * @param {*} version
      * @param {*} filename
-     * @param {*} file
+     * @param {*} files the files to upload
      */
-    async addFileToTask(UUID, version, filename, file) {
-      try {
-        const formData = new FormData();
-        formData.append("file", file);
-        const response = await axios.post(
-          "/task/" + UUID + "/" + version + "/resource/" + filename,
-          formData
-        );
-        return response.data.version;
-      } catch (e) {
-        console.log("Error" + e);
-        this.processAxiosError(e);
-        return null;
+    async addFileToTask(UUID, version, filename, files) {
+        try {          
+          const formData = new FormData();
+          console.log(files);
+          console.log(filename);
+          for(const f of files)
+          {
+            console.log(f);
+            formData.append("files", f.file, f.name);
+          }
+          const response = await axios.post(
+            "/task/" + UUID + "/" + version + "/resource/" + filename,
+            formData
+          );
+          
+          return response.data.version;
+        } catch (e) {
+          console.log("Error" + e);
+          this.processAxiosError(e);
+          return null;
+        }      
+    },
+    /**
+         * Add a Multiple files to a task at a given version
+         * @param {*} UUID
+         * @param {*} version
+         * @param {*} filename
+         * @param {*} file
+         */
+    async addFilesToTask(UUID, version, folder, files) {
+      if(files)
+      {
+        try {
+          const formData = new FormData();
+          formData.append("files", files);
+          const response = await axios.post(
+            "/task/" + UUID + "/" + version + "/resource/" + folder,
+            formData
+          );
+          return response.data.version;
+        } catch (e) {
+          console.log("Error" + e);
+          this.processAxiosError(e);
+          return null;
+        }
+
       }
     },
+
     /**
      * Remove the specified filename from the given task
      * @param {*} UUID

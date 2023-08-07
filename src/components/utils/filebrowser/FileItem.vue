@@ -41,7 +41,7 @@
 
 <script>
 import ContextMenu from "primevue/contextmenu";
-import FileAndDirectoryCreationItems from "@/components/utils/FileAndDirectoryCreationItems.vue";
+import FileAndDirectoryCreationItems from "./FileAndDirectoryCreationItems.vue";
 import mime from "mime";
 import { ref } from "vue";
 export default {
@@ -120,7 +120,7 @@ export default {
       this.$emit("createFile", {
         file: this.file,
         folder: this.isDirectory ? this.file.label + "/" : "",
-        addedFile: event,
+        addedFiles: event,
       });
     },
     createDirectory(event) {
