@@ -4,12 +4,12 @@
       <Button
         v-if="active"
         label="Deactivate Study"
-        @click="this.$emit('update:active', false)"
+        @click="$emit('update:active', false)"
       ></Button>
       <Button
         v-else
         label="Activate Study"
-        @click="this.$emit('update:active', true)"
+        @click="$emit('update:active', true)"
       ></Button>
 
       <Button
