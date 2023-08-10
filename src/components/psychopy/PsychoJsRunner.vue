@@ -32,7 +32,7 @@ export default {
       console.log(filename);
       console.log(data);
       console.log(mimetype);
-      this.results = data;
+      this.results = JSON.parse(data);
     },
     /**
      * Submit data

@@ -1,9 +1,9 @@
 <template>
   <div class="main-container">
-    <div class="toolbar">
-      <PanelMenu :model="items" class="w-full md:w-15rem" />
-      <!-- Left-hand toolbar goes here -->
-    </div>
+    <EditorTaskBar
+      @createElement="createElement"
+      @elementSelected="openSelectionTab"
+    />
     <div class="content">
       <TabView class="pb-0" v-model:activeIndex="activeElement">
         <TabPanel
@@ -116,12 +116,6 @@
       @confirm="confirmation(true)"
       @reject="confirmation(false)"
     />
-    <ObjectSelectionDialog
-      v-model:visible="showSelector"
-      :object-type="elementType"
-      @selected="openSelectionTab"
-    >
-    </ObjectSelectionDialog>
   </div>
 </template>
 
@@ -133,13 +127,13 @@ import PanelMenu from "primevue/panelmenu";
 
 import { useElementStore, useEditorStore, useGraphStore } from "@/stores";
 import { router } from "@/helpers";
-import Editor from "@/components/projecteditor/Editor.vue";
 
+import Editor from "@/components/projecteditor/Editor.vue";
+import EditorTaskBar from "@/components/EditorTaskBar.vue";
 import TaskEditor from "@/components/taskeditor/TaskEditor.vue";
 
 import { ref, computed, reactive } from "vue";
 import ConfirmDialog from "@/components/dialogs/ConfirmDialog.vue";
-import ObjectSelectionDialog from "../components/utils/ObjectSelectionDialog.vue";
 
 const elementStore = useElementStore();
 const editorStore = useEditorStore();
@@ -149,8 +143,6 @@ const graphStore = useGraphStore();
 //const editorStore.tasks = reactive({ active: 0, elements: [] });
 const currentTarget = ref({});
 const showConfirm = ref(false);
-const elementType = ref("");
-const showSelector = ref(false);
 const currentSelectedTask = ref(undefined);
 
 const activeElement = computed({
@@ -252,6 +244,11 @@ async function updateElement(data, index, type) {
   const newVersion = await editorStore.saveObject(type, data, index);
 }
 
+function createElement(type) {
+  console.log("Creating element of type: " + type);
+  editorStore.createElement(type);
+}
+
 async function changeElement(newObjectInfo, index, type) {
   editorStore.changeElement(
     type,
@@ -299,11 +296,6 @@ function confirmation(close) {
   currentTarget.value = {};
   showConfirm.value = false;
 }
-//const editorStore.projectsPresent = computed(() => editorStore.projects.length > 0
-function showOpenElementDialog(typeForDialog) {
-  elementType.value = typeForDialog;
-  showSelector.value = true;
-}
 
 /**
  * Open a tab for the selected Type of Element in the respective tabs rider.
@@ -311,84 +303,13 @@ function showOpenElementDialog(typeForDialog) {
  */
 function openSelectionTab(element) {
   console.log(element);
-  if (element) {
-    editorStore.loadElement(
-      elementType.value,
-      element.name,
-      element.UUID,
-      element.version
-    );
-    showSelector.value = false;
-  } else {
-    showSelector.value = false;
-  }
+  editorStore.loadElement(
+    element.type,
+    element.name,
+    element.UUID,
+    element.version
+  );
 }
-
-const items = computed(() => [
-  {
-    label: "Project",
-    icon: "pi pi-fw pi-tags",
-    items: [
-      {
-        label: "New",
-        icon: "pi pi-fw pi-plus",
-        command: () => {
-          console.log("Tring to create Project");
-          editorStore.createElement("Project");
-        },
-      },
-      {
-        label: "Open",
-        icon: "pi pi-fw pi-folder-open",
-        command: () => {
-          showOpenElementDialog("Project");
-        },
-      },
-    ],
-  },
-  {
-    label: "Tasks",
-    icon: "pi pi-fw pi-tag",
-    items: [
-      {
-        label: "New",
-        icon: "pi pi-fw pi-plus",
-        command: () => {
-          console.log("Tring to create Project");
-          editorStore.createElement("Task");
-        },
-      },
-      {
-        label: "Open",
-        icon: "pi pi-fw pi-folder-open",
-        command: () => {
-          showOpenElementDialog("Task");
-        },
-      },
-    ],
-  },
-  {
-    label: "Experiments",
-    icon: "pi pi-fw pi-user",
-    items: [
-      {
-        label: "New",
-        icon: "pi pi-fw pi-plus",
-        command: () => {
-          console.log("Tring to create Project");
-          editorStore.createElement("Experiment");
-        },
-      },
-      {
-        label: "Open",
-        icon: "pi pi-fw pi-folder-open",
-        command: () => {
-          showOpenElementDialog("Experiment");
-        },
-      },
-    ],
-  },
-]);
 </script>
 
 <style scoped>

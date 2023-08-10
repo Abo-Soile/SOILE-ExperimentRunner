@@ -1,36 +1,40 @@
 <template>
-  <div class="filebrowser">
-    <ScrollPanel style="width: 100%; height: 100%">
-      File Browser
-      <ul class="borderless">
-        <FileItem
-          v-for="file in files.children"
-          :key="file.id"
-          :file="file"
-          @file-click="handleFileClick"
-          @file-double-click="handleDoubleClick"
-          @createFile="createFile"
-          @deleteFile="deleteFile"
-          @editFile="editFile"
-          @createDirectory="createDirectory"
-        />
-        <FileAndDirectoryCreationItems
-          @createDirectory="
-            (event) =>
-              createDirectory({
-                folder: '',
-                file: fileStructure,
-                folderName: event,
-              })
-          "
-          @createFile="
-            (event) =>
-              createFile({ folder: '', file: fileStructure, addedFiles: event })
-          "
-        />
-      </ul>
-    </ScrollPanel>
-  </div>
+  <ScrollPanel
+    class="filebrowser"
+    style="width: 100%; height: 100%"
+    @dragenter.prevent
+    @dragover.prevent
+    @drop.prevent
+  >
+    File Browser
+    <ul class="borderless">
+      <FileItem
+        v-for="file in files.children"
+        :key="file.id"
+        :file="file"
+        @file-click="handleFileClick"
+        @file-double-click="handleDoubleClick"
+        @createFile="createFile"
+        @deleteFile="deleteFile"
+        @editFile="editFile"
+        @createDirectory="createDirectory"
+      />
+      <FileAndDirectoryCreationItems
+        @createDirectory="
+          (event) =>
+            createDirectory({
+              folder: '',
+              file: fileStructure,
+              folderName: event,
+            })
+        "
+        @createFile="
+          (event) =>
+            createFile({ folder: '', file: fileStructure, addedFiles: event })
+        "
+      />
+    </ul>
+  </ScrollPanel>
 </template>
 
 <script>
@@ -49,6 +53,7 @@ export default {
   components: {
     FileItem,
     FileAndDirectoryCreationItems,
+    ScrollPanel,
   },
   data() {
     return {

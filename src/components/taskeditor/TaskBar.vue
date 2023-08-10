@@ -61,7 +61,7 @@
         class="taskbarfield"
         label="Manage Versions"
         icon="pi pi-wrench"
-        @click="showReloadConfirm = true"
+        @click="showVersionManagement = true"
       ></Button>
     </div>
     <SelectNewVersionDialog
@@ -82,6 +82,13 @@
       v-model:isVisible="showReloadConfirm"
       confirm="Reload Task"
     ></ConfirmDialog>
+    <ElementVersionManagementDialog
+      v-if="showVersionManagement"
+      v-model:isVisible="showVersionManagement"
+      :UUID="currentUUID"
+      type="Task"
+    >
+    </ElementVersionManagementDialog>
   </div>
 </template>
 
@@ -91,6 +98,7 @@ import InputText from "primevue/inputtext";
 import Button from "primevue/button";
 import ObjectAndVersionSelectorWithProps from "@/components/utils/ObjectAndVersionSelectorWithProps.vue";
 import SelectNewVersionDialog from "@/components/dialogs/SelectNewVersionDialog.vue";
+import ElementVersionManagementDialog from "@/components/dialogs/ElementVersionManagementDialog.vue";
 import ConfirmDialog from "@/components/dialogs/ConfirmDialog.vue";
 
 export default {
@@ -130,23 +138,17 @@ export default {
       currentType: null,
       showChangeVersion: false,
       showReloadConfirm: false,
+      showVersionManagement: false,
     };
   },
   computed: {
     codeTypeVersions() {
-      const selectedType = this.codeTypeOptions[this.codeType];
-      console.log(this.codeTypeOptions);
-      console.log(this.codeType);
-      console.log(selectedType);
-      return selectedType ? selectedType.versions : [];
+      return this.codeType
+        ? this.codeTypeOptions.find((x) => x.name === this.codeType).versions
+        : [];
     },
     codeOptions() {
-      const codeOptions = [];
-      Object.keys(this.codeTypeOptions).forEach((element) => {
-        console.log(element);
-        codeOptions.push(element);
-      });
-      return codeOptions;
+      return this.codeTypeOptions.map((x) => x.name);
     },
     selectedCodeType: {
       get() {
@@ -194,6 +196,12 @@ export default {
     saveLabel() {
       return this.newTask ? "Create Task" : "Save";
     },
+    currentUUID() {
+      return this.task ? this.task.UUID : undefined;
+    },
+    currentVersion() {
+      return this.taskVersion ? this.taskVersion.version : undefined;
+    },
   },
   methods: {
     save() {
@@ -218,6 +226,7 @@ export default {
     InputText,
     SelectNewVersionDialog,
     ConfirmDialog,
+    ElementVersionManagementDialog,
   },
 };
 </script>

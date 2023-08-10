@@ -9,6 +9,10 @@ export const useElementStore = defineStore({
     availableTasks: [],
     availableExperiments: [],
     availableProjects: [],
+    existingTasks: [],
+    existingExperiments: [],
+    existingProjects: [],
+    codeOptions: [],
     elements: { task: {}, project: {}, experiment: {} },
   }),
   actions: {
@@ -16,18 +20,28 @@ export const useElementStore = defineStore({
       this.availableTasks = [];
       this.availableExperiments = [];
       this.availableProjects = [];
+      this.existingTasks = [];
+      this.existingExperiments = [];
+      this.existingProjects = [];
+      this.codeOptions = [];
       this.elements = { task: {}, project: {}, experiment: {} };
     },
     /**
      * Update the Projects available to the current user (i,.e where they have access to)
      */
-    async updateAvailableProjects() {
+    async updateAvailableProjects(full) {
       try {
-        const response = await axios.post("/project/list");
+        const response = await axios.post(
+          "/project/list" + (full ? "?full=true" : "")
+        );
         console.log(response?.data);
 
         // update pinia state
-        this.availableProjects = response?.data;
+        if (full) {
+          this.existingProjects = response?.data;
+        } else {
+          this.availableProjects = response?.data;
+        }
         console.log(this.availableProjects);
       } catch (e) {
         console.log("Error" + e);
@@ -37,13 +51,19 @@ export const useElementStore = defineStore({
     /**
      * Update the Experiments available to the current user (i,.e where they have access to)
      */
-    async updateAvailableExperiments() {
+    async updateAvailableExperiments(full) {
       try {
-        const response = await axios.post("/experiment/list");
+        const response = await axios.post(
+          "/experiment/list" + (full ? "?full=true" : "")
+        );
         console.log(response?.data);
 
         // update pinia state
-        this.availableExperiments = response?.data;
+        if (full) {
+          this.existingExperiments = response?.data;
+        } else {
+          this.availableExperiments = response?.data;
+        }
       } catch (e) {
         console.log("Error" + e);
         this.processAxiosError(e);
@@ -52,18 +72,40 @@ export const useElementStore = defineStore({
     /**
      * Update the Tasks available to the current user (i,.e where they have access to)
      */
-    async updateAvailableTasks() {
+    async updateAvailableTasks(full) {
       try {
-        const response = await axios.post("/task/list");
+        const response = await axios.post(
+          "/task/list" + (full ? "?full=true" : "")
+        );
         console.log(response?.data);
 
         // update pinia state
-        this.availableTasks = response?.data;
+        if (full) {
+          this.existingTasks = response?.data;
+        } else {
+          this.availableTasks = response?.data;
+        }
       } catch (e) {
         console.log("Error" + e);
         this.processAxiosError(e);
       }
     },
+    /**
+     * Update the Code Options available
+     */
+    async updateCodeOptions() {
+      try {
+        const response = await axios.get("/task/codeoptions");
+        console.log(response?.data);
+
+        // update pinia state
+        this.codeOptions = response?.data;
+      } catch (e) {
+        console.log("Error" + e);
+        this.processAxiosError(e);
+      }
+    },
+
     /**
      * Get the available versions for a specific task
      * @param {string} UUID the UUID of the task
@@ -108,7 +150,8 @@ export const useElementStore = defineStore({
      * @param {string} the type of element ('task','experiment' or 'project' )
      */
     async getListForType(type) {
-      switch (type) {
+      const usedType = type.toLowerCase();
+      switch (usedType) {
         case "task":
           return this.availableTasks;
         case "project":
@@ -123,7 +166,8 @@ export const useElementStore = defineStore({
      * @param {string} type type of element ('task','experiment' or 'project' )
      */
     async getOptionsForElement(UUID, type) {
-      switch (type) {
+      const usedType = type.toLowerCase();
+      switch (usedType) {
         case "task":
           return await this.getTaskOptions(UUID);
         case "project":
@@ -156,6 +200,44 @@ export const useElementStore = defineStore({
         .map((x) => {
           return { tag: x.tag, version: x.version };
         });
+    },
+    /**
+     * Remove tags for a given element.
+     * @param {string} UUID  the UUID of the element
+     * @param {string} type type of element ('task','experiment' or 'project' )
+     * @param {array} tags the Tags to remove from the element.
+     */
+    async removeTagsForElement(UUID, type, tags) {
+      const usedType = type.toLowerCase();
+      try {
+        const response = await axios.post(
+          "/" + type.toLowerCase() + "/" + UUID + "/removetags",
+          tags
+        );
+        return response.status == 200;
+      } catch (err) {
+        this.processAxiosError(err);
+      }
+    },
+
+    /**
+     * Remove tags for a given element.
+     * @param {string} UUID  the UUID of the element
+     * @param {string} type type of element ('task','experiment' or 'project' )
+     * @param {String} tags the Tags to remove from the element.
+     */
+    async addTagForElement(UUID, version, type, tag) {
+      try {
+        const response = await axios.post(
+          "/" + type.toLowerCase() + "/" + UUID + "/" + version + "/addtag",
+          {
+            name: tag,
+          }
+        );
+        return response.status == 200;
+      } catch (err) {
+        this.processAxiosError(err);
+      }
     },
     /**
      * Get an element, either load (if not yet loaded) or take from memory.
@@ -219,7 +301,7 @@ export const useElementStore = defineStore({
      * Write an element and return th new version.
      * @param {*} UUID the UUID of the object
      * @param {*} version  the version of the object this version is derived from.
-     * @param {*} data the data of the elment (including version and UUID)
+     * @param {*} data Only the codeType and code fields are required here.
      * @param {*} type the type (element, task or project) of the object
      * @return The new Version of the element;
      */
@@ -366,37 +448,35 @@ export const useElementStore = defineStore({
      * @param {*} files the files to upload
      */
     async addFileToTask(UUID, version, filename, files) {
-        try {          
-          const formData = new FormData();
-          console.log(files);
-          console.log(filename);
-          for(const f of files)
-          {
-            console.log(f);
-            formData.append("files", f.file, f.name);
-          }
-          const response = await axios.post(
-            "/task/" + UUID + "/" + version + "/resource/" + filename,
-            formData
-          );
-          
-          return response.data.version;
-        } catch (e) {
-          console.log("Error" + e);
-          this.processAxiosError(e);
-          return null;
-        }      
+      try {
+        const formData = new FormData();
+        console.log(files);
+        console.log(filename);
+        for (const f of files) {
+          console.log(f);
+          formData.append("files", f.file, f.name);
+        }
+        const response = await axios.post(
+          "/task/" + UUID + "/" + version + "/resource/" + filename,
+          formData
+        );
+
+        return response.data.version;
+      } catch (e) {
+        console.log("Error" + e);
+        this.processAxiosError(e);
+        return null;
+      }
     },
     /**
-         * Add a Multiple files to a task at a given version
-         * @param {*} UUID
-         * @param {*} version
-         * @param {*} filename
-         * @param {*} file
-         */
+     * Add a Multiple files to a task at a given version
+     * @param {*} UUID
+     * @param {*} version
+     * @param {*} filename
+     * @param {*} file
+     */
     async addFilesToTask(UUID, version, folder, files) {
-      if(files)
-      {
+      if (files) {
         try {
           const formData = new FormData();
           formData.append("files", files);
@@ -410,7 +490,6 @@ export const useElementStore = defineStore({
           this.processAxiosError(e);
           return null;
         }
-
       }
     },
 

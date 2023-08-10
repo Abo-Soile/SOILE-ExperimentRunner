@@ -88,13 +88,15 @@ import ConfirmDialog from "@/components/dialogs/ConfirmDialog.vue";
 import { useElementStore, useErrorStore, useEditorStore } from "@/stores";
 
 import { reactive } from "vue";
+import { storeToRefs } from "pinia";
+
 export default {
   data() {
     return {
       editedFiles: reactive([]),
       files: [],
       previewFile: undefined,
-      codeOptions: {
+      /*codeOptions: {
         qmarkup: { versions: ["1.0"], mimeType: "application/json" },
         elang: { versions: ["1.0"], mimeType: "application/javascript" },
         psychopy: {
@@ -105,7 +107,7 @@ export default {
           versions: ["ES6", "ECMAScript 2020"],
           mimeType: "application/javascript",
         },
-      },
+      },*/
       isValid: false,
       currentTags: [],
       showSave: false,
@@ -120,7 +122,14 @@ export default {
     const editorStore = useEditorStore();
     const currentObject = reactive(JSON.parse(JSON.stringify(props.target)));
     currentObject.codeType = reactive(currentObject.codeType);
-    return { errorStore, elementStore, currentObject, editorStore };
+    const { codeOptions } = storeToRefs(elementStore);
+    return {
+      errorStore,
+      elementStore,
+      currentObject,
+      editorStore,
+      codeOptions,
+    };
   },
   emits: ["updateName", "updateCurrentVersion", "saveTask", "changeTask"],
   components: {
@@ -187,7 +196,10 @@ export default {
           type: file.type,
         });
         console.log({ targetName: file.fullpath, file: file });
-        this.createFile({ targetName: file.fullpath, file: updatedFile });
+        this.createFile({
+          targetName: file.fullpath,
+          files: [{ name: file.fullpath, file: updatedFile }],
+        });
         file.modified = false;
       }
     },
@@ -367,6 +379,7 @@ export default {
   mounted() {
     this.updateFiles(this.target);
     this.updateFields(this.target);
+    this.elementStore.updateCodeOptions();
     console.log("Displaying task");
   },
 };
