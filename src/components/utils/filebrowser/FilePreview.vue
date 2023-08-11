@@ -19,6 +19,7 @@
 </template>
 
 <script>
+import { isVideo, isImage, isText } from "@/helpers/mimeHelper.js";
 export default {
   props: {
     file: {
@@ -31,18 +32,13 @@ export default {
   computed: {
     // TODO: We could provide an editor for text files.
     isText() {
-      return (
-        this.file.type.startsWith("text/") ||
-        this.file.type === "application/javascript" ||
-        this.file.type === "application/x-javascript" ||
-        this.file.type === "application/json"
-      );
+      return isText(this.file.type);
     },
     isVideo() {
-      return this.file.type.startsWith("video/");
+      return isVideo(this.file.type);
     },
     isImage() {
-      return this.file.type.startsWith("image/");
+      return isImage(this.file.type);
     },
     fileContent() {
       if (this.noPreview) {

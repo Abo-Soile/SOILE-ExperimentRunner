@@ -63,6 +63,12 @@
         icon="pi pi-wrench"
         @click="showVersionManagement = true"
       ></Button>
+      <Button
+        class="taskbarfield"
+        label="Export Task"
+        icon="pi pi-download"
+        @click="download"
+      ></Button>
     </div>
     <SelectNewVersionDialog
       v-if="changeTaskVersion"
@@ -216,6 +222,9 @@ export default {
       if (updated) {
         this.$emit("changeTaskVersion", updated);
       }
+    },
+    download() {
+      this.$emit("download");
     },
   },
   emits: ["reload", "changeTaskVersion", "update:valid"],

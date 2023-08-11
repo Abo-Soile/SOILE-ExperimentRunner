@@ -1,5 +1,10 @@
 <template>
-  <Dialog :visible="isVisible" :header="title" modal @hide="input = ''">
+  <Dialog
+    v-model:visible="dialogVisible"
+    :header="title"
+    modal
+    @hide="input = ''"
+  >
     {{ message }}
     <InputText
       v-model="input"
@@ -45,6 +50,10 @@ export default {
       type: String,
       default: "Please enter a value to use",
     },
+    defaultValue: {
+      type: String,
+      default: "",
+    },
     confirm: {
       type: String,
       default: "Confirm Selection",
@@ -72,6 +81,19 @@ export default {
       this.$emit("reject");
       this.input = "";
     },
+  },
+  computed: {
+    dialogVisible: {
+      get() {
+        return this.isVisible;
+      },
+      set(value) {
+        this.$emit("update:isVisible", value);
+      },
+    },
+  },
+  mounted() {
+    this.input = this.defaultValue;
   },
 };
 </script>

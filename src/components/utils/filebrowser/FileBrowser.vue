@@ -74,7 +74,10 @@ export default {
       if (file.children) {
         file.open = !file.open; // Toggle directory open state
       } else {
-        this.$emit("fileSelected", element.folder + element.file.label);
+        this.$emit("fileSelected", {
+          file: element.folder + element.file.label,
+          mimeType: element.mimeType,
+        });
       }
     },
     handleDoubleClick(file) {

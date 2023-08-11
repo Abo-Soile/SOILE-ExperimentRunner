@@ -26,6 +26,33 @@ export const useElementStore = defineStore({
       this.codeOptions = [];
       this.elements = { task: {}, project: {}, experiment: {} };
     },
+
+    /**
+     * Process axios error. Mainly to avoid having to define the errorStore at many places.
+     * @param {*} err
+     */
+    processAxiosError(err) {
+      const errorStore = useErrorStore();
+      errorStore.processAxiosError(err);
+    },
+
+    /**
+     * Update the available options for the given type.
+     * @param {String} type  One of "Task", "Experiment" or "Project"
+     * @param {Boolean} full whether to obtain ALL elements available (also unaccessible, for checking purposes or not).
+     */
+    async updateAvailableOptions(type, full) {
+      const usedType = type.toLowerCase();
+      switch (usedType) {
+        case "task":
+          await this.updateAvailableTasks(full);
+        case "project":
+          await this.updateAvailableProjects(full);
+        case "experiment":
+          await this.updateAvailableExperiments(full);
+      }
+    },
+
     /**
      * Update the Projects available to the current user (i,.e where they have access to)
      */
@@ -105,7 +132,22 @@ export const useElementStore = defineStore({
         this.processAxiosError(e);
       }
     },
-
+    /**
+     * Get the list of options/versions for the given element.
+     * @param {string} UUID  the UUID of the element
+     * @param {string} type type of element ('task','experiment' or 'project' )
+     */
+    async getOptionsForElement(UUID, type) {
+      const usedType = type.toLowerCase();
+      switch (usedType) {
+        case "task":
+          return await this.getTaskOptions(UUID);
+        case "project":
+          return await this.getProjectOptions(UUID);
+        case "experiment":
+          return await this.getExperimentOptions(UUID);
+      }
+    },
     /**
      * Get the available versions for a specific task
      * @param {string} UUID the UUID of the task
@@ -147,9 +189,10 @@ export const useElementStore = defineStore({
     },
     /**
      * get the list of objects for the given type. Makes it easier to write reusable components
+     * Does not refresh the available components
      * @param {string} the type of element ('task','experiment' or 'project' )
      */
-    async getListForType(type) {
+    getListForType(type) {
       const usedType = type.toLowerCase();
       switch (usedType) {
         case "task":
@@ -158,22 +201,6 @@ export const useElementStore = defineStore({
           return this.availableProjects;
         case "experiment":
           return this.availableExperiments;
-      }
-    },
-    /**
-     * Get the list of options/versions for the given element.
-     * @param {string} UUID  the UUID of the element
-     * @param {string} type type of element ('task','experiment' or 'project' )
-     */
-    async getOptionsForElement(UUID, type) {
-      const usedType = type.toLowerCase();
-      switch (usedType) {
-        case "task":
-          return await this.getTaskOptions(UUID);
-        case "project":
-          return await this.getProjectOptions(UUID);
-        case "experiment":
-          return await this.getExperimentOptions(UUID);
       }
     },
     /**
@@ -219,7 +246,6 @@ export const useElementStore = defineStore({
         this.processAxiosError(err);
       }
     },
-
     /**
      * Remove tags for a given element.
      * @param {string} UUID  the UUID of the element
@@ -239,6 +265,97 @@ export const useElementStore = defineStore({
         this.processAxiosError(err);
       }
     },
+    /**
+     * Get the Tag of a specific element of the given type at a specific version.
+     *
+     * @param {String} type the type of the element ( task, experiment or project )
+     * @param {String} UUID the uuid of the element
+     * @param {String} version the version of the element
+     * @returns {String} the tag of the element
+     */
+    async getTagForVersion(type, UUID, version) {
+      const currentElement = await this.getElement(UUID, version, type);
+      return currentElement.tag;
+    },
+    /**
+     * Download a given Task at a specific version.
+     * @param {*} taskID
+     * @param {*} taskVersion
+     */
+    async downloadTask(taskID, taskVersion) {
+      // This needs to use the session cookie for the download. Hopefully this works.
+      const fileUrl = `${axios.defaults.baseURL}/task/${taskID}/${taskVersion}/download`;
+      const link = document.createElement("a");
+      link.href = fileUrl;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    },
+
+    /**
+     * Upload a new task from an exported zip file.
+     * @param {File} file The file to upload
+     * @param {String} taskName the name for the uploaded task
+     */
+    async uploadTask(file, taskname) {
+      // This needs to use the session cookie for the download. Hopefully this works.
+      const fileUrl = `/task/upload?name=${taskname}&tag=Uploaded_Version`;
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+        const response = await axios.post(fileUrl, formData);
+
+        return response.data;
+      } catch (e) {
+        console.log("Error" + e);
+        this.processAxiosError(e);
+        return null;
+      }
+    },
+    /**
+     * Write an element and return th new version.
+     * @param {*} UUID the UUID of the object
+     * @param {*} version  the version of the object this version is derived from.
+     * @param {*} data Only the codeType and code fields are required here.
+     * @param {*} type the type (element, task or project) of the object
+     * @return The new Version of the element;
+     */
+    async createElement(name, data, type) {
+      try {
+        let params;
+        if (type.toLowerCase() === "task") {
+          params = {
+            name: name,
+            codeType: data.codeType.language,
+            codeVersion: data.codeType.version,
+          };
+        } else {
+          params = { name: name };
+        }
+        const response = await axios.post(
+          "/" + type.toLowerCase() + "/create",
+          null,
+          {
+            params: params,
+          }
+        );
+        data.UUID = response.data.UUID;
+        data.version = response.data.version;
+        const newVersion = await this.updateElement(
+          data.UUID,
+          data.version,
+          data,
+          type
+        );
+        data.version = newVersion;
+        return data;
+      } catch (err) {
+        this.processAxiosError(err);
+      }
+    },
+
     /**
      * Get an element, either load (if not yet loaded) or take from memory.
      * @param {*} UUID the UUID of the object
@@ -297,51 +414,11 @@ export const useElementStore = defineStore({
         this.processAxiosError(err);
       }
     },
-    /**
-     * Write an element and return th new version.
-     * @param {*} UUID the UUID of the object
-     * @param {*} version  the version of the object this version is derived from.
-     * @param {*} data Only the codeType and code fields are required here.
-     * @param {*} type the type (element, task or project) of the object
-     * @return The new Version of the element;
-     */
-    async createElement(name, data, type) {
-      try {
-        let params;
-        if (type.toLowerCase() === "task") {
-          params = {
-            name: name,
-            codeType: data.codeType.language,
-            codeVersion: data.codeType.version,
-          };
-        } else {
-          params = { name: name };
-        }
-        const response = await axios.post(
-          "/" + type.toLowerCase() + "/create",
-          null,
-          {
-            params: params,
-          }
-        );
-        data.UUID = response.data.UUID;
-        data.version = response.data.version;
-        const newVersion = await this.updateElement(
-          data.UUID,
-          data.version,
-          data,
-          type
-        );
-        data.version = newVersion;
-        return data;
-      } catch (err) {
-        this.processAxiosError(err);
-      }
-    },
+
     /**
      * Get the persistent data for a given task.
-     * @param {*} UUID
-     * @param {*} version
+     * @param {String} UUID
+     * @param {String} version
      */
     async getPersistentDataForTask(UUID, version) {
       const element = await this.getElement(UUID, version, "task");
@@ -352,10 +429,22 @@ export const useElementStore = defineStore({
         return [];
       }
     },
+    /**
+     * Get the persistent data for the experiment indicated by the UUID and version
+     * @param {String} UUID
+     * @param {String} version
+     * @returns
+     */
     async getPersistentDataForExperiment(UUID, version) {
       const experiment = await this.getElement(UUID, version, "experiment");
       return this.getPersistentDataForExperimentInstance(experiment);
     },
+    /**
+     * Get the persistent data for the experimentinstance indicated by the UUID and version
+     * @param {String} UUID
+     * @param {String} version
+     * @returns
+     */
     async getPersistentDataForExperimentInstance(instance) {
       const persistentElements = new Set();
       for (const element of instance.elements) {
@@ -382,6 +471,12 @@ export const useElementStore = defineStore({
       }
       return Array.from(persistentElements);
     },
+    /**
+     * Get the persistent data for the element indicated by the UUID and version along with its type (task or experiment)
+     * @param {String} UUID
+     * @param {String} version
+     * @returns
+     */
     async getPersistentDataForElement(UUID, version, type) {
       switch (type) {
         case "task":
@@ -390,24 +485,13 @@ export const useElementStore = defineStore({
           return await this.getPersistentDataForExperiment(UUID, version);
       }
     },
-    async updateAvailableOptions(type) {
-      switch (type) {
-        case "task":
-          await this.updateAvailableTasks();
-        case "project":
-          await this.updateAvailableProjects();
-        case "experiment":
-          await this.updateAvailableExperiments();
-      }
-    },
-    processAxiosError(err) {
-      const errorStore = useErrorStore();
-      errorStore.processAxiosError(err);
-    },
-    async getTagForVersion(type, UUID, version) {
-      const currentElement = await this.getElement(UUID, version, type);
-      return currentElement.tag;
-    },
+
+    /**
+     * Test whether a specific experiment can be randomized (i.e. has no filters in it)
+     * @param {String} UUID
+     * @param {String} version
+     * @returns {Boolean}
+     */
     async canExperimentBeRandomized(UUID, version) {
       const currentElement = await this.getElement(UUID, version, "experiment");
       for (const current of currentElement.elements) {
@@ -418,12 +502,7 @@ export const useElementStore = defineStore({
       }
       return true;
     },
-    reset() {
-      this.availableTasks = [];
-      this.availableExperiments = [];
-      this.availableProjects = [];
-      this.elements = { task: {}, project: {}, experiment: {} };
-    },
+
     /**
      * Get the list of Files for the task with the given UUID and version
      * @param {*} UUID
@@ -468,30 +547,6 @@ export const useElementStore = defineStore({
         return null;
       }
     },
-    /**
-     * Add a Multiple files to a task at a given version
-     * @param {*} UUID
-     * @param {*} version
-     * @param {*} filename
-     * @param {*} file
-     */
-    async addFilesToTask(UUID, version, folder, files) {
-      if (files) {
-        try {
-          const formData = new FormData();
-          formData.append("files", files);
-          const response = await axios.post(
-            "/task/" + UUID + "/" + version + "/resource/" + folder,
-            formData
-          );
-          return response.data.version;
-        } catch (e) {
-          console.log("Error" + e);
-          this.processAxiosError(e);
-          return null;
-        }
-      }
-    },
 
     /**
      * Remove the specified filename from the given task
@@ -525,7 +580,7 @@ export const useElementStore = defineStore({
      */
     async getResourceFile(UUID, version, filename) {
       try {
-        const url = "/task/" + UUID + "/" + version + "/resource/" + filename;
+        const url = this.getResourceURL(UUID, version, filename);
         const response = await axios.get(url);
         return {
           url: url,
@@ -538,6 +593,15 @@ export const useElementStore = defineStore({
         this.processAxiosError(e);
         return null;
       }
+    },
+    /**
+     * Get the URL of a resource in a specific task for a specific version
+     * @param {*} UUID
+     * @param {*} version
+     * @param {*} filename
+     */
+    getResourceURL(UUID, version, filename) {
+      return "/task/" + UUID + "/" + version + "/resource/" + filename;
     },
   },
 });

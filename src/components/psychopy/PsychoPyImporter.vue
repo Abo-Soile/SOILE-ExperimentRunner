@@ -140,6 +140,7 @@ export default {
       psychojsversion: null,
       scriptName: "",
       legacyScriptName: "",
+      libFolder: "",
       taskFiles: null,
     };
   },
@@ -155,6 +156,7 @@ export default {
           file.webkitRelativePath.replace(/\\/g, "/") ===
           rootFolder + "/index.html"
       );
+      this.libFolder = rootFolder + "/lib/";
       // check whether there is a data folder...
       const dataFolder = rootFolder + "/data/";
       if (
@@ -181,21 +183,25 @@ export default {
         return;
       }
     },
+    excludeDirectoryFromFiles(inputFiles, folder) {
+      return inputFiles.filter((f) => !f.webkitRelativePath.startsWith(folder));
+    },
     async createTask() {
       var usedFiles = [];
       if (this.uploadDataFolder) {
-        usedFiles = this.taskFiles.map((f) => {
+        usedFiles = this.excludeDirectoryFromFiles(
+          this.taskFiles,
+          this.libFolder
+        ).map((f) => {
           return { file: f, name: f.webkitRelativePath.replace(/^.+?\//i, "") };
         });
       } else {
-        for (const f of this.taskFiles) {
-          if (!f.webkitRelativePath.startsWith(this.dataFolder)) {
-            usedFiles.push({
-              file: f,
-              name: f.webkitRelativePath.replace(/^.+?\//i, ""),
-            });
-          }
-        }
+        usedFiles = this.excludeDirectoryFromFiles(
+          this.excludeDirectoryFromFiles(this.taskFiles, this.libFolder),
+          this.dataFolder
+        ).map((f) => {
+          return { file: f, name: f.webkitRelativePath.replace(/^.+?\//i, "") };
+        });
       }
       // these are now the used files and now we need to update/remove the script and index html file and add the config file.
       // first, remove the index file

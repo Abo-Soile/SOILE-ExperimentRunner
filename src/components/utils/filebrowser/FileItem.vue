@@ -43,6 +43,7 @@
 import ContextMenu from "primevue/contextmenu";
 import FileAndDirectoryCreationItems from "./FileAndDirectoryCreationItems.vue";
 import mime from "mime";
+import { isText } from "@/helpers/mimeHelper.js";
 import { ref } from "vue";
 export default {
   props: {
@@ -69,11 +70,7 @@ export default {
       return mime.getType(this.file.label);
     },
     isText() {
-      return this.mimeType
-        ? this.mimeType.startsWith("text") ||
-            this.mimeType === "application/json" ||
-            this.mimeType === "application/javascript"
-        : false;
+      return isText(this.mimeType);
     },
     getFileIconClass() {
       if (this.isDirectory) {
@@ -107,6 +104,7 @@ export default {
     handleClick() {
       this.$emit("file-click", {
         file: this.file,
+        mimeType: this.mimeType,
         folder: this.isDirectory ? this.file.label + "/" : "",
       });
     },

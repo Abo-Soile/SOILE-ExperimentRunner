@@ -15,12 +15,17 @@
     @selected="elementSelected"
   >
   </ObjectSelectionDialog>
+  <TaskUploader
+    ref="uploadComponent"
+    @elementSelected="openTask"
+  ></TaskUploader>
 </template>
 
 <script setup>
 import PanelMenu from "primevue/panelmenu";
 
 import PsychoPyImporter from "@/components/psychopy/PsychoPyImporter.vue";
+import TaskUploader from "@/components/taskeditor/TaskUploader.vue";
 import ObjectSelectionDialog from "@/components/utils/ObjectSelectionDialog.vue";
 
 import { ref, computed, reactive } from "vue";
@@ -30,6 +35,7 @@ const emit = defineEmits(["createElement", "elementSelected"]);
 const showSelector = ref(false);
 const showPsychoPyDialog = ref(false);
 const elementType = ref("");
+const uploadComponent = ref(null);
 
 function showOpenElementDialog(typeForDialog) {
   elementType.value = typeForDialog;
@@ -46,6 +52,10 @@ function elementSelected(element) {
     showSelector.value = false;
   }
 }
+function openTask(taskdata) {
+  elementType.value = "task";
+  elementSelected(taskdata);
+}
 
 function openPsychoPyTask(data) {
   elementType.value = "Task";
@@ -54,6 +64,12 @@ function openPsychoPyTask(data) {
   showPsychoPyDialog.value = false;
 }
 
+function callChildFunction() {
+  console.log(uploadComponent);
+  console.log("Trying to call something on uploader");
+  console.log(uploadComponent.value);
+  uploadComponent.value.loadZip();
+}
 const items = computed(() => [
   {
     label: "Project",
@@ -101,7 +117,9 @@ const items = computed(() => [
         items: [
           {
             label: "Import Task",
-            command: () => {},
+            command: () => {
+              callChildFunction();
+            },
           },
           {
             label: "Import from PsychoJS Folder",

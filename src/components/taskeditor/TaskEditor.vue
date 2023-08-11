@@ -15,6 +15,7 @@
             $emit('changeTask', { version: event, UUID: currentObject.UUID })
         "
         @reload="reload"
+        @download="download"
       >
       </TaskBar>
     </div>
@@ -86,6 +87,7 @@ import ElementSaveDialog from "@/components/utils/ElementSaveDialog.vue";
 import ConfirmDialog from "@/components/dialogs/ConfirmDialog.vue";
 
 import { useElementStore, useErrorStore, useEditorStore } from "@/stores";
+import { isVideo, isImage, isText } from "@/helpers/mimeHelper.js";
 
 import { reactive } from "vue";
 import { storeToRefs } from "pinia";
@@ -96,18 +98,6 @@ export default {
       editedFiles: reactive([]),
       files: [],
       previewFile: undefined,
-      /*codeOptions: {
-        qmarkup: { versions: ["1.0"], mimeType: "application/json" },
-        elang: { versions: ["1.0"], mimeType: "application/javascript" },
-        psychopy: {
-          versions: ["2022.2.5"],
-          mimeType: "application/javascript",
-        },
-        javascript: {
-          versions: ["ES6", "ECMAScript 2020"],
-          mimeType: "application/javascript",
-        },
-      },*/
       isValid: false,
       currentTags: [],
       showSave: false,
@@ -185,6 +175,12 @@ export default {
     },
   },
   methods: {
+    download() {
+      this.elementStore.downloadTask(
+        this.currentObject.UUID,
+        this.currentObject.version
+      );
+    },
     updateEditedFile(event) {
       this.editedFiles[event.index].data = event.value;
       this.editedFiles[event.index].modified = true;
@@ -322,13 +318,31 @@ export default {
           this.updateFiles(this.currentObject);
         });
     },
+    /**
+     * TODO: Do not load binary objects....
+     * @param {*} event
+     */
     preview(event) {
-      this.elementStore
-        .getResourceFile(this.target.UUID, this.currentObject.version, event)
-        .then((data) => {
-          console.log(data);
-          this.previewFile = data;
-        });
+      console.log(event);
+      if (isText(event.mimeType)) {
+        this.elementStore
+          .getResourceFile(
+            this.target.UUID,
+            this.currentObject.version,
+            event.file
+          )
+          .then((data) => {
+            console.log(data);
+            this.previewFile = data;
+          });
+      } else {
+        const url = this.elementStore.getResourceURL();
+        this.previewFile = {
+          url: url,
+          filename: event.file,
+          type: event.mimeType,
+        };
+      }
     },
     getCodeTypeObject() {
       return {

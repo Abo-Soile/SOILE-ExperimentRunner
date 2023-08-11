@@ -8,6 +8,11 @@ export const useErrorStore = defineStore({
     latestError: {},
   }),
   actions: {
+    /**
+     * Raise an Error, severity can be one of "warn", "info" or "error"
+     * @param {*} severity
+     * @param {*} message
+     */
     raiseError(severity, message) {
       if (!message) {
         message = "Unknown error";
