@@ -23,6 +23,7 @@
 </template>
 
 <script setup>
+//TODO: Add processing screen, while File is uploaded.
 import { useElementStore, useErrorStore } from "@/stores";
 import EnterTextDialog from "@/components/dialogs/EnterTextDialog.vue";
 
