@@ -1,69 +1,115 @@
 <template>
   <div>
-    <ObjectAndVersionSelectorWithProps
-      objectType="task"
-      v-model:element="currentTask"
-      v-model:version="currentVersion"
-      elementLabel="name"
-      versionLabel="tag"
-      dropDownClasses="baklava-dropdown"
-    >
-    </ObjectAndVersionSelectorWithProps>
-    <div>
-      <label for="addOutput">Add Outputs</label>
-      <input
-        class="baklava-input"
-        type="text"
-        v-model="newOutput"
-        name="addOutput"
-      />
-      <button class="baklava-button" @click="createOutput()">
-        Create output
-      </button>
-      <div v-for="output in currentOutputs">
-        <label :for="output"> {{ output }}</label>
-        <button
-          class="baklava-button"
-          :name="output"
-          @click="removeOutput(output)"
-        >
-          Remove output
+    <div class="grid mb-2">
+      <ObjectAndVersionSelectorWithProps
+        elementTitle="Task"
+        objectType="task"
+        v-model:element="currentTask"
+        v-model:version="currentVersion"
+        elementLabel="name"
+        versionLabel="tag"
+        dropDownClasses="baklava-dropdown"
+      >
+      </ObjectAndVersionSelectorWithProps>
+    </div>
+    <div class="grid border-white border-solid border-1 border-round-sm mb-2">
+      <div class="col-12">Add Output</div>
+      <div class="col-12">Variable Name:</div>
+      <div
+        class="col-6"
+        v-tooltip="{
+          value: `Create an output that can be used as in a Filter. <b>Note</b>: The Task must produce this output`,
+          escape: true,
+        }"
+      >
+        <input
+          class="baklava-input w-full"
+          type="text"
+          v-model="newOutput"
+          name="addOutput"
+        />
+      </div>
+
+      <div class="col-6">
+        <button class="baklava-button" @click="createOutput()">
+          Add output
         </button>
+      </div>
+      <div class="col-12">
+        Existing Outputs:
+        <ul>
+          <li v-for="output in currentOutputs">
+            <div class="flex align-items-center justify-content-between">
+              {{ output }}
+              <button class="baklava-button" @click="removeOutput(output)">
+                Remove output
+              </button>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="grid border-white border-solid border-1 border-round-sm mt-2">
+      <div class="col-12">Add Persistent Data</div>
+      <div class="col-12">Variable Name:</div>
+      <div class="col-6">
+        <input
+          class="baklava-input w-full"
+          type="text"
+          v-model="newPersistent"
+          name="addPersistent"
+        />
+      </div>
+      <div class="col-6">
+        <button class="baklava-button" @click="createPersistent()">
+          Add Persistent
+        </button>
+      </div>
+      <div class="col-12">
+        Existing Persistent Values:
+        <ul>
+          <li v-for="persistent in currentPersistent">
+            <div class="flex align-items-center justify-content-between">
+              {{ persistent }}
+              <button
+                class="baklava-button"
+                :name="persistent"
+                @click="removePersistent(persistent)"
+              >
+                Remove Persistent
+              </button>
+            </div>
+          </li>
+        </ul>
       </div>
     </div>
     <div>
-      <label for="addPersistent">Add Persistent Data</label>
-      <input
-        class="baklava-input"
-        type="text"
-        v-model="newPersistent"
-        name="addPersistent"
-      />
-      <button class="baklava-button" @click="createPersistent()">
-        Add Persistent
-      </button>
-      <div v-for="persistent in currentPersistent">
-        <label :for="persistent"> {{ persistent }}</label>
-        <button
-          class="baklava-button"
-          :name="persistent"
-          @click="removePersistent(persistent)"
-        >
-          Remove Persistent
-        </button>
-      </div>
+      <Button
+        class="baklava-button mt-2"
+        :disabled="isInValid"
+        @click="editTask()"
+        label="Edit Task"
+      >
+      </Button>
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import TaskNode from "../NodeTypes/TaskNode";
+import Button from "primevue/button";
 import { ComponentInterface } from "../NodeInterfaces/ComponentInterface";
-import { useGraphStore, useElementStore, useErrorStore } from "@/stores";
+import TaskNode from "../NodeTypes/TaskNode";
+import {
+  useGraphStore,
+  useEditorStore,
+  useElementStore,
+  useErrorStore,
+} from "@/stores";
 import ObjectAndVersionSelectorWithProps from "@/components/utils/ObjectAndVersionSelectorWithProps.vue";
+
 export default defineComponent({
-  components: { ObjectAndVersionSelectorWithProps },
+  components: { ObjectAndVersionSelectorWithProps, Button },
   props: {
     intf: {
       type: Object as () => ComponentInterface<TaskNode>,
@@ -75,6 +121,7 @@ export default defineComponent({
       nodeID: "",
       newOutput: "",
       newPersistent: "",
+      objectType: "task",
       taskVersions: [],
     };
   },
@@ -82,7 +129,8 @@ export default defineComponent({
     const elementStore = useElementStore();
     const graphStore = useGraphStore();
     const errorStore = useErrorStore();
-    return { elementStore, errorStore, graphStore };
+    const editorStore = useEditorStore();
+    return { elementStore, errorStore, graphStore, editorStore };
   },
   methods: {
     createOutput() {
@@ -112,13 +160,6 @@ export default defineComponent({
       }
       this.newPersistent = "";
     },
-    async setTask(selected) {
-      console.log("Setting task");
-      this.currentTask = selected;
-    },
-    async setTaskVersion(selected) {
-      this.currentVersion = selected;
-    },
     removeOutput(output: string) {
       console.log("removing output: " + output);
       this.currentNode.removeElementOutput(output);
@@ -127,8 +168,21 @@ export default defineComponent({
       console.log("removing Persistent: " + persistent);
       this.currentNode.removeElementPersistent(persistent);
     },
+    editTask() {
+      this.editorStore.loadElement(
+        this.objectType,
+        this.currentTask.name,
+        this.currentTask.UUID,
+        this.currentVersion.version
+      );
+    },
   },
   computed: {
+    isInValid() {
+      return (
+        this.currentTask.UUID == null || this.currentVersion.version == null
+      );
+    },
     currentNode(): TaskNode {
       return this.intf.data;
     },

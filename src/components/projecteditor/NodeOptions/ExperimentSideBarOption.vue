@@ -1,22 +1,26 @@
 <template>
   <div>
     <ObjectAndVersionSelectorWithProps
+      elementTitle="Experiment"
       :objectType="objectType"
-      v-model:element="currentTask"
+      v-model:element="currentExperiment"
       v-model:version="currentVersion"
       elementLabel="name"
       versionLabel="tag"
     >
     </ObjectAndVersionSelectorWithProps>
-    <div class="flex align-items-center">
-      <label for="random" class="ml-2"> Randomize </label>
-      <Checkbox
-        class="baklava-checkbox"
-        :disabled="!currentNode.canRandom"
-        v-model="isRandom"
-        :binary="true"
-        name="random"
-      />
+    <div
+      class="grid border-white border-solid border-1 border-round-sm mt-2 mb-2"
+    >
+      <div class="col-12 flex align-items-center justify-content-between">
+        <div>{{ "Randomize" }}</div>
+        <Checkbox
+          :disabled="!currentNode.canRandom"
+          v-model="isRandom"
+          :binary="true"
+          name="random"
+        />
+      </div>
     </div>
     <div>
       <Button
@@ -64,18 +68,11 @@ export default defineComponent({
     return { editorStore };
   },
   methods: {
-    async setTask(selected) {
-      console.log("Setting Exeriment");
-      this.currentTask = selected;
-    },
-    async setTaskVersion(selected) {
-      this.currentVersion = selected;
-    },
     editExperiment() {
       this.editorStore.loadElement(
         this.objectType,
-        this.currentTask.name,
-        this.currentTask.UUID,
+        this.currentExperiment.name,
+        this.currentExperiment.UUID,
         this.currentVersion.version
       );
     },
@@ -83,13 +80,14 @@ export default defineComponent({
   computed: {
     isInValid() {
       return (
-        this.currentTask.UUID == null || this.currentVersion.version == null
+        this.currentExperiment.UUID == null ||
+        this.currentVersion.version == null
       );
     },
     currentNode(): ExperimentNode {
       return this.intf.data;
     },
-    currentTask: {
+    currentExperiment: {
       get() {
         return {
           UUID: this.intf.data.objectData.UUID,
@@ -138,7 +136,7 @@ export default defineComponent({
   watch: {},
   async mounted() {
     this.nodeID = this.intf.id;
-    this.currentTask = this.intf.data.objectData;
+    this.currentExperiment = this.intf.data.objectData;
   },
 });
 </script>

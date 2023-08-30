@@ -136,6 +136,12 @@ export const useAuthStore = defineStore({
       await listStore.updateAvailableStudies();
       await listStore.fetchSignedUpStudies();
     },
+    /**
+     * Sign up a user with a given access token to the project with the given projectID.
+     * @param {*} projectID
+     * @param {*} accessToken
+     * @returns
+     */
     async signUp(projectID, accessToken) {
       const params = accessToken ? { token: accessToken } : {};
       try {

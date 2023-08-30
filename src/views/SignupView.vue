@@ -73,6 +73,7 @@ export default {
       console.log("Trying to auth with " + UUID + "/" + token);
       this.authStore.signUp(UUID, token).then(async (res) => {
         if (res) {
+          console.log("Signup successfull");
           this.justSignedUp = true;
           await this.authStore.refreshSession();
           await this.projectStore.fetchSignedUpStudies();
@@ -104,8 +105,8 @@ export default {
     const token = currentRoute.query.token;
     if (token) {
       // we have a signup with a token. Directly sign up to this project with the token, and display retrieved information.
+      console.log("Signing up to study");
       await this.signUp(currentRoute.params.id, token);
-
       // need to do this here, since otherwise it cannot be accessed.
     } else {
       await this.projectStore.updateAvailableStudies();

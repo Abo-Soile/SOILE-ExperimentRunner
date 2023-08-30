@@ -1,43 +1,60 @@
 <template>
   <div>
-    <FilterSetup
-      :node="intf.data"
-      v-model:filterName="newFilterName"
-      v-model:filterString="newFilter"
-      @saveFilter="createFilter()"
-      buttonLabel="Create Filter"
-    ></FilterSetup>
-    <table class="filterTable" v-if="currentFilters.size > 0">
-      <div v-for="(output, key) in currentFilters">
-        <tr>
-          <td class="tooltip-source">
+    <div class="grid border-white border-solid border-1 border-round-sm mb-2">
+      <div class="col-12">
+        <div class="mb-2">Create New Filter</div>
+        <FilterSetup
+          :node="intf.data"
+          v-model:filterName="newFilterName"
+          v-model:filterString="newFilter"
+          @saveFilter="createFilter()"
+          buttonLabel="Create Filter"
+        ></FilterSetup>
+      </div>
+    </div>
+
+    <div class="grid border-white border-solid border-1 border-round-sm mt-2">
+      <div class="col-12">
+        Existing Filters
+        <div class="grid mt-2" v-for="(output, key) in currentFilters">
+          <div
+            v-tooltip="output[1].filterstring"
+            class="col-6 flex align-items-center"
+          >
             {{ output[0] }}
-            <div class="tooltip-text">{{ output[1].filterstring }}</div>
-          </td>
-          <td>
-            <button class="baklava-button" @click="removeFilter(output[0])">
-              Remove Filter
+          </div>
+          <div class="col-3">
+            <button
+              class="baklava-button flex align-items-center"
+              @click="removeFilter(output[0])"
+            >
+              Remove
             </button>
-          </td>
-          <td v-if="!isEditing(key)">
-            <button class="baklava-button" @click="editFilter(key)">
-              Edit Filter
+          </div>
+          <div class="col-3 flex align-items-center justify-content-center">
+            <button
+              v-if="!isEditing(key)"
+              class="baklava-button"
+              @click="editFilter(key, false)"
+            >
+              Edit
             </button>
-          </td>
-        </tr>
-        <tr v-if="isEditing(key)">
-          <td colspan="2">
+          </div>
+          <div class="col-12" v-if="isEditing(key)">
             <FilterSetup
               :filterName="output[0]"
               :filterString="output[1].filterstring"
               :node="intf.data"
               buttonLabel="Update Node"
+              :allowCancel="true"
               @saveFilter="(event) => saveFilter(event, key)"
+              @cancel="editFilter(key, true)"
             ></FilterSetup>
-          </td>
-        </tr>
+            <div></div>
+          </div>
+        </div>
       </div>
-    </table>
+    </div>
   </div>
 </template>
 
@@ -45,7 +62,7 @@
 import { defineComponent } from "vue";
 import FilterNode from "../NodeTypes/FilterNode";
 import { ComponentInterface } from "../NodeInterfaces/ComponentInterface";
-import { FilterSetup } from "@/components";
+import FilterSetup from "./elements/FilterSetup.vue";
 
 export default defineComponent({
   props: {
@@ -85,8 +102,12 @@ export default defineComponent({
       this.currentNode.removeFilter(output);
       this.editing = [];
     },
-    editFilter(index: number) {
-      this.editing.push(index);
+    editFilter(index: number, stop: boolean) {
+      if (!stop) {
+        this.editing.push(index);
+      } else {
+        this.editing = this.editing.filter((e: number) => e != index);
+      }
     },
     isEditing(index: number): boolean {
       return this.editing.includes(index);

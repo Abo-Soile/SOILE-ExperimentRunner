@@ -26,22 +26,11 @@
         :accessTokens="accessTokens"
         :permanentToken="permanentAccessToken"
         :usedTokens="usedTokens"
+        :studyID="currentStudy.UUID"
+        :shortCut="currentStudy.shortCut ? currentStudy.shortCut : null"
         @createTokens="(event) => createAccessTokens(event)"
         @createMasterToken="createMasterToken"
       ></StudyActivity>
-      <!--<UserEditor
-        v-if="isStudyEditable"
-        :showPermissions="false"
-        @updateUsers="updateCollaborators"
-        @deleteUser="(event) => removeUser(event)"
-        @updateRole="(event) => updateRole(event.role, event.username)"
-        :showDetails="false"
-        :userList="collaborators"
-        title="Collaborators"
-        :roleOptions="['READ', 'READ_WRITE', 'FULL']"
-        roleColumn="access"
-      >
-      </UserEditor>-->
       <CollaboratorManager
         :availablePermissions="['READ', 'READ_WRITE', 'FULL']"
         :currentCollaborators="collaborators"

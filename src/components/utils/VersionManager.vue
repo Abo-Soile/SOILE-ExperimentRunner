@@ -97,7 +97,7 @@ const elementStore = useElementStore();
 const selectedTagData = ref(null);
 const displayedItems = computed(() => {
   if (!props.removeVersions) {
-    return props.elementVersionList.filter((x) => !x.tag);
+    return props.elementVersionList.filter((x) => x.canbe);
   } else {
     return props.elementVersionList.filter((x) => x.tag != null);
   }

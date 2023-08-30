@@ -33,7 +33,7 @@ export default class ExperimentNode extends SoileVersionedNode {
     ).setPort(false),
     ExperimentVersion: new TextInterface(
       "ExperimenVersion",
-      "Version: " + this.objectData.tag
+      "Version: " + this.objectData.tag ? this.objectData.tag : "UNVERSIONED"
     ).setPort(false),
     outputs: new ComponentInterface(
       "Outputs",

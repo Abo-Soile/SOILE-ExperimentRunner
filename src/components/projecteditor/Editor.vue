@@ -215,4 +215,15 @@ export default {
 .editor {
   position: relative;
 }
+
+.baklava-control {
+  background-color: var(--baklava-control-color-background);
+  color: var(--baklava-control-color-foreground);
+  border-radius: var(--baklava-control-border-radius);
+  transition: background-color var(--baklava-visual-transition);
+  padding: 0.45em 0.35em;
+  font-size: inherit;
+  border: none;
+  cursor: pointer;
+}
 </style>

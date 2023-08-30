@@ -17,7 +17,13 @@
         label="Create Permanent Access Token"
         @click="$emit('createMasterToken')"
       />
-      <div v-else>Permanent Access token is : {{ permanentToken }}</div>
+      <div v-else>
+        <div>Permanent Access token is : {{ permanentToken }}</div>
+        <div>
+          SignUp Link:
+          <a :href="baseTokenURL + permanentToken"> Right Click to Copy </a>
+        </div>
+      </div>
       <div v-if="accessTokens != null && accessTokens.length > 0">
         <h3>Access Tokens</h3>
         <ScrollPanel :style="{ width: '100%', height: maxSignupSize + 'rem' }">
@@ -94,6 +100,13 @@ const props = defineProps({
     type: Array,
     required: true,
   },
+  studyID: {
+    type: String,
+    required: true,
+  },
+  shortCut: {
+    type: String,
+  },
 });
 const emit = defineEmits([
   "update:active",
@@ -110,6 +123,22 @@ function createTokens() {
   // reset tokenCount
   tokenCount.value = 10;
 }
+
+const baseURL = computed(
+  () =>
+    `${getFullHost()}/signup/${props.shortCut ? props.shortCut : props.studyID}`
+);
+
+function getFullHost() {
+  var currentURL = window.location.href;
+
+  // Extracting protocol and host
+  return (
+    currentURL.split("//")[0] + "//" + currentURL.split("//")[1].split("/")[0]
+  );
+}
+
+const baseTokenURL = computed(() => `${baseURL.value}?token=`);
 
 const maxSignupSize = computed(() => Math.max(props.accessTokens.length, 10));
 const maxUsedSize = computed(() => Math.max(props.usedtokens.length, 10));

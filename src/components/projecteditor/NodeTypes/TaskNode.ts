@@ -37,7 +37,7 @@ export default class TaskNode extends SoileVersionedNode {
     ).setPort(false),
     taskVersion: new TextInterface(
       "TaskVersion",
-      "Version: " + this.objectData.tag ? this.objectData.tag : ""
+      "Version: " + this.objectData.tag ? this.objectData.tag : "UNVERSIONED"
     ).setPort(false),
     outputs: new ComponentInterface(
       "Outputs",
