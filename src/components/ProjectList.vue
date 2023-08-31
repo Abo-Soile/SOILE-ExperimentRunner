@@ -50,7 +50,7 @@
           </div>
         </template>
       </Column>
-      <Column header="Withdraw">
+      <Column :header="items.some((x) => isSignedUp(x)) ? 'Withdraw' : ''">
         <template #body="{ data, index }" let-index="index">
           <div>
             <Button
