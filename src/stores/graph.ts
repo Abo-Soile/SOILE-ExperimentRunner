@@ -6,6 +6,7 @@ import {
   SoileDataNode,
 } from "@/helpers/projecteditor/SoileTypes";
 import * as diacritics from "diacritics";
+import SoileNode from "@/components/projecteditor/NodeTypes/SoileNode";
 //var removeDiacritics = require('diacritics').remove;
 
 type Element = {
@@ -37,25 +38,6 @@ export const useGraphStore = defineStore({
       const errorStore = useErrorStore();
       //console.log(err);
       errorStore.raiseError(err.response?.status, err.response?.data);
-    },
-    isNameOk(node: SoileBaseNode, name: string) {
-      //console.log("Checking name: " + name)
-      const graph = node.graph;
-      //this.setupGraph(graph);
-      return ![...this.nodeNames.get(graph?.id).values()].some(
-        (v) => v === this.refineName(name)
-      );
-    },
-    updateName(node: SoileBaseNode, oldName: string, newName: string): string {
-      const graphid = node.graph?.id;
-      if (this.isNameOk(node, newName)) {
-        //console.log("New Name is ok")
-        this.nodeNames.get(graphid).set(node, this.refineName(newName));
-        return this.refineName(newName);
-      } else {
-        //console.log("New Name is not ok")
-        return oldName;
-      }
     },
     setStartNode(node: SoileBaseNode) {
       const graph = node.graph;
@@ -117,6 +99,33 @@ export const useGraphStore = defineStore({
         .replace(" ", "_")
         .replace(/[^\w_\.]/g, "");
     },
+    isNameOk(node: SoileBaseNode, name: string) {
+      //console.log("Checking name: " + name)
+      const graph = node.graph;
+      //this.setupGraph(graph);
+      return ![...this.nodeNames.get(graph?.id).values()].some(
+        (v) => v === this.refineName(name)
+      );
+    },
+    updateName(node: SoileBaseNode, oldName: string, newName: string): string {
+      const graphid = node.graph?.id;
+      if (this.isNameOk(node, newName)) {
+        //console.log("New Name is ok")
+        this.nodeNames.get(graphid).set(node, this.refineName(newName));
+        return this.refineName(newName);
+      } else {
+        //console.log("New Name is not ok")
+        return oldName;
+      }
+    },
+    setUniqueName(node: SoileNode) {
+      const uniqueName = this.getUniqueName(node);
+      const graph = node.graph;
+      const nodeID = node.id;
+      const nodeNames = this.nodeNames.get(graph?.id);
+      node.myTitle = uniqueName;
+      nodeNames.set(node, uniqueName);
+    },
     getUniqueName(node: SoileBaseNode) {
       const graph = node.graph;
       const nodeID = node.id;
@@ -142,6 +151,7 @@ export const useGraphStore = defineStore({
       //this.setupGraph(node.graph);
 
       if (node.isDataNode()) {
+        console.log("This is a data node");
         // we know this is a data node.
         const datanode = node as SoileDataNode;
         if (!(node.id in this.nodeOutputInformation.get(node.graph?.id))) {

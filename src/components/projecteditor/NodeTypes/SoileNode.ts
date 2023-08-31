@@ -44,12 +44,9 @@ export default abstract class SoileNode
   template: GraphTemplate;
   subgraph: Graph;
   public set title(newTitle: string) {
-    console.log("Updating title " + this.title);
-    console.log("Updating title to" + newTitle);
-    console.log("MyTitle: " + this.myTitle);
-    console.log("Type: " + this.type);
     //console.log("Setting title")
     if (this.graphStore.isNameOk(this, newTitle)) {
+      console.log(this.graph);
       console.log("Name was ok, changing");
       //console.log("updating title to" + newTitle);
       const changedTitle = this.graphStore.updateName(
@@ -80,7 +77,7 @@ export default abstract class SoileNode
 
     this.graphStore.setupNode(this);
     if (this.title === this.type) {
-      this.myTitle = this.graphStore.getUniqueName(this);
+      this.graphStore.setUniqueName(this);
     }
   }
   onDestroy() {
