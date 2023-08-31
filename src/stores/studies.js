@@ -143,6 +143,27 @@ export const useStudyStore = defineStore({
         return false;
       }
     },
+    /**
+     * Update a given study.
+     * @param {*} studyData
+     */
+    async updateStudy(studyData) {
+      try {
+        const response = await axios.post(
+          `/study/${studyData.UUID}/update`,
+          studyData
+        );
+        return response.data;
+      } catch (error) {
+        this.processAxiosError(error);
+        return false;
+      }
+    },
+    /**
+     * Download results for the given Study ID and the given downloadID.
+     * @param {*} studyID
+     * @param {*} downloadID
+     */
     async downloadResults(studyID, downloadID) {
       /* const response = await axios.get(
         `/study/${studyID}/download/${downloadID}`,

@@ -215,7 +215,7 @@ export default {
                 download.errors = response.problems;
               } else {
                 // still collecting or setting up
-                setTimeOut(this.checkDownloadReady, 2000, download);
+                setTimeout(this.checkDownloadReady, 2000, download);
               }
             }
           }

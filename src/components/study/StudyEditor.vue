@@ -19,6 +19,15 @@
         v-model:private="currentStudy.private"
         @update:valid="(event) => (dataValid = event)"
       />
+      <div
+        v-tooltip="
+          'You can only change the project if it is not active and there are no Participants yet'
+        "
+      >
+        <Button @click="updateStudy" :disabled="!isStudyEditable"
+          >Save Changes</Button
+        >
+      </div>
     </div>
     <div class="displaypart col-4">
       <StudyActivity
@@ -31,6 +40,7 @@
         @createTokens="(event) => createAccessTokens(event)"
         @createMasterToken="createMasterToken"
       ></StudyActivity>
+
       <CollaboratorManager
         :availablePermissions="['READ', 'READ_WRITE', 'FULL']"
         :currentCollaborators="collaborators"
@@ -107,11 +117,16 @@ export default {
   computed: {
     isStudyEditable() {
       return (
-        this.selectedStudy.UUID == null ||
-        this.editableStudies
-          .map((x) => x.UUID)
-          .includes(this.selectedStudy.UUID)
+        (this.selectedStudy.UUID == null || this.hasWriteAccess) &&
+        (!this.availableData.participants ||
+          this.availableData.participants.length == 0) && // This study cannot have any participants, if it does, the settings cannot be changed.
+        !this.currentStudy.active
       );
+    },
+    hasWriteAccess() {
+      return this.editableStudies
+        .map((x) => x.UUID)
+        .includes(this.selectedStudy.UUID);
     },
     sourceProject: {
       get() {
@@ -179,7 +194,7 @@ export default {
       console.log("Updating Data for Study in Editor");
       this.updateTokenData();
       this.updateAvailableDLData();
-      if (this.isStudyEditable) {
+      if (this.hasWriteAccess) {
         this.updateCollaborators();
       }
       this.userStore.fetchUserData();
@@ -217,6 +232,9 @@ export default {
     async createMasterToken() {
       await this.studyStore.generateMasterToken(this.currentStudy.UUID);
       await this.updateTokenData();
+    },
+    async updateStudy() {
+      await this.studyStore.updateStudy(this.currentStudy);
     },
   },
   mounted() {
