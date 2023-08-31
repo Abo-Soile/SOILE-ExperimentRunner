@@ -39,7 +39,18 @@
           </div>
         </template>
       </Column>
-      <Column header="Continue">
+      <Column :header="items.some((x) => isSignedUp(x)) ? 'Continue' : ''">
+        <template #body="{ data, index }" let-index="index">
+          <div>
+            <Button
+              v-if="isSignedUp(data)"
+              label="Continue"
+              @click="(event) => runProject(index, event)"
+            ></Button>
+          </div>
+        </template>
+      </Column>
+      <Column header="Withdraw">
         <template #body="{ data, index }" let-index="index">
           <div>
             <Button
