@@ -30,7 +30,9 @@
   <div v-if="showConfirmRemove">
     <ConfirmDialog
       v-model:isVisible="showConfirmRemove"
-      :tagData="selectedTagData"
+      :message="
+        'Do you really want to remove tag <' + selectedTagData.tag + '>'
+      "
       @confirm="deleteTag"
       @reject="showConfirmRemove = false"
     >
@@ -97,7 +99,9 @@ const elementStore = useElementStore();
 const selectedTagData = ref(null);
 const displayedItems = computed(() => {
   if (!props.removeVersions) {
-    return props.elementVersionList.filter((x) => x.canbe);
+    return props.elementVersionList.filter(
+      (x) => x.canbetagged && x.tag == null
+    );
   } else {
     return props.elementVersionList.filter((x) => x.tag != null);
   }
@@ -135,6 +139,7 @@ async function deleteTag() {
     props.type,
     [selectedTagData.value.tag]
   );
+  showConfirmRemove.value = false;
   if (removed) {
     emit("refreshData");
   }
@@ -171,6 +176,7 @@ function showAdd(rowData) {
  * @param {*} rowData
  */
 function confirmRemove(rowData) {
+  console.log(rowData);
   selectedTagData.value = rowData;
   showConfirmRemove.value = true;
 }
