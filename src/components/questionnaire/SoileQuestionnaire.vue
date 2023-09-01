@@ -90,13 +90,27 @@ export default {
           );
         }
       }
+      const persistentData = [];
+      for (const output of this.persistent) {
+        if (output in this.valuesToStore) {
+          const outValue = this.valuesToStore[output];
+          persistentData.push({ name: output, value: outValue });
+        } else {
+          throw new Error(
+            "Missing required output " +
+              output +
+              " cannot submit this questionnaire"
+          );
+        }
+      }
       const jsonData = [];
       for (const result in this.valuesToStore) {
         jsonData.push({ name: result, value: this.valuesToStore[result] });
       }
       return {
-        outputData: outputData,
+        outputData,
         resultData: { fileData: [], jsonData: jsonData },
+        persistentData,
       };
     },
     submitForm() {
