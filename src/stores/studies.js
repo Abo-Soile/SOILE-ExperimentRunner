@@ -160,6 +160,19 @@ export const useStudyStore = defineStore({
       }
     },
     /**
+     * Reset a given study.
+     * @param {*} studyID
+     */
+    async resetStudy(studyID) {
+      try {
+        await axios.post(`/study/${studyID}/reset`);
+        return true;
+      } catch (error) {
+        this.processAxiosError(error);
+        return false;
+      }
+    },
+    /**
      * Download results for the given Study ID and the given downloadID.
      * @param {*} studyID
      * @param {*} downloadID

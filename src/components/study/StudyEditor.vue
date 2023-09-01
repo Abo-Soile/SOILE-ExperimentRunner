@@ -19,14 +19,22 @@
         v-model:private="currentStudy.private"
         @update:valid="(event) => (dataValid = event)"
       />
-      <div
-        v-tooltip="
-          'You can only change the project if it is not active and there are no Participants yet'
-        "
-      >
-        <Button @click="updateStudy" :disabled="!isStudyEditable"
-          >Save Changes</Button
+      <div class="grid">
+        <div
+          class="col-6 flex justify-content-start"
+          v-tooltip="
+            'You can only change the project if it is not active and there are no Participants yet'
+          "
         >
+          <Button @click="updateStudy" :disabled="!isStudyEditable"
+            >Save Changes</Button
+          >
+        </div>
+        <div class="col-6 flex justify-content-end">
+          <Button @click="showResetDialog = true" :disabled="isActive"
+            >Reset Study</Button
+          >
+        </div>
       </div>
     </div>
     <div class="displaypart col-4">
@@ -56,6 +64,13 @@
       ></StudyDataSelector>
     </div>
   </div>
+  <ConfirmDialog
+    v-if="showResetDialog"
+    v-model:isVisible="showResetDialog"
+    @confirm="resetStudy"
+    title="Reset Study"
+    message="This will irreversibly delete all participant data from this study! Are you sure you want to do this?"
+  ></ConfirmDialog>
 </template>
 
 <script>
@@ -66,6 +81,7 @@ import ObjectAndVersionSelectorWithProps from "@/components/utils/ObjectAndVersi
 import { useStudyStore, useUserStore, useElementStore } from "@/stores";
 import { reactive } from "vue";
 
+import { ConfirmDialog } from "@/components/dialogs";
 import StudyProperties from "./StudyProperties.vue";
 import StudyActivity from "./StudyActivity.vue";
 import CollaboratorManager from "./CollaboratorManager.vue";
@@ -82,6 +98,7 @@ export default {
     UserEditor,
     Button,
     CollaboratorManager,
+    ConfirmDialog,
   },
   props: {
     editableStudies: {
@@ -102,6 +119,7 @@ export default {
       availableData: {},
       collaborators: [],
       showUserDialog: false,
+      showResetDialog: false,
     };
   },
   setup(props) {
@@ -120,8 +138,11 @@ export default {
         (this.selectedStudy.UUID == null || this.hasWriteAccess) &&
         (!this.availableData.participants ||
           this.availableData.participants.length == 0) && // This study cannot have any participants, if it does, the settings cannot be changed.
-        !this.currentStudy.active
+        !this.isActive
       );
+    },
+    isActive() {
+      return this.currentStudy.active;
     },
     hasWriteAccess() {
       return this.editableStudies
@@ -235,6 +256,11 @@ export default {
     },
     async updateStudy() {
       await this.studyStore.updateStudy(this.currentStudy);
+    },
+    async resetStudy() {
+      await this.studyStore.resetStudy(this.currentStudy.UUID);
+      this.updateData();
+      this.showResetDialog = false;
     },
   },
   mounted() {
