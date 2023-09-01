@@ -138,15 +138,15 @@ export const useAuthStore = defineStore({
     },
     /**
      * Sign up a user with a given access token to the project with the given projectID.
-     * @param {*} projectID
+     * @param {*} studyID
      * @param {*} accessToken
      * @returns
      */
-    async signUp(projectID, accessToken) {
+    async signUp(studyID, accessToken) {
       const params = accessToken ? { token: accessToken } : {};
       try {
         const response = await axios.post(
-          "/study/" + projectID + "/signup",
+          "/study/" + studyID + "/signup",
           null,
           {
             params: params,
@@ -154,6 +154,27 @@ export const useAuthStore = defineStore({
         );
         this.setProjectToken(response?.data.token);
         console.log("Signup was successful");
+        return true;
+      } catch (failed) {
+        console.log("Caught error");
+        console.log(failed);
+        this.processAxiosError(failed);
+        return false;
+      }
+    },
+    /**
+     * Withdraw from the specified study.
+     * @param {*} studyID
+     * @returns
+     */
+    async withdraw(studyID) {
+      try {
+        const response = await axios.post(
+          "/study/" + studyID + "/withdraw",
+          null
+        );
+        this.setProjectToken(null);
+        console.log("Withdraw was successful");
         return true;
       } catch (failed) {
         console.log("Caught error");

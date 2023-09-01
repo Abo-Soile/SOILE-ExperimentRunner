@@ -2,6 +2,7 @@
   <div v-if="canRun">
     <div class="h-screen" v-if="isRunningTask">
       <SoileExpRunner
+        class="taskPreview"
         v-if="codeType == 'elang'"
         :code="code"
         :outputs="currentTaskSettings.outputs"
@@ -20,6 +21,7 @@
       >
       </SoileExpRunner>
       <PsychoJsRunner
+        class="taskPreview"
         v-if="codeType == 'psychopy'"
         :code="code"
         :psychoJSVersion="codeTypeVersion"
@@ -37,6 +39,7 @@
       >
       </PsychoJsRunner>
       <SoileQuestionnaire
+        class="taskPreview"
         v-if="codeType == 'qmarkup'"
         :code="code"
         :outputs="currentTaskSettings.outputs"
@@ -44,6 +47,7 @@
         @handleError="(error) => handleError(error)"
       ></SoileQuestionnaire>
       <JsRunner
+        class="taskPreview"
         v-if="codeType == 'javascript'"
         :preview="true"
         :code="code"
@@ -194,3 +198,9 @@ export default {
   },
 };
 </script>
+<style scoped>
+.taskPreview {
+  width: 100%;
+  height: 100%;
+}
+</style>

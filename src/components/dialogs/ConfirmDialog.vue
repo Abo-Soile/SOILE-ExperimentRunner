@@ -23,7 +23,7 @@ export default {
     Dialog,
     Button,
   },
-  emits: ["confirm", "reject"],
+  emits: ["confirm", "reject", "update:isVisible"],
   props: {
     message: {
       type: String,
