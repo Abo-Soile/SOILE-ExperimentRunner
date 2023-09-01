@@ -55,14 +55,29 @@
           <div>
             <Button
               v-if="isSignedUp(data)"
-              label="Continue"
-              @click="(event) => runProject(index, event)"
+              label="Withdraw"
+              @click="showWithDrawConfirmation(index)"
             ></Button>
           </div>
         </template>
       </Column>
     </DataTable>
   </div>
+  <ConfirmDialog
+    v-if="withDrawConfirm"
+    v-model:isVisible="withDrawConfirm"
+    :message="
+      'Do you really want to withdraw from the following study: ' +
+      selectedStudy.name +
+      '? All your data and progress will be permanently deleted and your access key will no longer work.'
+    "
+    title="Withdraw from Study"
+    @reject="
+      selectedStudy = null;
+      withDrawConfirm = false;
+    "
+    @confirm="confirmWithDraw()"
+  ></ConfirmDialog>
 </template>
 
 <script setup>
@@ -71,6 +86,7 @@ import Button from "primevue/button";
 import InputText from "primevue/inputtext";
 import Column from "primevue/column";
 
+import { ConfirmDialog } from "@/components/dialogs";
 import { router } from "@/helpers";
 import { useProjectStore, useAuthStore } from "@/stores";
 
@@ -79,7 +95,8 @@ import { ref } from "vue";
 const projectStore = useProjectStore();
 const authStore = useAuthStore();
 const continueToken = ref(undefined);
-
+const withDrawConfirm = ref(false);
+const selectedStudy = ref(null);
 const props = defineProps({
   items: {
     type: Array,
@@ -105,6 +122,21 @@ async function runProject(index, event) {
 async function continueProject(index, event) {
   event.preventDefault();
   runProject(index);
+}
+
+/**
+ * Show the withdraw Confirmation dialog
+ * @param {*} index
+ * @param {*} event
+ */
+function showWithDrawConfirmation(index, event) {
+  selectedStudy.value = props.items[index];
+  withDrawConfirm.value = true;
+}
+
+async function confirmWithDraw() {
+  await authStore.withdraw(selectedStudy.value.UUID);
+  withDrawConfirm.value = false;
 }
 
 function isSignedUp(data) {

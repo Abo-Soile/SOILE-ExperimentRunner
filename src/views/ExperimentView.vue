@@ -46,7 +46,7 @@
       @handleError="(error) => handleError(error)"
     ></SoileQuestionnaire>
     <JsRunner
-      v-if="codeType == 'javascript'"
+      v-if="currentTaskSettings.codeType == 'javascript'"
       :preview="false"
       :code="code"
       :studyID="$route.params.id"
@@ -73,7 +73,13 @@ import Button from "primevue/button";
 
 export default {
   name: "ExperimentView",
-  components: { SoileQuestionnaire, SoileExpRunner, PsychoJsRunner, Button },
+  components: {
+    SoileQuestionnaire,
+    SoileExpRunner,
+    PsychoJsRunner,
+    Button,
+    JsRunner,
+  },
   data() {
     return {
       code: undefined,
