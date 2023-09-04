@@ -67,9 +67,14 @@
     Javascript tasks need to use the following available end-points to produce outputs:
     <ul>
     <li> <code>window.submitFile(fileName : string, fileFormat : string, file : File)</code> : This function submits a file with the given mime type that will be added to the results of the given task.</li>
-    <li> <code>window.reportResults(data : Object)</code> : This function will add Data in a JSON format to the results data for this task. NOTE: existing fields will not be merged but overwritten.</li>
+    <li> <code>window.reportResult(data : Object)</code> : This function will add Data in a JSON format to the results data for this task. NOTE: existing fields will not be merged but overwritten.</li>
     <li> <code>window.submitResults()</code> : This function submits the data to the database. Without calling it, all other data will not be stored.</li>
-    <li> <code>window.handleError(error)</code> : This function will raise an error, indicating a problem to the user.</li>
+    <li> <code>window.handleError(error)</code> : This function will raise an error, indicating a problem to the user.</li>    
+    <li> <code>window.setOutput(key, value)</code> : This function will add an output value to the task outputs, which can be used in future filters. NOTE: Output values have to be numbers! </li>    
+    </ul>
+    There is also a special field added to the window, to save and retrieve data from a task:
+    <ul>
+      <li><code>window.persistentData</code>: This is an object where any data can be saved and retrieved using the same variable name in later tasks. NOTE: Any modification of this object will be reflected in future tasks !</li>
     </ul>
   </p>
   <h3>Editing Tasks</h3>

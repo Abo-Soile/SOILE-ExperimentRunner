@@ -27,8 +27,12 @@ export default {
       required: true,
     },
     persistentData: {
-      required: true,
+      default: {},
       type: Object,
+    },
+    outputs: {
+      default: [],
+      type: Array,
     },
   },
   data() {
@@ -36,6 +40,7 @@ export default {
       results: {},
       files: [],
       persistent: {},
+      outputValues: {},
     };
   },
   methods: {
@@ -89,6 +94,38 @@ export default {
       }
     },
     /**
+     * Build the persisten Object used for the task
+     * @param {*} persistentDataArray
+     */
+    buildPersistentObject(persistentDataArray) {
+      const persistent = {};
+      persistentDataArray.forEach((element) => {
+        persistent[element.name] = element.value;
+      });
+      return persistent;
+    },
+
+    /**
+     * Parse the persistent object to the array required.
+     * @param {*} objectToConvert
+     */
+    buildArrayFromObject(objectToConvert) {
+      const result = [];
+      Object.keys(objectToConvert).forEach((element) => {
+        result.push({ name: element, value: objectToConvert[element] });
+      });
+      return result;
+    },
+
+    /**
+     * Set a given output key to the given value
+     * @param {*} key
+     * @param {*} value
+     */
+    setOutput(key, value) {
+      this.outputValues[key] = value;
+    },
+    /**
      * @return a json object that can be submitted to the SOILE backend
      */
     buildResults() {
@@ -98,22 +135,37 @@ export default {
         jsonResults.push({ name: field, value: this.results[field] });
       }
       return {
-        outputData: [],
+        outputData: this.buildArrayFromObject(this.outputValues),
         resultData: { fileData: this.files, jsonData: jsonResults },
-        persistentData: this.persistentData,
+        persistentData: this.buildArrayFromObject(this.persistent),
       };
     },
     handleError(error) {
       this.$emit("handleError", error);
     },
+    resetData() {
+      this.persistent = this.persistentData;
+      this.outputValues = {};
+      this.files = {};
+      this.results = {};
+    },
   },
   mounted() {
+    this.resetData();
     const iframeWindow = this.$refs.JSWindow.contentWindow;
-    iframeWindow.persistentData = this.persistentData;
+    this.persistent = this.persistentData;
+    iframeWindow.persistentData = this.persistent;
     iframeWindow.submitFile = this.submitFile;
     iframeWindow.reportResult = this.handleData;
-    iframeWindow.submitResult = this.submit;
+    iframeWindow.submitResults = this.submit;
     iframeWindow.handleError = this.handleError;
+    iframeWindow.setOutput = this.setOutput;
+  },
+  watch: {
+    code() {
+      // if the code changes, reset the data
+      this.reset();
+    },
   },
   setup() {
     const projectStore = useProjectStore();
