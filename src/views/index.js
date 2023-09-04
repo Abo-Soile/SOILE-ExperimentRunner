@@ -8,3 +8,4 @@ export { default as UserManagementView } from "./UserManagementView.vue";
 export { default as RegisterView } from "./RegisterView.vue";
 export { default as LoginView } from "./LoginView.vue";
 export { default as ProfileView } from "./ProfileView.vue";
+export { default as PilotView } from "./PilotView.vue";
