@@ -13,7 +13,7 @@ import SoileVersionedNode from "./SoileVersionedNode";
 export default class ExperimentNode extends SoileVersionedNode {
   public type = "ExperimentNode";
   public objectType = "experiment";
-  public random = ref(false);
+  public random = false;
   public canRandom = ref(true);
   public constructor() {
     super();

@@ -126,7 +126,11 @@ export default defineComponent({
         return this.intf.data.random;
       },
       async set(newValue: boolean) {
+        console.log(this.intf.data);
+        console.log({ ...this.intf.data });
         this.intf.data.random = newValue;
+        console.log({ ...this.intf.data });
+        console.log(this.intf.data);
       },
     },
     canRandom() {

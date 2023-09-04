@@ -21,6 +21,8 @@ export async function instantiateExperimentInProject(
   const experiment = JSON.parse(
     JSON.stringify(await elementStore.getElement(UUID, Version, "experiment"))
   ) as Experiment; // stringyfy/destringyfy for a deep copy.
+
+  experiment.randomize = random;
   const outputs = new Map<string, string>();
   for (const element of experiment.elements) {
     if (element.elementType === "task") {

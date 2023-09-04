@@ -178,7 +178,6 @@ async function addTask(
   previousMap: Map<String, NodeInterface>
 ) {
   const graphStore = useGraphStore();
-  console.log(task);
   const t = new TaskNode();
   if (task.position) {
     t.position = task.position;
@@ -212,7 +211,6 @@ async function addExperiment(
 ) {
   const graphStore = useGraphStore();
 
-  console.log(experiment);
   const e = new ExperimentNode();
   if (experiment.position) {
     e.position = experiment.position;
@@ -230,7 +228,7 @@ async function addExperiment(
     graphStore.setStartNode(e);
   }
   e.title = experiment.instanceID;
-  e.random.value = experiment.randomize ? experiment.randomize : false;
+  e.random = experiment.randomize ? experiment.randomize : false;
   nextMap.set(experiment.instanceID, e.outputs.next);
   previousMap.set(experiment.instanceID, e.inputs.previous);
   connections.push({ from: experiment.instanceID, to: experiment.next });
@@ -244,7 +242,6 @@ async function addFilter(
   nextMap: Map<String, NodeInterface>,
   previousMap: Map<String, NodeInterface>
 ) {
-  console.log(filter);
   const f = new FilterNode();
   if (filter.position) {
     f.position = filter.position;
@@ -313,7 +310,7 @@ export async function BaklavaToSoileProjectJSON(
       const instance = await instantiateExperimentInProject(
         cnode.objectData.UUID,
         cnode.objectData.version,
-        cnode.random.value,
+        cnode.random,
         cnode.title
       );
       instance.next = nextMap.get(cnode.outputs.next.id)
@@ -384,7 +381,7 @@ export async function BaklavaToSoileExperimentJSON(
       const instance = await instantiateExperimentInProject(
         cnode.objectData.UUID,
         cnode.objectData.version,
-        cnode.random.value,
+        cnode.random,
         cnode.title
       );
       instance.next = nextMap.get(cnode.outputs.next.id)
@@ -455,7 +452,6 @@ function createFilterJson(
 ): FilterInstance {
   const filters = new Array<{ name: string; filter: string; next: string }>();
   cnode.Filters.forEach((value, key) => {
-    console.log(key);
     const current = {
       name: key,
       filter: value.filterstring,
