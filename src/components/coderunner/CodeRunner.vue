@@ -43,7 +43,7 @@
     ></SoileQuestionnaire>
     <JsRunner
       class="h-full w-full"
-      v-if="currentTaskSettings.codeType == 'javascript'"
+      v-if="currentTaskSettings.codeType.language == 'javascript'"
       :code="code"
       :persistentData="currentTaskSettings.persistentData"
       @handleSubmit="(event) => submitResults(event)"
