@@ -8,17 +8,32 @@
       </template>
       <template #toolbar="toolbarProps">
         <div class="baklava-toolbar">
-          <button class="baklava-button" @click="saveProject()">
+          <button
+            v-tooltip="'Save the project'"
+            class="baklava-button"
+            @click="save()"
+          >
             <i class="pi pi-save" />
           </button>
-          <button class="baklava-button" @click="editSettings = true">
+          <button
+            v-tooltip="'Edit project settings'"
+            class="baklava-button"
+            @click="editSettings = true"
+          >
             <i class="pi pi-cog" />
+          </button>
+          <button
+            v-tooltip="'Edit the available versions for this project'"
+            class="baklava-button"
+            @click="showVersionManagementDialog = true"
+          >
+            <i class="pi pi-server" />
           </button>
         </div>
       </template>
     </baklava-editor>
   </div>
-  <ElementSettings
+  <ElementSettingsDialog
     v-model:visible="editSettings"
     :newElement="newElement"
     :initialValues="objectOptions"
@@ -30,6 +45,11 @@
     :currentTags="currentTags"
     @submit="saveElement"
   />
+  <ElementVersionManagementDialog
+    :UUID="data.UUID"
+    :type="type"
+    v-model:isVisible="showVersionManagementDialog"
+  ></ElementVersionManagementDialog>
 </template>
 
 <script>
@@ -42,8 +62,12 @@ import FilterNode from "./NodeTypes/FilterNode";
 import ExperimentNode from "./NodeTypes/ExperimentNode";
 import SoileNode from "./ViewComponents/SoileVueNode.vue";
 import HintOverlay from "./HintOverlay.vue";
-import ElementSettings from "@/components/utils/ElementSettings.vue";
-import ElementSaveDialog from "@/components/utils/ElementSaveDialog.vue";
+
+import {
+  ElementSettingsDialog,
+  ElementSaveDialog,
+  ElementVersionManagementDialog,
+} from "@/components/dialogs";
 
 import {
   BaklavaToSoileProjectJSON,
@@ -64,8 +88,9 @@ export default {
     ElementSaveDialog,
     BaklavaNode,
     SoileNode,
-    ElementSettings,
+    ElementSettingsDialog,
     HintOverlay,
+    ElementVersionManagementDialog,
   },
   emits: ["updateName", "updateElement", "createElement"],
   props: {
@@ -91,6 +116,7 @@ export default {
       editSettings: false,
       showSave: false,
       currentTags: [],
+      showVersionManagementDialog: false,
     };
   },
   setup(props) {
@@ -132,7 +158,7 @@ export default {
     return { graphStore, objectOptions, elementStore, errorStore };
   },
   methods: {
-    async saveProject() {
+    async save() {
       try {
         if (this.type === "project") {
           await BaklavaToSoileProjectJSON(this.baklava.editor.graph);

@@ -9,6 +9,7 @@ import {
   RegisterView,
   LoginView,
   ProfileView,
+  PilotView,
 } from "@/views";
 import { useProjectStore, useAuthStore } from "@/stores";
 
@@ -32,6 +33,18 @@ const routes = [
     path: "/editing/:id/:version/",
     name: "TaskEditingView",
     component: ProjectEditingView,
+    props: true,
+  },
+  {
+    path: "/pilot/:id/:version/",
+    name: "PilotTask",
+    component: PilotView,
+    props: true,
+  },
+  {
+    path: "/pilot/",
+    name: "PilotStarter",
+    component: PilotView,
     props: true,
   },
   {

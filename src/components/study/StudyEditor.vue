@@ -21,7 +21,7 @@
       />
       <div class="grid">
         <div
-          class="col-6 flex justify-content-start"
+          class="col-4 flex justify-content-start"
           v-tooltip="
             'You can only change the project if it is not active and there are no Participants yet'
           "
@@ -30,7 +30,19 @@
             >Save Changes</Button
           >
         </div>
-        <div class="col-6 flex justify-content-end">
+        <div
+          class="col-4 flex justify-content-start"
+          v-tooltip="
+            'Pilot the study, without actually generating any data (only temporary data will be created)'
+          "
+        >
+          <Button
+            @click="this.$router.push('/pilot/')"
+            :disabled="!isStudyEditable"
+            >Pilot</Button
+          >
+        </div>
+        <div class="col-4 flex justify-content-end">
           <Button @click="showResetDialog = true" :disabled="isActive"
             >Reset Study</Button
           >
