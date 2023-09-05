@@ -32,10 +32,10 @@
                   :data="experiment.data"
                   :name="experiment.name"
                   @updateElement="
-                    (data) => updateElement(data, index, 'project')
+                    (data) => updateElement(data, index, 'experiment')
                   "
                   @createElement="
-                    (data) => updateElement(data, index, 'project')
+                    (data) => updateElement(data, index, 'experiment')
                   "
                   @updateName="(name) => updateName(name, index, 'experiment')"
                 ></Editor>
