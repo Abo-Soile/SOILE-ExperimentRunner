@@ -10,19 +10,9 @@
 </template>
 
 <script>
-import { useProjectStore } from "@/stores";
-
 export default {
   props: {
     code: {
-      type: String,
-      required: true,
-    },
-    preview: {
-      type: Boolean,
-      default: false,
-    },
-    studyID: {
       type: String,
       required: true,
     },
@@ -77,21 +67,7 @@ export default {
       }
     },
     async submitFile(fileName, fileFormat, file) {
-      if (this.preview) {
-        this.files.push({
-          filename: fileName,
-          targetid: "temp",
-          fileformat: fileFormat,
-          file: file,
-        });
-      } else {
-        const fileID = await this.projectStore.uploadData(this.studyID, file);
-        this.files.push({
-          filename: fileName,
-          targetid: fileID,
-          fileformat: fileFormat,
-        });
-      }
+      this.emit("handleUpload", { fileName, fileFormat, file });
     },
     /**
      * Build the persisten Object used for the task
@@ -136,7 +112,7 @@ export default {
       }
       return {
         outputData: this.buildArrayFromObject(this.outputValues),
-        resultData: { fileData: this.files, jsonData: jsonResults },
+        resultData: { fileData: [], jsonData: jsonResults }, // files are handled at a higher level and added there.
         persistentData: this.buildArrayFromObject(this.persistent),
       };
     },

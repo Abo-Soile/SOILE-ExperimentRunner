@@ -83,8 +83,7 @@ import CodeEditor from "./CodeEditor.vue";
 import CodePreview from "./CodePreview.vue";
 import TaskBar from "./TaskBar.vue";
 import DataEditor from "./DataEditor.vue";
-import ElementSaveDialog from "@/components/utils/ElementSaveDialog.vue";
-import ConfirmDialog from "@/components/dialogs/ConfirmDialog.vue";
+import { ElementSaveDialog, ConfirmDialog } from "@/components/dialogs";
 
 import { useElementStore, useErrorStore, useEditorStore } from "@/stores";
 import { isVideo, isImage, isText } from "@/helpers/mimeHelper.js";

@@ -1,15 +1,14 @@
 <template>
-  <div>
-    <label :for="source_data.id">{{ source_data.label }}</label>
-    <Dropdown
-      :class="isValid ? 'p-inputtext-sm' : 'p-invalid'"
-      v-model="value"
-      optionLabel="text"
-      optionValue="value"
-      :options="source_data.options"
-      placeholder="--- Please select an option ---"
-    />
-  </div>
+  <label :for="source_data.id">{{ source_data.label }}</label>
+  <Dropdown
+    class="ml-2"
+    :class="isValid ? 'p-inputtext-sm' : 'p-invalid'"
+    v-model="value"
+    optionLabel="text"
+    optionValue="value"
+    :options="source_data.options"
+    placeholder="--- Please select an option ---"
+  />
 </template>
 
 <script>

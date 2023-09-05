@@ -1,18 +1,19 @@
 <template>
-  <div
-    v-for="option in options"
-    :key="option.label"
-    class="flex align-items-center"
-  >
-    <Checkbox
-      class="questionnaire-label"
-      v-model="value"
-      :inputId="option.label"
-      name="category"
-      :value="option.value"
-      >{{ option.label }}</Checkbox
+  <div class="grid">
+    <div
+      v-for="option in options"
+      :key="option.label"
+      class="col-12 align-items-center"
     >
-    <label :for="option.label">{{ option.label }}</label>
+      <Checkbox
+        class="questionnaire-label"
+        v-model="value"
+        :inputId="option.label"
+        name="category"
+        :value="option.value"
+      ></Checkbox>
+      <label>{{ option.label }}</label>
+    </div>
   </div>
 </template>
 

@@ -1,16 +1,18 @@
 <template>
-  <div
-    v-for="option in source_data.options"
-    :key="option.id"
-    class="flex align-items-center"
-  >
-    <RadioButton
-      class="questionnaire-label"
-      v-model="value"
-      :inputId="option.id"
-      :value="{ value: option.selectedValue, id: option.id }"
-    />
-    <label :for="option.id" class="ml-2">{{ option.label }}</label>
+  <div class="grid">
+    <div
+      v-for="option in source_data.options"
+      :key="option.id"
+      class="col-12 align-items-center"
+    >
+      <RadioButton
+        class="questionnaire-label"
+        v-model="value"
+        :inputId="option.id"
+        :value="{ value: option.selectedValue, id: option.id }"
+      />
+      <label :for="option.id" class="ml-2">{{ option.label }}</label>
+    </div>
   </div>
 </template>
 

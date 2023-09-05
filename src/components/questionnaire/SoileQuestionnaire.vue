@@ -1,17 +1,14 @@
 <template>
-  <div>
-    <div
-      class="questionnaire"
-      inline
+  <div class="grid w-full">
+    <QuestionnaireParagraph
+      class="col-12 questionnaire"
       v-for="(paragraph, index) in usedCode.elements"
       :key="'paragraph_' + index"
+      @dataUpdate="(event) => updateAndCheckData(event)"
+      :paragraph_data="paragraph"
     >
-      <QuestionnaireParagraph
-        @dataUpdate="(event) => updateAndCheckData(event)"
-        :paragraph_data="paragraph"
-      >
-      </QuestionnaireParagraph>
-    </div>
+    </QuestionnaireParagraph>
+
     <Button :disabled="!canSubmit" @click="submitForm">Submit</Button>
   </div>
 </template>
@@ -35,12 +32,16 @@ export default {
       required: true,
       type: Array,
     },
+    persistent: {
+      type: Array,
+      default: [],
+    },
   },
+  name: "SoileQuestionnaire",
   emits: ["handleSubmit", "handleError"],
   components: { QuestionnaireParagraph, Button },
   methods: {
     updateAndCheckData(event) {
-      console.log(event);
       this.updatetarget(
         this.dbMap[event.target].dbcolumn,
         event.isValid,
@@ -55,16 +56,13 @@ export default {
       this.updateSubmittable();
     },
     updateSubmittable() {
-      console.log("Updating submission status");
-      console.log(this.validOptions);
       for (const toCheck in this.validOptions) {
         if (!this.validOptions[toCheck]) {
-          console.log("canSubmit is false!");
           this.canSubmit = false;
           return;
         }
       }
-      console.log("canSubmit is true!");
+
       this.canSubmit = true;
     },
 
@@ -118,7 +116,6 @@ export default {
         const submitJson = this.getSubmitJson();
         this.$emit("handleSubmit", submitJson);
       } catch (error) {
-        console.log(error);
         this.$emit("handleError", error.message);
       }
     },
@@ -145,7 +142,6 @@ export default {
     // reset first
     if (this.code) {
       for (const option of this.code.mapping) {
-        console.log("Setting " + option.dbcolumn + " to false in beforeMount");
         this.validOptions[option.dbcolumn] = false;
         // it might already be set, if, we ignore this.
         if (
@@ -163,9 +159,6 @@ export default {
     code(newValue) {
       if (newValue) {
         for (const option of newValue.mapping) {
-          console.log(
-            "Setting " + option.dbcolumn + " to false in code update"
-          );
           this.validOptions[option.dbcolumn] =
             this.validOptions[option.dbcolumn] || false;
           if (

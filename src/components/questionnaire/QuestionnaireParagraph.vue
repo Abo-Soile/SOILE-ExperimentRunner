@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="flex w-full align-items-center flex-row">
     <QuestionnaireComponent
       v-for="(element, index) in inlineGroups"
       :key="'component_' + index"
@@ -23,7 +23,6 @@ export default {
   methods: {
     dataUpdate(data) {
       this.$emit("dataUpdate", data);
-      console.log(data);
     },
   },
   computed: {
@@ -45,7 +44,7 @@ export default {
       if (currentgroup.length > 0) {
         groups.push(currentgroup);
       }
-      console.log(groups);
+
       return groups;
     },
   },

@@ -7,3 +7,6 @@ export { default as PasswordChangeDialog } from "./PasswordChangeDialog.vue";
 export { default as PermissionDialog } from "./PermissionDialog.vue";
 export { default as SelectNewVersionDialog } from "./SelectNewVersionDialog.vue";
 export { default as UserDialog } from "./UserDialog.vue";
+export { default as ElementSaveDialog } from "./ElementSaveDialog.vue";
+export { default as ElementSettingsDialog } from "./ElementSettingsDialog.vue";
+export { default as ObjectSelectionDialog } from "./ElementSettingsDialog.vue";

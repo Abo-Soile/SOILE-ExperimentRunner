@@ -1,13 +1,9 @@
 <template>
-  <div v-if="isRunningTask">
-    <SoileExpRunner
-      class="experimentview"
-      v-if="currentTaskSettings.codeType.language == 'elang'"
+  <div v-if="isRunningTask" class="h-screen">
+    <CodeRunner
+      class="h-full w-full"
+      :currentTaskSettings="taskInfo"
       :code="code"
-      :outputs="currentTaskSettings.outputs"
-      :persistentData="persistentData"
-      @handleSubmit="(event) => submitResults(event)"
-      @handleError="(error) => handleError(error)"
       @handleUpload="
         (event) =>
           uploadFile(
@@ -17,43 +13,9 @@
             event.errorCallBack
           )
       "
-    >
-    </SoileExpRunner>
-    <PsychoJsRunner
-      class="experimentview"
-      v-if="currentTaskSettings.codeType.language == 'psychopy'"
-      :code="code"
-      :psychoJSVersion="currentTaskSettings.codeType.version"
-      @handleSubmit="(event) => submitResults(event)"
-      @handleError="(error) => handleError(error)"
-      @handleUpload="
-        (event) =>
-          uploadFile(
-            event.file,
-            event.fileName,
-            event.idCallBack,
-            event.errorCallBack
-          )
-      "
-    >
-    </PsychoJsRunner>
-    <SoileQuestionnaire
-      class="experimentview"
-      v-if="currentTaskSettings.codeType.language == 'qmarkup'"
-      :code="code"
-      :outputs="currentTaskSettings.outputs"
-      @handleSubmit="(event) => submitResults(event)"
-      @handleError="(error) => handleError(error)"
-    ></SoileQuestionnaire>
-    <JsRunner
-      v-if="currentTaskSettings.codeType == 'javascript'"
-      :preview="false"
-      :code="code"
-      :studyID="$route.params.id"
-      :persistentData="persistentData"
-      @handleSubmit="(event) => submitResults(event)"
-      @handleError="(error) => handleError(error)"
-    ></JsRunner>
+      @submitResults="submitResults"
+      @handleError="handleError"
+    ></CodeRunner>
   </div>
   <div v-else>
     <Button @click="setTaskActive">Start Next Task</Button>
@@ -62,10 +24,7 @@
 
 <script>
 import axios from "axios";
-import SoileQuestionnaire from "../components/questionnaire/SoileQuestionnaire.vue";
-import SoileExpRunner from "../components/experimentlang/SoileExpRunner.vue";
-import PsychoJsRunner from "../components/psychopy/PsychoJsRunner.vue";
-import JsRunner from "../components/jsrunner/JsRunner.vue";
+import CodeRunner from "@/components/coderunner/CodeRunner.vue";
 import { mapState } from "pinia";
 import { useErrorStore } from "@/stores";
 import { useProjectStore } from "@/stores/project";
@@ -74,16 +33,13 @@ import Button from "primevue/button";
 export default {
   name: "ExperimentView",
   components: {
-    SoileQuestionnaire,
-    SoileExpRunner,
-    PsychoJsRunner,
     Button,
-    JsRunner,
+    CodeRunner,
   },
   data() {
     return {
       code: undefined,
-      persistentData: {},
+      persistentData: [],
       running: false,
     };
   },
@@ -104,6 +60,7 @@ export default {
       axios
         .post("/study/" + this.$route.params.id + "/getpersistent")
         .then((persistentresponse) => {
+          console.log(persistentresponse);
           this.persistentData = persistentresponse?.data;
           axios
             .get(
@@ -206,6 +163,14 @@ export default {
   },
   computed: {
     ...mapState(useProjectStore, ["currentTaskSettings", "isRunningTask"]),
+    taskInfo() {
+      return {
+        codeType: this.currentTaskSettings.codeType,
+        outputs: this.currentTaskSettings.outputs, // this is only information on whether these outputs are indicated in the task.
+        persistentData: { ...this.persistentData }, // this is data that needs to be submitted and changed.
+        persistentFields: this.currentTaskSettings.persistent,
+      };
+    },
   },
   mounted() {
     console.log("ExpView Mounted");

@@ -26,7 +26,7 @@ import PanelMenu from "primevue/panelmenu";
 
 import PsychoPyImporter from "@/components/psychopy/PsychoPyImporter.vue";
 import TaskUploader from "@/components/taskeditor/TaskUploader.vue";
-import ObjectSelectionDialog from "@/components/utils/ObjectSelectionDialog.vue";
+import ObjectSelectionDialog from "@/components/dialogs/ObjectSelectionDialog.vue";
 
 import { ref, computed, reactive } from "vue";
 

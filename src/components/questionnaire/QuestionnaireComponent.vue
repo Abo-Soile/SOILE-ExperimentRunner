@@ -1,5 +1,9 @@
 <template>
-  <span v-for="(element, index) in component_data" :key="index">
+  <span
+    class="flex align-items-center"
+    v-for="(element, index) in component_data"
+    :key="index"
+  >
     <QuestionnaireDropDownMenu
       v-if="element.type == 'dropdownmenu'"
       @dataUpdate="dataUpdate"

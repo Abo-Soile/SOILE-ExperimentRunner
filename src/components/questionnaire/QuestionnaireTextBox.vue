@@ -1,5 +1,5 @@
 <template>
-  <span>
+  <span class="align-items-start">
     <label class="questionnaire-label" :for="source_data.id">{{
       source_data.label
     }}</label>

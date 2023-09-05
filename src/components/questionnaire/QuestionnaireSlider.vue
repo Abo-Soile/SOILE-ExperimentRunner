@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div :style="source_data.style">
     <Slider
       type="range"
       :step="source_data.increment"

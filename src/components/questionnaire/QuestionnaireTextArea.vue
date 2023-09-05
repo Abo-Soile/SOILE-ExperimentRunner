@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="flex align-items-start">
     <label class="questionnaire-label" v-if="hasLabel" :for="source_data.id">{{
       source_data.label
     }}</label>

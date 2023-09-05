@@ -1,18 +1,16 @@
 <template>
-  <div>
-    <label class="questionnaire-label" :for="source_data.id">{{
-      source_data.label
-    }}</label>
-    <InputNumber
-      :class="isValid ? 'p-inputtext-sm' : 'p-invalid p-inputtext-sm'"
-      :step="source_data.increment"
-      mode="decimal"
-      showButtons
-      :id="source_data.id"
-      v-model="value"
-    >
-    </InputNumber>
-  </div>
+  <label class="questionnaire-label" :for="source_data.id">{{
+    source_data.label
+  }}</label>
+  <InputNumber
+    :class="isValid ? 'p-inputtext-sm' : 'p-invalid p-inputtext-sm'"
+    :step="source_data.increment"
+    mode="decimal"
+    showButtons
+    :id="source_data.id"
+    v-model="value"
+  >
+  </InputNumber>
 </template>
 
 <script>

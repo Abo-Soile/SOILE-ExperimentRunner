@@ -18,15 +18,14 @@ export default {
   },
   methods: {
     /**
-     *
-     * @param {*} filename (unused)
-     * @param {*} data the data of the experiment.
-     * @param {*} mimetype (unused)
+     * Handle a submission of a JSON file coming from psychoJS.
+     * In theory filename and mimetype are irrelevant...
+     * TODO: Make this more versatile...
+     * @param {*} filename
+     * @param {*} data
+     * @param {*} mimetype
      */
     handleData(filename, data, mimetype) {
-      console.log(filename);
-      console.log(data);
-      console.log(mimetype);
       this.results = JSON.parse(data);
     },
     /**

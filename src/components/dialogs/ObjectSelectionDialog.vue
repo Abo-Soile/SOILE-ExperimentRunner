@@ -30,7 +30,7 @@
 <script>
 import Dialog from "primevue/dialog";
 import Button from "primevue/button";
-import ObjectAndVersionSelector from "./ObjectAndVersionSelector.vue";
+import { ObjectAndVersionSelector } from "@/components/utils";
 
 export default {
   components: { Button, Dialog, ObjectAndVersionSelector },

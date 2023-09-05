@@ -22,6 +22,9 @@ export default {
       required: true,
       type: Array,
     },
+    /**
+     * This is an Object with variable names.
+     */
     persistentData: {
       required: true,
       type: Object,
