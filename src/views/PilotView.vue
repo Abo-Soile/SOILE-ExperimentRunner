@@ -79,19 +79,20 @@ export default {
       });
       this.code = response?.data;
     },
+    /**
+     * Get the next element in the project.
+     * @param {*} start
+     */
     async getNext(start) {
-      console.log(this.currentElementID);
       const nextElementID = this.elements[this.currentElementID].next;
-
+      // if we end, this is done and if we get null, we stop as well.
       if (nextElementID != null && nextElementID != "end") {
+        // if this is a call from the start, our next element is the current element.
         var nextElement = start
           ? this.elements[this.currentElementID]
           : this.elements[nextElementID];
         while (nextElement != null && nextElement.elementType != "task") {
-          console.log("Trying to determine the next element");
-          console.log(nextElement);
-          console.log(nextElement.elementType);
-          console.log(nextElement.instanceID);
+          // obtain the next element of the filter and check whether thats a task
           if (nextElement.elementType === "filter") {
             nextElement = await this.getFilterNext(nextElement);
           }
@@ -105,11 +106,12 @@ export default {
           nextElement.version,
           "task"
         );
-        console.log(taskData);
+        // update the settings of the task.
         this.codeType = taskData.codeType.language;
         this.codeTypeVersion = taskData.codeType.version;
         this.sourceCode = taskData.code;
         this.currentElementID = nextElement.instanceID;
+        // compile it to obtain the compiled code.
         await this.compileTask();
         console.log(nextElement);
         this.currentElement = nextElement;
@@ -117,13 +119,18 @@ export default {
         this.currentElement = null;
       }
     },
-
+    /**
+     * Get the next element based on the given filter node.
+     * @param {*} filter
+     */
     async getFilterNext(filter) {
       for (const option of filter.options) {
+        // use the test filter endpoint to check the result of the filter.
         const response = await axios.post("/project/testfilter", {
           filter: option.filter,
-          parameters: this.outputData,
+          parameters: this.outputData, // the output data that we have obtained till now.
         });
+        // if the option is valid, return it.
         if (response.data.valid) {
           if (response.data.value > 0) {
             return this.elements[option.next];
@@ -132,7 +139,10 @@ export default {
       }
       return this.elements[filter.defaultOption];
     },
-
+    /**
+     * Get the next element from an experiment.
+     * @param {*} experiment
+     */
     getExperimentNext(experiment) {
       console.log(experiment);
       console.log(this.elements[experiment.elements[0].data.instanceID]);
@@ -158,13 +168,24 @@ export default {
         return this.elements[experiment.elements[0].data.instanceID];
       }
     },
+    /**
+     * Handle a file upload. We could also store the actual uploaded file here, but I don't think that's necessary
+     * @param {*} event
+     */
     handleFileUpload(event) {
       // we ignore what exactly it is ad just give back a temporary id;
       event.idCallBack("temporary");
     },
+    /**
+     * Submit results. This finishes a task, changes to the loading view and performs updates.
+     * Since everything is local, I assume this to be fast enough so that the user pressing the button
+     * is late enough for everything to be done. But maybe we will need to disable the button till it hasupdated...
+     * @param {*} results
+     */
     async submitResults(results) {
       this.loading = true;
       const currentInstanceID = this.currentElement.instanceID;
+      // update the rsult data for this task.
       const resultData = results.resultData
         ? results.resultData
         : { resultData: [], fileData: [] };
@@ -173,16 +194,20 @@ export default {
         step: this.results.length + 1,
         resultData,
       });
+      // update the persistent data.
       results.persistentData.forEach(
         (x) => (this.persistent[x.name] = x.value)
       );
-
-      this.persistent = results.persistentData ? results.persistentData : [];
+      // update the output data.
       results.outputData.forEach(
         (x) => (this.outputData[currentInstanceID + "." + x.name] = x.value)
       );
       await this.getNext();
     },
+    /**
+     * Handle errors, mainly a referral to the error store.
+     * @param {*} error
+     */
     handleError(error) {
       this.errorStore.raiseError(undefined, error);
     },
@@ -191,6 +216,7 @@ export default {
      * Parse a study such that we can run it.
      */
     async parseStudy() {
+      // get the project run by the study.
       this.currentProject = await this.elementStore.getElement(
         this.currentEditedStudy.sourceUUID,
         this.currentEditedStudy.version,
@@ -198,13 +224,16 @@ export default {
       );
       // this needs to be a deep copy, since we are altering the contents
       this.currentProject = JSON.parse(JSON.stringify(this.currentProject));
+      // add all tasks
       for (const task of this.currentProject.tasks) {
         task.elementType = "task";
         this.elements[task.instanceID] = task;
       }
+      // and everything from experiments
       for (const experiment of this.currentProject.experiments) {
         this.parseExperiment(experiment);
       }
+      // add filters
       for (const filter of this.currentProject.filters) {
         filter.elementType = "filter";
         this.elements[filter.instanceID] = filter;
@@ -212,6 +241,10 @@ export default {
       this.currentElementID = this.currentProject.start;
       await this.getNext(true);
     },
+    /**
+     * Parse an experiment object from a Project.
+     * @param {*} experiment
+     */
     parseExperiment(experiment) {
       for (const element of experiment.elements) {
         console.log(element);
@@ -226,6 +259,9 @@ export default {
       experiment.elementType = "experiment";
       this.elements[experiment.instanceID] = experiment;
     },
+    /**
+     * Start, i.e. run the task by adding uuid and version to the path so that files can be loaded
+     */
     start() {
       this.$router.push(
         "/pilot/" +
