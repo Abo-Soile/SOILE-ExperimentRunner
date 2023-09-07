@@ -12,12 +12,14 @@ import {
   Experiment,
   ExperimentInstance,
   FilterInstance,
+  RandomizerInstance,
   SOILEProject,
   TaskInstance,
 } from "./SoileTypes";
 import { useGraphStore } from "@/stores/graph";
 import { instantiateExperimentInProject } from "./experimentConverter";
 import SoileNode from "@/components/projecteditor/NodeTypes/SoileNode";
+import RandomNode from "@/components/projecteditor/NodeTypes/RandomNode";
 
 interface BasicConnection {
   from: string;
@@ -78,6 +80,9 @@ export async function loadSoileProjectToBaklava(
       previousMap
     );
   }
+  for (const randomizer of soileJson.randomizers) {
+    await addRandomizer(graph, randomizer, filterconnections, previousMap);
+  }
   buildconnections(graph, filterconnections, connections, nextMap, previousMap);
 }
 
@@ -127,6 +132,14 @@ export async function loadSoileExperimentToBaklava(
         "",
         connections,
         nextMap,
+        previousMap
+      );
+    }
+    if (element.elementType === "randomizer") {
+      await addRandomizer(
+        graph,
+        element.data as RandomizerInstance,
+        filterconnections,
         previousMap
       );
     }
@@ -268,6 +281,55 @@ async function addFilter(
   previousMap.set(filter.instanceID, f.inputs.previous);
 }
 
+async function addRandomizer(
+  graph: Graph,
+  randomizer: RandomizerInstance,
+  filterconnections: FilterConnection[],
+  previousMap: Map<String, NodeInterface>
+) {
+  const f = new RandomNode();
+  if (randomizer.position) {
+    f.position = randomizer.position;
+  } else {
+    f.position = { x: defaultX, y: defaultY, width: 300, height: 300 };
+    defaultX = defaultX + 300;
+    defaultY = defaultY + 100;
+  }
+  const type = randomizer.type;
+  f.setType(f.getRandomOptionForValue(type));
+  switch (type) {
+    case "block":
+      for (const setting of randomizer.settings) {
+        if (setting.name === "blockSpecification") {
+          f.setBlockSpecification(setting.value as string);
+        }
+      }
+      break;
+    case "random":
+      f.setOutputsForCount(randomizer.options.length);
+      break;
+  }
+
+  graph.addNode(f);
+  f.title = randomizer.instanceID;
+
+  for (let i = 0; i < randomizer.options.length; ++i) {
+    var outputName;
+    var outputTarget;
+    if (type === "block") {
+      const currentOutput = randomizer.options[i];
+      outputName = currentOutput.name;
+      outputTarget = currentOutput.next;
+    }
+    if (type === "random") {
+      outputTarget = randomizer.options[i].next;
+      outputName = "" + (i + 1);
+    }
+    filterconnections.push({ from: f.outputs[outputName], to: outputTarget });
+  }
+  previousMap.set(randomizer.instanceID, f.inputs.previous);
+}
+
 export async function BaklavaToSoileProjectJSON(
   graph: Graph
 ): Promise<SOILEProject> {
@@ -277,6 +339,7 @@ export async function BaklavaToSoileProjectJSON(
     tasks: new Array<TaskInstance>(),
     experiments: new Array<ExperimentInstance>(),
     filters: new Array<FilterInstance>(),
+    randomizers: new Array<RandomizerInstance>(),
     start: "",
     UUID: "",
     name: "",
@@ -305,6 +368,11 @@ export async function BaklavaToSoileProjectJSON(
     if (node.type === "FilterNode") {
       projectData.filters.push(createFilterJson(node as FilterNode, nextMap));
     }
+    if (node.type === "RandomNode") {
+      projectData.randomizers.push(
+        createRandomJson(node as RandomNode, nextMap)
+      );
+    }
     if (node.type === "ExperimentNode") {
       const cnode = node as ExperimentNode;
       const instance = await instantiateExperimentInProject(
@@ -331,7 +399,11 @@ export async function BaklavaToSoileExperimentJSON(
   const experimentData = {
     elements: new Array<{
       elementType: string;
-      data: TaskInstance | ExperimentInstance | FilterInstance;
+      data:
+        | TaskInstance
+        | ExperimentInstance
+        | FilterInstance
+        | RandomizerInstance;
     }>(),
     UUID: "",
     version: "",
@@ -343,7 +415,11 @@ export async function BaklavaToSoileExperimentJSON(
   const tempData = {} as Experiment;
   tempData.elements = new Array<{
     elementType: string;
-    data: TaskInstance | ExperimentInstance | FilterInstance;
+    data:
+      | TaskInstance
+      | ExperimentInstance
+      | FilterInstance
+      | RandomizerInstance;
   }>();
   const nextMap = createNextMap(nodes, connections);
   // now actually make the nodes
@@ -374,6 +450,12 @@ export async function BaklavaToSoileExperimentJSON(
       experimentData.elements.push({
         elementType: "filter",
         data: createFilterJson(node as FilterNode, nextMap),
+      });
+    }
+    if (node.type === "RandomNode") {
+      experimentData.elements.push({
+        elementType: "randomizer",
+        data: createRandomJson(node as RandomNode, nextMap),
       });
     }
     if (node.type === "ExperimentNode") {
@@ -468,6 +550,31 @@ function createFilterJson(
       : "end",
     options: filters,
     position: cnode.position,
+  };
+  return filterData;
+}
+
+function createRandomJson(
+  cnode: RandomNode,
+  nextMap: Map<string, string>
+): RandomizerInstance {
+  const options = new Array<{ name: string; next: string }>();
+  const settings = new Array<{ name: string; value: string }>();
+  cnode.outputIDs.forEach((outputName) => {
+    options.push({
+      name: outputName,
+      next: nextMap.get(cnode.outputs[outputName].id),
+    });
+  });
+  for (const [key, value] of Object.entries(cnode.settings)) {
+    settings.push({ name: key, value: value as string });
+  }
+  const filterData = {
+    instanceID: cnode.title,
+    options,
+    settings,
+    position: cnode.position,
+    type: cnode.randomType.value,
   };
   return filterData;
 }

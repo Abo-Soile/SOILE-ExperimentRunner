@@ -36,6 +36,7 @@ const defaultData = {
     tasks: [],
     experiments: [],
     filters: [],
+    randomizers: [],
   },
 };
 

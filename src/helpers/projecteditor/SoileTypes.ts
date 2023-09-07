@@ -11,6 +11,20 @@ export interface FilterInstance {
   position: Position;
 }
 
+export interface RandomizerInstance {
+  instanceID: string;
+  options: {
+    name: string;
+    next: string;
+  }[];
+  position: Position;
+  type: string;
+  settings: {
+    name: string;
+    value: any;
+  }[];
+}
+
 export interface TaskInstance {
   UUID: string;
   name: string;
@@ -35,7 +49,11 @@ export interface Experiment {
   tag: string;
   elements: {
     elementType: string;
-    data: TaskInstance | FilterInstance | ExperimentInstance;
+    data:
+      | TaskInstance
+      | FilterInstance
+      | ExperimentInstance
+      | RandomizerInstance;
   }[];
   randomize: boolean;
   private: boolean;
@@ -50,7 +68,11 @@ export interface ExperimentInstance {
   elements: [
     {
       elementType: string;
-      data: TaskInstance | FilterInstance | ExperimentInstance;
+      data:
+        | TaskInstance
+        | FilterInstance
+        | ExperimentInstance
+        | RandomizerInstance;
     }
   ];
   randomize: boolean;
@@ -67,6 +89,7 @@ export interface SOILEProject {
   tasks: TaskInstance[];
   experiments: ExperimentInstance[];
   filters: FilterInstance[];
+  randomizers: RandomizerInstance[];
   start: string;
   private: boolean;
 }

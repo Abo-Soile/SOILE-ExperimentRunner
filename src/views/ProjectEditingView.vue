@@ -1,6 +1,6 @@
 <template>
   <div class="main-container">
-    <EditorTaskBar
+    <ElementEditingMenu
       @createElement="createElement"
       @elementSelected="openSelectionTab"
     />
@@ -129,7 +129,7 @@ import { useElementStore, useEditorStore, useGraphStore } from "@/stores";
 import { router } from "@/helpers";
 
 import Editor from "@/components/projecteditor/Editor.vue";
-import EditorTaskBar from "@/components/EditorTaskBar.vue";
+import ElementEditingMenu from "@/components/ElementEditingMenu.vue";
 import TaskEditor from "@/components/taskeditor/TaskEditor.vue";
 
 import { ref, computed, reactive } from "vue";

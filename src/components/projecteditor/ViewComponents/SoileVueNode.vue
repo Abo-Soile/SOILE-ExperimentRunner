@@ -39,7 +39,6 @@
         @keydown.enter="doneRenaming"
       />
     </div>
-
     <div class="__content">
       <!-- Outputs -->
       <div class="__outputs">
@@ -239,5 +238,6 @@ onUpdated(onRender);
   display: grid;
   grid-row: 1;
   grid-column-end: span 2;
+  padding-right: 7px;
 }
 </style>

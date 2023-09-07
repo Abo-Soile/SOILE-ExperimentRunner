@@ -3,6 +3,7 @@ import {
   Experiment,
   TaskInstance,
   FilterInstance,
+  RandomizerInstance,
 } from "./SoileTypes";
 import { useElementStore } from "@/stores/elements";
 
@@ -25,6 +26,8 @@ export async function instantiateExperimentInProject(
   experiment.randomize = random;
   const outputs = new Map<string, string>();
   for (const element of experiment.elements) {
+    // update the element ID.
+    element.data.instanceID = InstanceID + "." + element.data.instanceID;
     if (element.elementType === "task") {
       const currentTask = element.data as TaskInstance;
       for (const output of currentTask.outputs) {
@@ -34,7 +37,6 @@ export async function instantiateExperimentInProject(
         );
       }
       // update the instance ID.
-      element.data.instanceID = InstanceID + "." + element.data.instanceID;
       if (random) {
         currentTask.next = InstanceID;
       } else {
@@ -55,6 +57,19 @@ export async function instantiateExperimentInProject(
         InstanceID + "." + currentFilter.defaultOption;
       for (const option of currentFilter.options) {
         option.next = InstanceID + "." + option.next;
+      }
+    }
+    if (element.elementType === "randomizer") {
+      if (random) {
+        throw "Filter in Random Experiment is not possible!";
+      }
+      const currentRandomizer = element.data as RandomizerInstance;
+      // We are already in an instance, so the elements already have to point back.
+      for (const option of currentRandomizer.options) {
+        {
+          const currentOption = option as { name: string; next: string };
+          currentOption.next = InstanceID + "." + currentOption.next;
+        }
       }
     }
     if (element.elementType === "experiment") {
@@ -85,6 +100,7 @@ function updateExperimentInstance(
   currentInstance.instanceID = InstanceID + "." + currentInstance.instanceID;
   currentInstance.next = InstanceID + "." + currentInstance.next;
   for (const element of currentInstance.elements) {
+    element.data.instanceID = InstanceID + "." + element.data.instanceID;
     if (element.elementType === "task") {
       const currentTask = element.data as TaskInstance;
       for (const output of currentTask.outputs) {
@@ -94,7 +110,6 @@ function updateExperimentInstance(
         );
       }
       // update the instance ID.
-      element.data.instanceID = InstanceID + "." + element.data.instanceID;
       currentTask.next = InstanceID + "." + currentTask.next;
     }
     if (element.elementType === "experiment") {
@@ -110,6 +125,13 @@ function updateExperimentInstance(
       currentFilter.defaultOption =
         InstanceID + "." + currentFilter.defaultOption;
       for (const option of currentFilter.options) {
+        option.next = InstanceID + "." + option.next;
+      }
+    }
+    if (element.elementType === "randomizer") {
+      const currentRandomizer = element.data as RandomizerInstance;
+      // We are already in an instance, so the elements already have to point back.
+      for (const option of currentRandomizer.options) {
         option.next = InstanceID + "." + option.next;
       }
     }

@@ -20,10 +20,6 @@ export default {
       default: {},
       type: Object,
     },
-    outputs: {
-      default: [],
-      type: Array,
-    },
   },
   data() {
     return {
@@ -142,10 +138,6 @@ export default {
       // if the code changes, reset the data
       this.reset();
     },
-  },
-  setup() {
-    const projectStore = useProjectStore();
-    return { projectStore };
   },
 };
 </script>

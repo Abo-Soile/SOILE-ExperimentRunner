@@ -23,6 +23,7 @@
             <i class="pi pi-cog" />
           </button>
           <button
+            v-if="data.UUID"
             v-tooltip="'Edit the available versions for this project'"
             class="baklava-button"
             @click="showVersionManagementDialog = true"
@@ -46,6 +47,7 @@
     @submit="saveElement"
   />
   <ElementVersionManagementDialog
+    v-if="data.UUID"
     :UUID="data.UUID"
     :type="type"
     v-model:isVisible="showVersionManagementDialog"
@@ -60,6 +62,7 @@ import "@baklavajs/themes/dist/syrup-dark.css";
 import TaskNode from "./NodeTypes/TaskNode";
 import FilterNode from "./NodeTypes/FilterNode";
 import ExperimentNode from "./NodeTypes/ExperimentNode";
+import RandomNode from "./NodeTypes/RandomNode";
 import SoileNode from "./ViewComponents/SoileVueNode.vue";
 import HintOverlay from "./HintOverlay.vue";
 
@@ -128,6 +131,7 @@ export default {
     props.baklava.editor.registerNodeType(TaskNode);
     props.baklava.editor.registerNodeType(FilterNode);
     props.baklava.editor.registerNodeType(ExperimentNode);
+    props.baklava.editor.registerNodeType(RandomNode);
     props.baklava.editor.graphHooks.checkConnection.subscribe(
       "soile:connectionCheck",
       (c) => checkConnection(c.from, c.to)
@@ -177,7 +181,8 @@ export default {
       return (
         nodeType === "TaskNode" ||
         nodeType === "FilterNode" ||
-        nodeType === "ExperimentNode"
+        nodeType === "ExperimentNode" ||
+        nodeType === "RandomNode"
       );
     },
     updateOptions(newProps) {

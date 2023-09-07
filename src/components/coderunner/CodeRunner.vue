@@ -59,6 +59,10 @@ import SoileExpRunner from "@/components/experimentlang/SoileExpRunner.vue";
 import PsychoJsRunner from "@/components/psychopy/PsychoJsRunner.vue";
 import JsRunner from "@/components/jsrunner/JsRunner.vue";
 
+/**
+ * This component Should encapsulate all possibilities that tasks can have
+ * i.e.
+ */
 export default {
   name: "CodeRunner",
   components: {

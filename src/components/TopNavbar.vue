@@ -9,7 +9,7 @@
       </div>
     </template>
     <template #end>
-      <Button icon="pi pi-question-circle" @click="showHelp = true"></Button>
+      <HelpPage />
     </template>
   </Menubar>
   <StudyCreationDialog
@@ -23,12 +23,10 @@
     :researchStudies="studyStore.researchStudies"
     @selected="(event) => handleLoad(event)"
   ></StudyLoadDialog>
-  <HelpDialog v-if="showHelp" v-model:visible="showHelp"></HelpDialog>
 </template>
 
 <script>
 import Menubar from "primevue/menubar";
-import Button from "primevue/button";
 import Menu from "primevue/menu";
 import Dialog from "primevue/dialog";
 import { computed, ref } from "vue";
@@ -36,19 +34,18 @@ import Login from "./LoginForm.vue";
 import { useAuthStore, useStudyStore } from "@/stores";
 import StudyCreationDialog from "@/components/study/StudyCreationDialog.vue";
 import StudyLoadDialog from "@/components/study/StudyLoadDialog.vue";
-import HelpDialog from "@/components/dialogs/HelpDialog.vue";
+import HelpPage from "@/components/helppages/HelpPage.vue";
 
 export default {
   name: "TopNavbar",
   components: {
     Login,
     Menubar,
-    Button,
     Menu,
     Dialog,
     StudyCreationDialog,
     StudyLoadDialog,
-    HelpDialog,
+    HelpPage,
   },
   data() {
     return {
