@@ -223,8 +223,9 @@ export default {
           });
       }
     },
-    updateData() {
+    async updateData() {
       console.log("Updating Data for Study in Editor");
+      await this.studyStore.updateEditableStudies();
       this.updateTokenData();
       this.updateAvailableDLData();
       if (this.hasWriteAccess) {

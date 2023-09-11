@@ -81,7 +81,13 @@ export async function loadSoileProjectToBaklava(
     );
   }
   for (const randomizer of soileJson.randomizers) {
-    await addRandomizer(graph, randomizer, filterconnections, previousMap);
+    await addRandomizer(
+      graph,
+      randomizer,
+      filterconnections,
+      previousMap,
+      soileJson.start
+    );
   }
   buildconnections(graph, filterconnections, connections, nextMap, previousMap);
 }
@@ -285,7 +291,8 @@ async function addRandomizer(
   graph: Graph,
   randomizer: RandomizerInstance,
   filterconnections: FilterConnection[],
-  previousMap: Map<String, NodeInterface>
+  previousMap: Map<String, NodeInterface>,
+  start: string
 ) {
   const f = new RandomNode();
   if (randomizer.position) {
@@ -328,6 +335,10 @@ async function addRandomizer(
     filterconnections.push({ from: f.outputs[outputName], to: outputTarget });
   }
   previousMap.set(randomizer.instanceID, f.inputs.previous);
+  if (randomizer.instanceID === start) {
+    const graphStore = useGraphStore();
+    graphStore.setStartNode(f);
+  }
 }
 
 export async function BaklavaToSoileProjectJSON(
@@ -372,9 +383,16 @@ export async function BaklavaToSoileProjectJSON(
       projectData.randomizers.push(
         createRandomJson(node as RandomNode, nextMap)
       );
+      const randomNode = node as RandomNode;
+      if (randomNode.isStartNode()) {
+        projectData.start = randomNode.title;
+      }
     }
     if (node.type === "ExperimentNode") {
       const cnode = node as ExperimentNode;
+      if (cnode.isStartNode()) {
+        projectData.start = cnode.title;
+      }
       const instance = await instantiateExperimentInProject(
         cnode.objectData.UUID,
         cnode.objectData.version,

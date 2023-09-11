@@ -175,6 +175,10 @@ export const useGraphStore = defineStore({
       this.nodeOutputInformation.get(node.graph?.id).delete(node.id);
       this.nodePersistentInformation.get(node.graph?.id).delete(node.id);
       this.nodeNames.get(node.graph?.id).delete(node);
+      if (this.startNodes[node.graph?.id] === node.id) {
+        console.log("REmoved Start NOde need to select a new one!");
+        this.startNodes.delete(node.graph?.id);
+      }
     },
     canAddTaskOutput(node: SoileBaseNode, outputName: string) {
       // just in case this hasn't been done.

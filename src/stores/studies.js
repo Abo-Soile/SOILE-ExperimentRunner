@@ -12,7 +12,8 @@ export const useStudyStore = defineStore({
   }),
   actions: {
     clearData() {
-      this.currentEditedStudy = null;
+      this.currentEditedStudy =
+        JSON - parse(sessionStorage.getItem("soile:currentStudy"));
       this.researchStudies = [];
       this.editableStudies = [];
     },
@@ -261,6 +262,10 @@ export const useStudyStore = defineStore({
         console.log(response.data);
         console.log(response);
         this.currentEditedStudy = response.data;
+        sessionStorage.setItem(
+          "soile:currentStudy",
+          JSON.stringify(this.currentEditedStudy)
+        );
       } catch (error) {
         this.processAxiosError(error);
         return false;

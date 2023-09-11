@@ -2,7 +2,7 @@
   <Button v-if="!started" :diabled="study" @click="start"
     >Start Study Pilot</Button
   >
-  <div v-if="started">
+  <div v-if="started && !finished">
     <Button
       v-if="loading"
       @click="
@@ -22,7 +22,23 @@
       @handleError="handleError"
     ></CodeRunner>
   </div>
-  <JsonViewer v-if="finished" :value="results"></JsonViewer>
+  <div v-if="finished">
+    <h3>Results</h3>
+    <JsonViewer :value="results"></JsonViewer>
+    <div v-if="outputData.length > 0">
+      <h3>OUtputs</h3>
+      <JsonViewer :value="outputData"></JsonViewer>
+    </div>
+    <div v-if="persistentData.length > 0">
+      <h3>Persistent Data</h3>
+      <JsonViewer :value="persistentData"></JsonViewer>
+    </div>
+
+    <div v-if="randomAssignments.length > 0">
+      <h3>Random Assigments</h3>
+      <JsonViewer :value="randomAssignments"></JsonViewer>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -53,6 +69,8 @@ export default {
       finished: false,
       loading: false,
       results: [],
+      randomAssignments: [],
+      randomization: {},
     };
   },
   computed: {
@@ -84,14 +102,19 @@ export default {
      * @param {*} start
      */
     async getNext(start) {
+      // take next element if there is one.
       const nextElementID = this.elements[this.currentElementID].next;
+      // except for the start element, we should always be in a Task when coming here.
+      var nextElement = start
+        ? this.elements[this.currentElementID]
+        : this.elements[nextElementID];
       // if we end, this is done and if we get null, we stop as well.
-      if (nextElementID != null && nextElementID != "end") {
+      if (nextElement != null) {
         // if this is a call from the start, our next element is the current element.
-        var nextElement = start
-          ? this.elements[this.currentElementID]
-          : this.elements[nextElementID];
+
         while (nextElement != null && nextElement.elementType != "task") {
+          console.log("Current element is");
+          console.log(nextElement);
           // obtain the next element of the filter and check whether thats a task
           if (nextElement.elementType === "filter") {
             nextElement = await this.getFilterNext(nextElement);
@@ -99,24 +122,34 @@ export default {
           if (nextElement.elementType === "experiment") {
             nextElement = this.getExperimentNext(nextElement);
           }
+          if (nextElement.elementType === "randomizer") {
+            console.log("Found randomizer");
+            nextElement = this.getRandomizerNext(nextElement);
+          }
         }
-        // now, we have a task, so lets updae the data for it.
-        const taskData = await this.elementStore.getElement(
-          nextElement.UUID,
-          nextElement.version,
-          "task"
-        );
-        // update the settings of the task.
-        this.codeType = taskData.codeType.language;
-        this.codeTypeVersion = taskData.codeType.version;
-        this.sourceCode = taskData.code;
-        this.currentElementID = nextElement.instanceID;
-        // compile it to obtain the compiled code.
-        await this.compileTask();
-        console.log(nextElement);
-        this.currentElement = nextElement;
+        if (nextElement != null) {
+          // now, we have a task, so lets updae the data for it.
+          const taskData = await this.elementStore.getElement(
+            nextElement.UUID,
+            nextElement.version,
+            "task"
+          );
+          // update the settings of the task.
+          this.codeType = taskData.codeType.language;
+          this.codeTypeVersion = taskData.codeType.version;
+          this.sourceCode = taskData.code;
+          this.currentElementID = nextElement.instanceID;
+          // compile it to obtain the compiled code.
+          await this.compileTask();
+          console.log(nextElement);
+          this.currentElement = nextElement;
+        } else {
+          this.currentElement = null;
+          this.finished = true;
+        }
       } else {
         this.currentElement = null;
+        this.finished = true;
       }
     },
     /**
@@ -138,6 +171,34 @@ export default {
         }
       }
       return this.elements[filter.defaultOption];
+    },
+    /**
+     * Get the next element based on the given randomizer node.
+     * @param {*} randomizer
+     */
+    getRandomizerNext(randomizer) {
+      var assignOnce = undefined;
+      for (const setting of randomizer.settings) {
+        if (setting.name === "assignOnce") {
+          assignOnce = setting.value;
+        }
+      }
+      if (
+        (this.randomization[randomizer.instanceID] && assignOnce) ||
+        randomizer.type === "block"
+      ) {
+        return this.elements[this.randomization[randomizer.instanceID]];
+      } else {
+        console.log("Assigning random variable");
+        const index = Math.floor(Math.random() * randomizer.options.length);
+        this.randomAssignments.push({
+          randomizer: randomizer.instanceID,
+          assignment: randomizer.options[index].name,
+        });
+        this.randomization[randomizer.instanceID] =
+          randomizer.options[index].next;
+        return this.elements[this.randomization[randomizer.instanceID]];
+      }
     },
     /**
      * Get the next element from an experiment.
@@ -196,7 +257,7 @@ export default {
       });
       // update the persistent data.
       results.persistentData.forEach(
-        (x) => (this.persistent[x.name] = x.value)
+        (x) => (this.persistentData[x.name] = x.value)
       );
       // update the output data.
       results.outputData.forEach(
@@ -238,7 +299,13 @@ export default {
         filter.elementType = "filter";
         this.elements[filter.instanceID] = filter;
       }
+
+      for (const filter of this.currentProject.randomizers) {
+        filter.elementType = "randomizer";
+        this.elements[filter.instanceID] = filter;
+      }
       this.currentElementID = this.currentProject.start;
+      console.log("Study parsed. Requesting next element.");
       await this.getNext(true);
     },
     /**
@@ -282,7 +349,7 @@ export default {
   },
   async mounted() {
     this.reset();
-    this.parseStudy();
+    await this.parseStudy();
   },
   setup() {
     const elementStore = useElementStore();

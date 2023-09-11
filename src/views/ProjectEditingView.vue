@@ -21,7 +21,9 @@
                 <span> {{ experiment.name }} </span>
                 <Button
                   icon="pi pi-times"
-                  @click="closeTab(index, editorStore.experiments)"
+                  @click="
+                    closeTab(index, editorStore.experiments, 'experiment')
+                  "
                 />
               </template>
               <div style="width: 100%; height: 80vh">
@@ -50,7 +52,7 @@
                 <span> {{ task.name }} </span>
                 <Button
                   icon="pi pi-times"
-                  @click="closeTab(index, editorStore.tasks)"
+                  @click="closeTab(index, editorStore.tasks, 'task')"
                 />
               </template>
               <div style="width: 100%; height: 80vh">
@@ -82,7 +84,7 @@
                 <span> {{ project.name }} </span>
                 <Button
                   icon="pi pi-times"
-                  @click="closeTab(index, editorStore.projects)"
+                  @click="closeTab(index, editorStore.projects, 'project')"
                 />
               </template>
               <div style="width: 100%; height: 80vh">
@@ -113,8 +115,8 @@
       message="Are you sure you want to close this? All unsaved changes will be lost"
       reject="Cancel"
       :isVisible="showConfirm"
-      @confirm="confirmation(true)"
-      @reject="confirmation(false)"
+      @confirm="closeConfirmation(true)"
+      @reject="closeConfirmation(false)"
     />
   </div>
 </template>
@@ -266,19 +268,19 @@ function updateName(name, index, type) {
   elementStore.elements[index].name = name;
 }
 
-function closeTab(index, target) {
+function closeTab(index, target, type) {
   console.log("Trying to close tab");
   console.log(currentTarget);
   console.log("Could set target");
-  currentTarget.value = { index: index, target: target };
+  currentTarget.value = { index: index, target: target, type };
   showConfirm.value = true;
 }
 function tabSelected(index, target) {
   console.log("Selected tab " + index);
 }
-function confirmation(close) {
+function closeConfirmation(close) {
   console.log("Getting confirmation with value " + close);
-  console.log(currentTarget);
+  console.log(currentTarget.value);
   if (close) {
     const currentElement =
       currentTarget.value.target.elements[currentTarget.value.index].data;
@@ -289,7 +291,12 @@ function confirmation(close) {
       version: currentElement.version,
       type: currentTarget.value.target.id,
     };
-    if (currentTarget.type == "project") {
+    if (
+      currentTarget.value.type === "project" ||
+      currentTarget.value.type === "experiment"
+    ) {
+      console.log("Trying to remove Graph for element: ");
+      console.log(element);
       graphStore.removeGraphForElement(element);
     }
   }
