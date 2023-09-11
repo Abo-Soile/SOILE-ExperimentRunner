@@ -6,14 +6,16 @@ export const useStudyStore = defineStore({
   id: "studies",
   state: () => ({
     // initialize the state. We don't update from the local storage, because this could contain privilegded data
-    currentEditedStudy: null,
+    currentEditedStudy: JSON.parse(
+      sessionStorage.getItem("soile:currentStudy")
+    ),
     researchStudies: [],
     editableStudies: [],
   }),
   actions: {
     clearData() {
-      this.currentEditedStudy =
-        JSON - parse(sessionStorage.getItem("soile:currentStudy"));
+      this.currentEditedStudy = null;
+      sessionStorage.removeItem("soile:currentStudy");
       this.researchStudies = [];
       this.editableStudies = [];
     },

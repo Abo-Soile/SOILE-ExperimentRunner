@@ -1,0 +1,27 @@
+<h3>The Filter Node</h3>
+<p>
+    A Filter Node represents a junction in the SOILE Project or experiment, where the next task depends on the results of previous tasks.
+    A Filter is defined as a function that needs to evaluate to "true". 
+</p>
+<p> 
+    Filters can use the following functionalities:
+     <ul>
+        <li>
+            Operators such as  "+", "-", "*", "^" (power)
+        </li>
+        <li>
+            The functions <code>mean(val1, val2, ...)</code>, <code>median(val1,val2,...)</code>, <code>min(val1,val2,...)</code>, <code>max(val1,val2,...)</code>
+        </li>
+        <li>
+            An approximation function that checks, whether two values are the same within a given tolerance: 
+            <code>approx(A,B,tol)</code>, Where <code> abs(A - B) &lt; tol</code>
+        </li>
+        <li>
+            logical operators: <code> | </code> (or), <code> & </code> (and), <code> = </code> (equal), <code> &lt; </code> (smaller), <code> &gt; </code> (larger)             
+        </li>
+     </ul>
+     You can build any formaula with these operators. Best use parenthesis to make operation precedence clear.
+</p>
+<p>
+    The values used in filters need to be defined as outputs in other tasks. and referenced as TaskID.outputName.
+</p>

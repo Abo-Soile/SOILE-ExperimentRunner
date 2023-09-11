@@ -18,7 +18,18 @@
           {{ node.title }}
         </div>
         <div class="__menu">
-          <i class="pi pi-bars --clickable" @click="openContextMenu" />
+          <HelpItem
+            v-if="node.type"
+            :helpSubject="node.type"
+            buttonClass="baklava-button"
+          ></HelpItem>
+          <button
+            v-tooltip="'Button Menu'"
+            class="baklava-button ml-1"
+            @click="openContextMenu"
+          >
+            <i class="pi pi-bars" />
+          </button>
           <context-menu
             v-model="showContextMenu"
             :x="0"
@@ -92,6 +103,7 @@ import NodeInterface from "./NodeInterface.vue";
 import { useGraphStore } from "@/stores";
 import { ResizeObserverEntry } from "@vueuse/core";
 import SoileNode from "../NodeTypes/SoileNode";
+import HelpItem from "@/components/helppages/HelpItem.vue";
 
 const graphStore = useGraphStore();
 const contextMenu = Components.ContextMenu;

@@ -135,7 +135,11 @@ function showWithDrawConfirmation(index, event) {
 }
 
 async function confirmWithDraw() {
+  console.log("Withdrawing");
   await authStore.withdraw(selectedStudy.value.UUID);
+  if (!authStore.isUser()) {
+    authStore.logout();
+  }
   withDrawConfirm.value = false;
   projectStore.fetchSignedUpStudies();
 }

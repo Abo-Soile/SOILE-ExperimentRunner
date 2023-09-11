@@ -34,6 +34,11 @@ export const useAuthStore = defineStore({
         return false;
       }
     },
+    isUser() {
+      if (this.user) {
+        return true;
+      }
+    },
     /**
      * Check whether the current session is a session of a researcher
      */
