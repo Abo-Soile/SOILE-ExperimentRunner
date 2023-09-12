@@ -146,7 +146,8 @@ export async function loadSoileExperimentToBaklava(
         graph,
         element.data as RandomizerInstance,
         filterconnections,
-        previousMap
+        previousMap,
+        ""
       );
     }
   }
@@ -206,8 +207,10 @@ async function addTask(
     defaultY = defaultY + 100;
   }
   t.setElement(task.UUID, task.name);
-  await t.setElementVersion(task.version, task.tag);
+  // need to add the node before we can set the ElementVersion, since
+  // setting the element version does retrieve some data potentially that requires the node to be in a
   graph.addNode(t);
+  await t.setElementVersion(task.version, task.tag);
   t.title = task.instanceID;
   if (task.instanceID === start) {
     graphStore.setStartNode(t);
