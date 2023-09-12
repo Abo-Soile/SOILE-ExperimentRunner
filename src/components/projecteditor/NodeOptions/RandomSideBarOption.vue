@@ -14,11 +14,11 @@
       v-if="randomType.value === 'random'"
     >
       <div class="col-12 flex align-items-center">
-        <label for="outputAmount">Select Number of Outputs</label
-        ><InputNumber
+        <label for="outputAmount">Select Number of Outputs</label>
+        <InputNumber
           class="w-4"
           v-model="outputCount"
-          showButtons=""
+          showButtons
           inputId="outputAmount"
           inputClass="w-4"
           :min="1"
@@ -120,7 +120,7 @@ export default defineComponent({
           this.currentNode.setBlockSpecification(newValue);
         }
       },
-      get(): number {
+      get(): string {
         return this.currentNode.settings.blockSpecification
           ? this.currentNode.settings.blockSpecification
           : "";
