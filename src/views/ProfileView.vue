@@ -65,6 +65,10 @@ export default {
     return { userStore, errorStore, authStore };
   },
   methods: {
+    /**
+     * Update the user with the given data.
+     * @param {*} userData
+     */
     updateUser(userData) {
       console.log("Updating user");
       // remove the role field, can't update this way.
@@ -80,6 +84,10 @@ export default {
         }
       });
     },
+    /**
+     * Update the users password.
+     * @param {*} newPass
+     */
     updatePassword(newPass) {
       this.userStore.setUserPassword(newPass, this.authStore.user);
     },

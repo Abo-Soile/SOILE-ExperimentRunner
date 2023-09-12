@@ -42,6 +42,10 @@
 </template>
 
 <script>
+/**
+ * This view is a bit more cmoplex, as it essentially resembles the back-ends handling of the
+ * walk through process of a participant.
+ */
 import CodeRunner from "@/components/coderunner/CodeRunner.vue";
 import { useElementStore, useStudyStore } from "@/stores";
 import axios from "axios";

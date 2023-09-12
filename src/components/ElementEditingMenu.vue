@@ -6,13 +6,13 @@
   <PsychoPyImporter
     v-if="showPsychoPyDialog"
     v-model:visible="showPsychoPyDialog"
-    @taskCreated="openPsychoPyTask"
+    @taskCreated="openTask"
   ></PsychoPyImporter>
   <ObjectSelectionDialog
     v-if="showSelector"
     v-model:visible="showSelector"
     :object-type="elementType"
-    @selected="elementSelected"
+    @selected="openTabForElement"
   >
   </ObjectSelectionDialog>
   <TaskUploader
@@ -27,49 +27,75 @@ import PanelMenu from "primevue/panelmenu";
 import PsychoPyImporter from "@/components/psychopy/PsychoPyImporter.vue";
 import TaskUploader from "@/components/taskeditor/TaskUploader.vue";
 import ObjectSelectionDialog from "@/components/dialogs/ObjectSelectionDialog.vue";
+import { useEditorStore } from "@/stores";
 
 import { ref, computed, reactive } from "vue";
-
-const emit = defineEmits(["createElement", "elementSelected"]);
 
 const showSelector = ref(false);
 const showPsychoPyDialog = ref(false);
 const elementType = ref("");
 const uploadComponent = ref(null);
+const editorStore = useEditorStore();
 
+/**
+ * Create an element
+ * @param {*} type
+ */
+function createElement(type) {
+  console.log("Creating element of type: " + type);
+  editorStore.createElement(type);
+}
+
+/**
+ * Show the Dialog to select the Element to Open.
+ * @param {*} typeForDialog
+ */
 function showOpenElementDialog(typeForDialog) {
   elementType.value = typeForDialog;
   showSelector.value = true;
 }
 
-function elementSelected(element) {
+/**
+ * Open a tab for the indicated element
+ * @param {{UUID: string, version: string, name: string}} element the element to load given by its name, version and UUID
+ */
+function openTabForElement(element) {
   if (element) {
     console.log(element);
-    element.type = elementType.value;
-    emit("elementSelected", element);
+    editorStore.loadElement(
+      elementType.value,
+      element.name,
+      element.UUID,
+      element.version
+    );
     showSelector.value = false;
   } else {
     showSelector.value = false;
   }
 }
+
+/**
+ * Open a specific Task specified by the Task Data
+ * @param {{UUID: string, version: string, name: string}} taskdata The data of the task to load.
+ */
 function openTask(taskdata) {
   elementType.value = "task";
-  elementSelected(taskdata);
-}
-
-function openPsychoPyTask(data) {
-  elementType.value = "Task";
-  console.log(data);
-  elementSelected(data);
+  openTabForElement(taskdata);
+  // close potentially calling Dialogs
   showPsychoPyDialog.value = false;
 }
 
+/**
+ * We need this wrapper around the function, as putting it directly
+ * in the menu-items will fail due to uploadComponent not being defined initially.
+ */
 function callChildFunction() {
-  console.log(uploadComponent);
-  console.log("Trying to call something on uploader");
-  console.log(uploadComponent.value);
   uploadComponent.value.loadZip();
 }
+
+/**
+ * The items of the menu
+ */
 const items = computed(() => [
   {
     label: "Project",
@@ -80,7 +106,7 @@ const items = computed(() => [
         icon: "pi pi-fw pi-plus",
         command: () => {
           console.log("Trying to create Project");
-          emit("createElement", "Project");
+          editorStore.createElement("Project");
         },
       },
       {
@@ -101,7 +127,7 @@ const items = computed(() => [
         icon: "pi pi-fw pi-plus",
         command: () => {
           console.log("Trying to create Task");
-          emit("createElement", "Task");
+          editorStore.createElement("Task");
         },
       },
       {
@@ -141,7 +167,7 @@ const items = computed(() => [
         icon: "pi pi-fw pi-plus",
         command: () => {
           console.log("Trying to create Experiment");
-          emit("createElement", "Experiment");
+          editorStore.createElement("Experiment");
         },
       },
       {
@@ -157,5 +183,7 @@ const items = computed(() => [
 </script>
 
 <style scoped>
-/* Your existing styles for .toolbar go here */
+.p-tabview .p-tabview-panels {
+  padding: 0px;
+}
 </style>

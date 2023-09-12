@@ -56,12 +56,18 @@ export default {
       console.log("Activating task");
       this.projectStore.setTaskActive();
     },
-    runTask() {
+    /**
+     * Retrieve all Data for the current task.
+     * This is dependent on the current route and the current Task ID.
+     */
+    retrieveDataForTask() {
+      // get the persistent data stored for the user for the study.
       axios
         .post("/study/" + this.$route.params.id + "/getpersistent")
         .then((persistentresponse) => {
           console.log(persistentresponse);
           this.persistentData = persistentresponse?.data;
+          // and then retrieve the code to handle by the CodeRunner
           axios
             .get(
               "/run/" + this.$route.params.id + "/" + this.$route.params.taskID
@@ -131,6 +137,13 @@ export default {
           this.projectStore.setTaskNotRunning();
         });
     },
+    /**
+     * Upload file data to the back-end
+     * @param {*} file The file to upload
+     * @param {*} fileName The name of the file
+     * @param {*} idCallBack the callback that receives the ID of the call
+     * @param {*} errorCallback the callback to call if any error happens.
+     */
     uploadData(file, fileName, idCallBack, errorCallback) {
       var formData = new FormData();
       formData.append(fileName, file);
@@ -153,12 +166,12 @@ export default {
     },
   },
   async beforeMount() {
-    console.log("Before Mount");
-    this.runTask();
+    console.log("Receiving data for inital Task");
+    this.retrieveDataForTask();
   },
   async beforeRouteUpdate(to, from, next) {
-    console.log("before route updated");
-    this.runTask();
+    console.log("Retrieving data for next Task");
+    this.retrieveDataForTask();
     next();
   },
   computed: {
@@ -171,9 +184,6 @@ export default {
         persistentFields: this.currentTaskSettings.persistent,
       };
     },
-  },
-  mounted() {
-    console.log("ExpView Mounted");
   },
 };
 </script>
