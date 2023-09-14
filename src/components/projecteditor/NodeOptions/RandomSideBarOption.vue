@@ -1,4 +1,9 @@
 <template>
+  <HelpItem
+    helpSubject="RandomNode"
+    buttonClass="baklava-button absolute"
+    buttonStyle="position: absolute;top:15px; right:10px"
+  ></HelpItem>
   <div>
     <div>
       <DropDown
@@ -56,7 +61,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-
+import HelpItem from "@/components/helppages/HelpItem.vue";
 import DropDown from "primevue/dropdown";
 import Checkbox from "primevue/checkbox";
 import InputNumber from "primevue/inputnumber";
@@ -73,7 +78,7 @@ export default defineComponent({
       required: true,
     },
   },
-  components: { DropDown, InputNumber, Checkbox, InputText },
+  components: { DropDown, InputNumber, Checkbox, InputText, HelpItem },
   data() {
     return {
       editing: [],
