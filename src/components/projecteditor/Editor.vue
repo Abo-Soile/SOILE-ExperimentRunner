@@ -30,6 +30,14 @@
           >
             <i class="pi pi-server" />
           </button>
+          <button
+            v-if="data.UUID"
+            v-tooltip="'Pilot this element'"
+            class="baklava-button"
+            @click="pilotElement"
+          >
+            <i class="pi pi-directions" />
+          </button>
         </div>
       </template>
     </baklava-editor>
@@ -79,7 +87,12 @@ import {
   loadSoileExperimentToBaklava,
 } from "@/helpers/projecteditor/baklavasoileConverter";
 import { checkConnection } from "./events/graphEvents.ts";
-import { useGraphStore, useElementStore, useErrorStore } from "@/stores";
+import {
+  usePilotStore,
+  useGraphStore,
+  useElementStore,
+  useErrorStore,
+} from "@/stores";
 
 import { reactive, ref } from "vue";
 
@@ -126,6 +139,7 @@ export default {
     const graphStore = useGraphStore();
     const elementStore = useElementStore();
     const errorStore = useErrorStore();
+    const pilotStore = usePilotStore();
     //const baklava = useBaklava();
     const objectOptions = reactive({ name: undefined, private: undefined });
     props.baklava.editor.registerNodeType(TaskNode);
@@ -159,7 +173,7 @@ export default {
       objectOptions.name = props.name;
       objectOptions.private = false;
     }
-    return { graphStore, objectOptions, elementStore, errorStore };
+    return { pilotStore, graphStore, objectOptions, elementStore, errorStore };
   },
   methods: {
     async save() {
@@ -171,6 +185,7 @@ export default {
           await BaklavaToSoileExperimentJSON(this.baklava.editor.graph);
         }
       } catch (err) {
+        console.error(err);
         this.errorStore.raiseError("error", err.message);
         return;
       }
@@ -210,11 +225,15 @@ export default {
       this.showSave = false;
       console.log(this.baklava.editor.save());
       var data;
-      if (this.type === "project") {
-        data = await BaklavaToSoileProjectJSON(this.baklava.editor.graph);
-      }
-      if (this.type === "experiment") {
-        data = await BaklavaToSoileExperimentJSON(this.baklava.editor.graph);
+      try {
+        if (this.type === "project") {
+          data = await BaklavaToSoileProjectJSON(this.baklava.editor.graph);
+        }
+        if (this.type === "experiment") {
+          data = await BaklavaToSoileExperimentJSON(this.baklava.editor.graph);
+        }
+      } catch (e) {
+        this.errorStore.raiseError("error", err.message);
       }
       data.name = this.objectOptions.name;
       data.private = this.objectOptions.private;
@@ -228,6 +247,17 @@ export default {
         data.tag = tag;
         this.$emit("updateElement", data);
       }
+    },
+    async pilotElement() {
+      var data;
+      if (this.type === "project") {
+        data = await BaklavaToSoileProjectJSON(this.baklava.editor.graph);
+      }
+      if (this.type === "experiment") {
+        data = await BaklavaToSoileExperimentJSON(this.baklava.editor.graph);
+      }
+      this.pilotStore.setCurrentObject(data);
+      this.$router.push("/pilot/");
     },
   },
   mounted() {

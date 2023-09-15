@@ -47,7 +47,7 @@
  * walk through process of a participant.
  */
 import CodeRunner from "@/components/coderunner/CodeRunner.vue";
-import { useElementStore, useStudyStore } from "@/stores";
+import { useElementStore, usePilotStore } from "@/stores";
 import axios from "axios";
 import JsonViewer from "vue-json-viewer";
 import Button from "primevue/button";
@@ -58,7 +58,6 @@ export default {
   components: { CodeRunner, JsonViewer, Button },
   data() {
     return {
-      study: null,
       persistentData: {},
       outputData: {},
       codeType: null,
@@ -280,43 +279,44 @@ export default {
     /**
      * Parse a study such that we can run it.
      */
-    async parseStudy() {
+    async parseElement() {
+      const elementType = this.isExperiment ? "experiment" : "project";
       // get the project run by the study.
-      this.currentProject = await this.elementStore.getElement(
-        this.currentEditedStudy.sourceUUID,
-        this.currentEditedStudy.version,
-        "project"
-      );
-      // this needs to be a deep copy, since we are altering the contents
-      this.currentProject = JSON.parse(JSON.stringify(this.currentProject));
-      // add all tasks
-      for (const task of this.currentProject.tasks) {
-        task.elementType = "task";
-        this.elements[task.instanceID] = task;
-      }
-      // and everything from experiments
-      for (const experiment of this.currentProject.experiments) {
-        this.parseExperiment(experiment);
-      }
-      // add filters
-      for (const filter of this.currentProject.filters) {
-        filter.elementType = "filter";
-        this.elements[filter.instanceID] = filter;
-      }
 
-      for (const filter of this.currentProject.randomizers) {
-        filter.elementType = "randomizer";
-        this.elements[filter.instanceID] = filter;
+      // this needs to be a deep copy, since we are altering the contents
+      const copy = JSON.parse(JSON.stringify(this.pilotedElement));
+      if (this.isExperiment) {
+        this.parseExperiment(copy, true);
+      } else {
+        // add all tasks
+        for (const task of copy.tasks) {
+          task.elementType = "task";
+          this.elements[task.instanceID] = task;
+        }
+        // and everything from experiments
+        for (const experiment of copy.experiments) {
+          this.parseExperiment(experiment);
+        }
+        // add filters
+        for (const filter of copy.filters) {
+          filter.elementType = "filter";
+          this.elements[filter.instanceID] = filter;
+        }
+
+        for (const filter of copy.randomizers) {
+          filter.elementType = "randomizer";
+          this.elements[filter.instanceID] = filter;
+        }
+        console.log("Study parsed. Requesting next element.");
+        this.currentElementID = copy.start;
       }
-      this.currentElementID = this.currentProject.start;
-      console.log("Study parsed. Requesting next element.");
       await this.getNext(true);
     },
     /**
      * Parse an experiment object from a Project.
      * @param {*} experiment
      */
-    parseExperiment(experiment) {
+    parseExperiment(experiment, isBase) {
       for (const element of experiment.elements) {
         console.log(element);
         if (element.elementType === "experiment") {
@@ -326,9 +326,17 @@ export default {
           this.elements[element.data.instanceID].elementType =
             element.elementType;
         }
+        if (experiment.randomize) {
+          // we need to call back to the experiment.
+          element.next = experiment.instanceID;
+        }
       }
-      experiment.elementType = "experiment";
-      this.elements[experiment.instanceID] = experiment;
+      if (!isBase) {
+        experiment.elementType = "experiment";
+        this.elements[experiment.instanceID] = experiment;
+      } else {
+        this.currentElementID = experiment.elements[0].data.instanceID;
+      }
     },
     /**
      * Start, i.e. run the task by adding uuid and version to the path so that files can be loaded
@@ -353,13 +361,13 @@ export default {
   },
   async mounted() {
     this.reset();
-    await this.parseStudy();
+    await this.parseElement();
   },
   setup() {
     const elementStore = useElementStore();
-    const studyStore = useStudyStore();
-    const { currentEditedStudy } = storeToRefs(studyStore);
-    return { elementStore, currentEditedStudy };
+    const pilotStore = usePilotStore();
+    const { pilotedElement, isExperiment } = storeToRefs(pilotStore);
+    return { elementStore, pilotedElement, isExperiment };
   },
 };
 </script>

@@ -1,28 +1,82 @@
 <template>
   <div class="editor">
     <div class="editor-content">
-      <div class="textarea-container">
-        <Textarea v-model="text" />
-      </div>
+      <div ref="editorContainer" class="textarea-container"></div>
     </div>
   </div>
 </template>
 
 <script>
 import Textarea from "primevue/textarea";
+import { EditorState, Compartment } from "@codemirror/state";
+import { htmlLanguage, html } from "@codemirror/lang-html";
+import { language } from "@codemirror/language";
+import { javascript } from "@codemirror/lang-javascript";
+import { json } from "@codemirror/lang-json";
+import { css } from "@codemirror/lang-css";
+import { EditorView, basicSetup } from "codemirror";
 
 export default {
   components: {
     Textarea,
+  },
+  data() {
+    return {
+      editor: null,
+      autoLanguage: null,
+      languageConf: new Compartment(),
+    };
   },
   props: {
     inputText: {
       type: String,
       required: true,
     },
+    inputLanguage: {
+      type: String,
+      default: null,
+    },
   },
-  methods: {},
+  methods: {
+    detectLanguage() {
+      const startText = this.text.substring(0, 100);
+      let docIsHTML = /^\s*<.*?>/.test(startText); // assume that there is a, reasonably short tag at the start.
+      let docIsJSON = /^\s*\{\[/.test(startText); // starts with a parenthesis
+      let docIsCSS = /^\s*[\.#].*? \{/.test(startText); // starts with a spec.
+      var currentLang = javascript();
+      if (docIsHTML) {
+        currentLang = html();
+      }
+      if (docIsJSON) {
+        currentLang = json();
+      }
+      if (docIsCSS) {
+        currentLang = css();
+      }
+      return currentLang;
+    },
+    dataChanged(cm, changeObj) {
+      console.log(cm);
+      console.log(changeObj);
+    },
+  },
   computed: {
+    language() {
+      if (this.inputLanguage) {
+        switch (this.inputLanguage) {
+          case "javascript":
+            return javascript();
+          case "css":
+            return css();
+          case "html":
+            return html();
+          case "json":
+            return json();
+        }
+      } else {
+        return this.detectLanguage(this.text);
+      }
+    },
     text: {
       set(newValue) {
         this.$emit("update:inputText", newValue);
@@ -31,6 +85,35 @@ export default {
         return this.inputText;
       },
     },
+  },
+  mounted() {
+    this.autoLanguage = EditorState.transactionExtender.of((tr) => {
+      if (!tr.docChanged) return null;
+      return {
+        effects: this.languageConf.reconfigure(this.language),
+      };
+    });
+    const listener = EditorView.updateListener.of((v) => {
+      if (v.docChanged) {
+        // Document changed
+        this.text = this.editor.state.doc.toString();
+      }
+    });
+    this.editor = new EditorView({
+      doc: this.text,
+      extensions: [
+        basicSetup,
+        this.languageConf.of(this.language),
+        this.autoLanguage,
+        listener,
+      ],
+      parent: this.$refs.editorContainer,
+    });
+    /*this.editor.updateListener((value) => {
+      console.log(value);
+    });*/
+    console.log(this.editor);
+    //this.editor.addEventListener("input", this.dataChanged);
   },
 };
 </script>
@@ -51,6 +134,7 @@ export default {
 .textarea-container {
   height: 100%;
   overflow: auto;
+  border: black 1px solid;
 }
 
 .textarea-container .p-inputtextarea {

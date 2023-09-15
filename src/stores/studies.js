@@ -158,6 +158,7 @@ export const useStudyStore = defineStore({
         );
         return response.data;
       } catch (error) {
+        console.error(error);
         this.processAxiosError(error);
         return false;
       }
@@ -263,6 +264,9 @@ export const useStudyStore = defineStore({
         const response = await axios.post(`/study/${UUID}/get`);
         console.log(response.data);
         console.log(response);
+        if (!response.data.shortcut) {
+          response.data.shortcut = "";
+        }
         this.currentEditedStudy = response.data;
         sessionStorage.setItem(
           "soile:currentStudy",

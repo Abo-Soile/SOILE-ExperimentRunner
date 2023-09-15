@@ -1,4 +1,9 @@
 <template>
+  <HelpItem
+    helpSubject="RandomNode"
+    buttonClass="baklava-button absolute"
+    buttonStyle="position: absolute;top:15px; right:10px"
+  ></HelpItem>
   <div>
     <div>
       <DropDown
@@ -14,11 +19,11 @@
       v-if="randomType.value === 'random'"
     >
       <div class="col-12 flex align-items-center">
-        <label for="outputAmount">Select Number of Outputs</label
-        ><InputNumber
+        <label for="outputAmount">Select Number of Outputs</label>
+        <InputNumber
           class="w-4"
           v-model="outputCount"
-          showButtons=""
+          showButtons
           inputId="outputAmount"
           inputClass="w-4"
           :min="1"
@@ -56,7 +61,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-
+import HelpItem from "@/components/helppages/HelpItem.vue";
 import DropDown from "primevue/dropdown";
 import Checkbox from "primevue/checkbox";
 import InputNumber from "primevue/inputnumber";
@@ -73,7 +78,7 @@ export default defineComponent({
       required: true,
     },
   },
-  components: { DropDown, InputNumber, Checkbox, InputText },
+  components: { DropDown, InputNumber, Checkbox, InputText, HelpItem },
   data() {
     return {
       editing: [],
@@ -120,7 +125,7 @@ export default defineComponent({
           this.currentNode.setBlockSpecification(newValue);
         }
       },
-      get(): number {
+      get(): string {
         return this.currentNode.settings.blockSpecification
           ? this.currentNode.settings.blockSpecification
           : "";
