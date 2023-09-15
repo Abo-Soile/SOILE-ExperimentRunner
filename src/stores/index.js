@@ -6,3 +6,4 @@ export { useEditorStore } from "./editing";
 export { useElementStore } from "./elements";
 export { useGraphStore } from "./graph";
 export { useErrorStore } from "./errors";
+export { usePilotStore } from "./pilot";

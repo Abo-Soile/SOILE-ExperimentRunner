@@ -93,15 +93,25 @@ export default {
         effects: this.languageConf.reconfigure(this.language),
       };
     });
+    const listener = EditorView.updateListener.of((v) => {
+      if (v.docChanged) {
+        // Document changed
+        this.text = this.editor.state.doc.toString();
+      }
+    });
     this.editor = new EditorView({
       doc: this.text,
       extensions: [
         basicSetup,
         this.languageConf.of(this.language),
         this.autoLanguage,
+        listener,
       ],
       parent: this.$refs.editorContainer,
     });
+    /*this.editor.updateListener((value) => {
+      console.log(value);
+    });*/
     console.log(this.editor);
     //this.editor.addEventListener("input", this.dataChanged);
   },

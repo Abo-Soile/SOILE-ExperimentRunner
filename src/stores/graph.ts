@@ -41,6 +41,7 @@ export const useGraphStore = defineStore({
     },
     setStartNode(node: SoileBaseNode) {
       const graph = node.graph;
+      console.log("Setting startnode for graph: " + graph?.id);
       this.startNodes.set(graph?.id, node.id);
     },
     isStartNode(node: SoileBaseNode): boolean {
@@ -107,6 +108,9 @@ export const useGraphStore = defineStore({
         (v) => v === this.refineName(name)
       );
     },
+    getStartNode(graph: Graph): string {
+      return this.startNodes.get(graph.id);
+    },
     updateName(node: SoileBaseNode, oldName: string, newName: string): string {
       const graphid = node.graph?.id;
       if (this.isNameOk(node, newName)) {
@@ -167,16 +171,19 @@ export const useGraphStore = defineStore({
           //TODO: Check if we need to add the nodeName here.
         }
       }
-      if (!this.startNodes.has(node.graph?.id)) {
+      // set the start node if it does not exist...
+      if (!this.startNodes.get(node.graph?.id)) {
         this.setStartNode(node);
       }
     },
     removeNode(node: SoileBaseNode) {
+      console.log("Removing Node");
+      console.log(this.startNodes.get(node.graph?.id));
       this.nodeOutputInformation.get(node.graph?.id).delete(node.id);
       this.nodePersistentInformation.get(node.graph?.id).delete(node.id);
       this.nodeNames.get(node.graph?.id).delete(node);
-      if (this.startNodes[node.graph?.id] === node.id) {
-        console.log("REmoved Start NOde need to select a new one!");
+      if (this.startNodes.get(node.graph?.id) === node.id) {
+        console.log("Removed Start Node need to select a new one!");
         this.startNodes.delete(node.graph?.id);
       }
     },

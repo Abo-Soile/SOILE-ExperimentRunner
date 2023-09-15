@@ -361,6 +361,12 @@ export async function BaklavaToSoileProjectJSON(
     tag: "",
     private: false,
   };
+  const graphStore = useGraphStore();
+  if (!graphStore.getStartNode(graph)) {
+    throw new Error(
+      "No start node defined. Select a start node before saving."
+    );
+  }
   const nextMap = createNextMap(nodes, connections);
   // now actually make the nodes
   for (const node of nodes) {
@@ -433,6 +439,12 @@ export async function BaklavaToSoileExperimentJSON(
     private: false,
     name: "",
   };
+  const graphStore = useGraphStore();
+  if (!graphStore.getStartNode(graph)) {
+    throw new Error(
+      "No start node defined. Select a start node before saving."
+    );
+  }
   const tempData = {} as Experiment;
   tempData.elements = new Array<{
     elementType: string;

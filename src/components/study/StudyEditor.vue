@@ -36,9 +36,7 @@
             'Pilot the study, without actually generating any data (only temporary data will be created)'
           "
         >
-          <Button
-            @click="this.$router.push('/pilot/')"
-            :disabled="!isStudyEditable"
+          <Button @click="pilotStudy" :disabled="!isStudyEditable"
             >Pilot</Button
           >
         </div>
@@ -90,7 +88,12 @@ import Dropdown from "primevue/dropdown";
 import Button from "primevue/button";
 
 import ObjectAndVersionSelectorWithProps from "@/components/utils/ObjectAndVersionSelectorWithProps.vue";
-import { useStudyStore, useUserStore, useElementStore } from "@/stores";
+import {
+  useStudyStore,
+  useUserStore,
+  useElementStore,
+  usePilotStore,
+} from "@/stores";
 import { reactive } from "vue";
 
 import { ConfirmDialog } from "@/components/dialogs";
@@ -140,9 +143,10 @@ export default {
       JSON.parse(JSON.stringify(props.selectedStudy))
     );
     const studyStore = useStudyStore();
+    const pilotStore = usePilotStore();
     const userStore = useUserStore();
     const elementStore = useElementStore();
-    return { currentStudy, elementStore, studyStore, userStore };
+    return { currentStudy, elementStore, studyStore, userStore, pilotStore };
   },
   computed: {
     isStudyEditable() {
@@ -222,6 +226,18 @@ export default {
             }
           });
       }
+    },
+    pilotStudy() {
+      this.elementStore
+        .getElement(
+          this.currentStudy.sourceUUID,
+          this.currentStudy.version,
+          "project"
+        )
+        .then((element) => {
+          this.pilotStore.setCurrentObject(element);
+          this.$router.push("/pilot/");
+        });
     },
     async updateData() {
       console.log("Updating Data for Study in Editor");
