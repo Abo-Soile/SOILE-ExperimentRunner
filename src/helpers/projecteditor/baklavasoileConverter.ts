@@ -201,6 +201,7 @@ async function addTask(
   const t = new TaskNode();
   if (task.position) {
     t.position = task.position;
+    t.position.width = Math.max(200, t.position.width);
   } else {
     t.position = { x: defaultX, y: defaultY, width: 300, height: 300 };
     defaultX = defaultX + 300;
@@ -236,6 +237,7 @@ async function addExperiment(
   const e = new ExperimentNode();
   if (experiment.position) {
     e.position = experiment.position;
+    e.position.width = Math.max(200, e.position.width);
   } else {
     e.position = { x: defaultX, y: defaultY, width: 300, height: 300 };
     defaultX = defaultX + 300;
@@ -267,6 +269,7 @@ async function addFilter(
   const f = new FilterNode();
   if (filter.position) {
     f.position = filter.position;
+    f.position.width = Math.max(200, f.position.width);
   } else {
     f.position = { x: defaultX, y: defaultY, width: 300, height: 300 };
     defaultX = defaultX + 300;
@@ -300,6 +303,7 @@ async function addRandomizer(
   const f = new RandomNode();
   if (randomizer.position) {
     f.position = randomizer.position;
+    f.position.width = Math.max(200, f.position.width);
   } else {
     f.position = { x: defaultX, y: defaultY, width: 300, height: 300 };
     defaultX = defaultX + 300;
