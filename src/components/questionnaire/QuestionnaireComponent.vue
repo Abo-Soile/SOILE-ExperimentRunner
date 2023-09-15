@@ -4,6 +4,11 @@
     v-for="(element, index) in component_data"
     :key="index"
   >
+    <QuestionnaireTable
+      v-if="element.type == 'table'"
+      @dataUpdate="dataUpdate"
+      :source_data="element.data"
+    />
     <QuestionnaireDropDownMenu
       v-if="element.type == 'dropdownmenu'"
       @dataUpdate="dataUpdate"
@@ -47,6 +52,7 @@
 </template>
 
 <script>
+import { defineAsyncComponent } from "vue";
 import QuestionnaireDropDownMenu from "./QuestionnaireDropDownMenu.vue";
 import QuestionnaireText from "./QuestionnaireText.vue";
 import QuestionnaireMultiSelect from "./QuestionnaireMultiSelect.vue";
@@ -84,6 +90,9 @@ export default {
     QuestionnaireTextBox,
     QuestionnaireTextArea,
     QuestionnaireSlider,
+    QuestionnaireTable: defineAsyncComponent(() =>
+      import("./QuestionnaireTable.vue")
+    ),
   },
 };
 </script>

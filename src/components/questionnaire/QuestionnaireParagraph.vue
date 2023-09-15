@@ -10,8 +10,7 @@
 </template>
 
 <script>
-import QuestionnaireComponent from "./QuestionnaireComponent.vue";
-
+import { defineAsyncComponent } from "vue";
 export default {
   props: {
     paragraph_data: {
@@ -48,7 +47,11 @@ export default {
       return groups;
     },
   },
-  components: { QuestionnaireComponent, QuestionnaireComponent },
+  components: {
+    QuestionnaireComponent: defineAsyncComponent(() =>
+      import("./QuestionnaireComponent.vue")
+    ),
+  },
   emits: ["dataUpdate"],
 };
 </script>
