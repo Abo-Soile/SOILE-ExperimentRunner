@@ -69,7 +69,7 @@
     <div class="displaypart col-4">
       Available Data
       <StudyDataSelector
-        :studyID="selectedStudy.UUID"
+        :studyID="currentStudy.UUID"
         :availableData="availableData"
       ></StudyDataSelector>
     </div>
@@ -151,7 +151,7 @@ export default {
   computed: {
     isStudyEditable() {
       return (
-        (this.selectedStudy.UUID == null || this.hasWriteAccess) &&
+        (this.currentStudy.UUID == null || this.hasWriteAccess) &&
         (!this.availableData.participants ||
           this.availableData.participants.length == 0) && // This study cannot have any participants, if it does, the settings cannot be changed.
         !this.isActive
@@ -163,27 +163,28 @@ export default {
     hasWriteAccess() {
       return this.editableStudies
         .map((x) => x.UUID)
-        .includes(this.selectedStudy.UUID);
+        .includes(this.currentStudy.UUID);
     },
     sourceProject: {
       get() {
         return this.elementStore.availableProjects.find(
-          (x) => x.UUID === this.selectedStudy.sourceUUID
+          (x) => x.UUID === this.currentStudy.sourceUUID
         );
       },
       set(newValue) {
-        this.selectedStudy.sourceUUID = newValue.UUID;
+        this.currentStudy.sourceUUID = newValue.UUID;
       },
     },
     sourceVersion: {
       get() {
-        return this.selectedStudy.version;
+        return this.currentStudy.version;
       },
       set(newValue) {
+        console.log(newValue);
         if (newValue) {
-          this.selectedStudy.version = newValue.version;
+          this.currentStudy.version = newValue.version;
         } else {
-          this.selectedStudy.version = undefined;
+          this.currentStudy.version = undefined;
         }
       },
       additionalUsersExist: {},
