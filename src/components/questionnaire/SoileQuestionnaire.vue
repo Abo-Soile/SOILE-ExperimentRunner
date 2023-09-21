@@ -9,7 +9,9 @@
     >
     </QuestionnaireParagraph>
 
-    <Button :disabled="!canSubmit" @click="submitForm">Submit</Button>
+    <Button :disabled="!canSubmit" @click="submitForm">{{
+      $t("submit")
+    }}</Button>
   </div>
 </template>
 

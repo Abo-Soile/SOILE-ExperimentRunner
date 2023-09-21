@@ -49,6 +49,21 @@
   </div>
   <div class="grid">
     <div class="col">
+      <label for="shortcut">Language</label>
+    </div>
+    <div class="col">
+      <div>
+        <DropDown
+          :options="supportedLocales"
+          optionLabel="name"
+          id="language"
+          v-model="currentLanguage"
+        />
+      </div>
+    </div>
+  </div>
+  <div class="grid">
+    <div class="col">
       <label for="private">Private</label>
     </div>
     <div class="col">
@@ -61,10 +76,16 @@
 import Checkbox from "primevue/checkbox";
 import InputText from "primevue/inputtext";
 import TextArea from "primevue/textarea";
+import DropDown from "primevue/dropdown";
+
+import { mapState } from "pinia";
+
 import ObjectAndVersionSelector from "@/components/utils/ObjectAndVersionSelector.vue";
+import { supportedLocales } from "@/i18n";
+import { useLanguageStore } from "@/stores";
 
 export default {
-  components: { TextArea, InputText, Checkbox },
+  components: { TextArea, InputText, Checkbox, DropDown },
   emits: [
     "update:valid",
     "update:name",
@@ -72,7 +93,9 @@ export default {
     "update:descriptionShort",
     "update:descriptionLong",
     "update:private",
+    "update:language",
   ],
+
   props: {
     name: {
       type: String,
@@ -94,8 +117,21 @@ export default {
       type: Boolean,
       required: true,
     },
+    language: {
+      type: String,
+      required: true,
+    },
   },
   computed: {
+    ...mapState(useLanguageStore, ["supportedLocales"]),
+    currentLanguage: {
+      get() {
+        return this.supportedLocales.find((x) => x.id == this.language);
+      },
+      set(newValue) {
+        this.$emit("update:language", newValue.id);
+      },
+    },
     currentName: {
       set(newValue) {
         this.$emit("update:name", newValue);

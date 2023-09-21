@@ -7,3 +7,4 @@ export { useElementStore } from "./elements";
 export { useGraphStore } from "./graph";
 export { useErrorStore } from "./errors";
 export { usePilotStore } from "./pilot";
+export { useLanguageStore } from "./language";

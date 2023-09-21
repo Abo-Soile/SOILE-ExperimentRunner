@@ -1,0 +1,21 @@
+{
+    "name" : "Name",
+    "signuptitle" : "Sign up to Study",
+    "signup": "Sign up",
+    "continue" : "Continue",
+    "Withdraw" : "Writhdraw",
+    "Signup as user" : "Sign up as user",
+    "startStudy" : "Start study",
+    "continueStudy" : "Continue study",
+    "tokenInfo" : "Your token for this Study is",
+    "tokenReminder" : "Note this token carfully as it is needed to continue the study if you leave the page at any point during the study",
+    "startNext" : "Start Next Task",    
+    "userIdentificationToken" : "User Identification Token",
+    "setToken" : "Set Token",
+    "tokenTip" : "If you have already signed up to a project use the token you were provided to continue",
+    "login" : "Login",
+    "withdrawQuestion" : "Do you really want to withdraw from the following study: { name }? All your data and progress will be permanently deleted and your access key will no longer work.",
+    "withdrawTitle" : "Withdraw from Study",
+    "submit" : "Submit",
+    "availableStudies" : "Available Studies"
+}

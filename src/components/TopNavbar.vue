@@ -9,6 +9,11 @@
       </div>
     </template>
     <template #end>
+      <DropDown
+        v-model="currentLocale"
+        :options="supportedLocales"
+        optionLabel="name"
+      ></DropDown>
       <HelpPage />
     </template>
   </Menubar>
@@ -29,9 +34,14 @@
 import Menubar from "primevue/menubar";
 import Menu from "primevue/menu";
 import Dialog from "primevue/dialog";
+import DropDown from "primevue/dropdown";
+
 import { computed, ref } from "vue";
+import { mapState } from "pinia";
+
+import { useAuthStore, useStudyStore, useLanguageStore } from "@/stores";
+import { supportedLocales } from "@/i18n";
 import Login from "./LoginForm.vue";
-import { useAuthStore, useStudyStore } from "@/stores";
 import StudyCreationDialog from "@/components/study/StudyCreationDialog.vue";
 import StudyLoadDialog from "@/components/study/StudyLoadDialog.vue";
 import HelpPage from "@/components/helppages/HelpPage.vue";
@@ -46,6 +56,7 @@ export default {
     StudyCreationDialog,
     StudyLoadDialog,
     HelpPage,
+    DropDown,
   },
   data() {
     return {
@@ -55,6 +66,17 @@ export default {
     };
   },
   computed: {
+    ...mapState(useLanguageStore, ["supportedLocales"]),
+    currentLocale: {
+      get() {
+        return this.supportedLocales.find(
+          (x) => x.id == this.languageStore.getLocale()
+        );
+      },
+      set(newValue) {
+        this.languageStore.setLocale(newValue.id);
+      },
+    },
     editingMenu() {
       return {
         label: "Project Editing",
@@ -106,7 +128,7 @@ export default {
         });
       }
       return {
-        label: this.isLoggedIn ? "User" : "Login",
+        label: this.isLoggedIn ? "User" : this.$t("login"),
         icon: this.isLoggedIn ? "pi pi-user" : "pi pi-sign-in",
         items: items,
         to: this.isLoggedIn ? undefined : "/login",
@@ -160,6 +182,7 @@ export default {
     const isAdmin = computed(() => authStore.isAdmin());
     const isResearcher = computed(() => authStore.isResearcher());
     const studyStore = useStudyStore();
+    const languageStore = useLanguageStore();
     return {
       showLoginDialog,
       isLoggedIn,
@@ -168,6 +191,7 @@ export default {
       isAdmin,
       studyStore,
       isAnonymous,
+      languageStore,
     };
   },
 };

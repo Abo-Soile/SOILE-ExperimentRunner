@@ -156,6 +156,12 @@ export const useStudyStore = defineStore({
           `/study/${studyData.UUID}/update`,
           studyData
         );
+        if (studyData.UUID === this.currentEditedStudy?.UUID) {
+          sessionStorage.setItem(
+            "soile:currentStudy",
+            JSON.stringify(this.currentEditedStudy)
+          );
+        }
         return response.data;
       } catch (error) {
         console.error(error);

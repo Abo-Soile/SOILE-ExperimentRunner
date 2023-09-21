@@ -1,5 +1,5 @@
 <template>
-  <h2>{{ currentStudy.name }}</h2>
+  <h2>{{ currentEditedStudy?.name }}</h2>
   <div class="grid studydisplay">
     <div class="displaypart col-4 h-full">
       <h3>Project Properties</h3>
@@ -12,11 +12,12 @@
         elementTitle="Project Name"
       />
       <StudyProperties
-        v-model:name="currentStudy.name"
-        v-model:descriptionShort="currentStudy.shortDescription"
-        v-model:descriptionLong="currentStudy.description"
-        v-model:shortCut="currentStudy.shortcut"
-        v-model:private="currentStudy.private"
+        v-model:name="currentStudyName"
+        v-model:descriptionShort="currentStudyShortDescription"
+        v-model:descriptionLong="currentStudyDescription"
+        v-model:shortCut="currentStudyShortcut"
+        v-model:private="currentStudyPrivate"
+        v-model:language="currentStudyLanguage"
         @update:valid="(event) => (dataValid = event)"
       />
       <div class="grid">
@@ -49,12 +50,12 @@
     </div>
     <div class="displaypart col-4">
       <StudyActivity
-        v-model:active="currentStudy.active"
+        v-model:active="currentStudyActive"
         :accessTokens="accessTokens"
         :permanentToken="permanentAccessToken"
         :usedTokens="usedTokens"
-        :studyID="currentStudy.UUID"
-        :shortCut="currentStudy.shortCut ? currentStudy.shortCut : null"
+        :studyID="currentEditedStudy?.UUID"
+        :shortCut="currentStudyShortcut ? currentStudyShortcut : null"
         @createTokens="(event) => createAccessTokens(event)"
         @createMasterToken="createMasterToken"
       ></StudyActivity>
@@ -69,7 +70,7 @@
     <div class="displaypart col-4">
       Available Data
       <StudyDataSelector
-        :studyID="currentStudy.UUID"
+        :studyID="currentEditedStudy?.UUID"
         :availableData="availableData"
       ></StudyDataSelector>
     </div>
@@ -95,6 +96,7 @@ import {
   usePilotStore,
 } from "@/stores";
 import { reactive } from "vue";
+import { mapState } from "pinia";
 
 import { ConfirmDialog } from "@/components/dialogs";
 import StudyProperties from "./StudyProperties.vue";
@@ -120,10 +122,6 @@ export default {
       type: Array,
       required: true,
     },
-    selectedStudy: {
-      type: Object,
-      required: true,
-    },
   },
   data() {
     return {
@@ -139,59 +137,118 @@ export default {
   },
   setup(props) {
     console.log("Setting up StudyEditor");
-    const currentStudy = reactive(
-      JSON.parse(JSON.stringify(props.selectedStudy))
-    );
     const studyStore = useStudyStore();
     const pilotStore = usePilotStore();
     const userStore = useUserStore();
     const elementStore = useElementStore();
-    return { currentStudy, elementStore, studyStore, userStore, pilotStore };
+    return { elementStore, studyStore, userStore, pilotStore };
   },
   computed: {
+    ...mapState(useStudyStore, ["currentEditedStudy"]),
+    currentStudyName: {
+      get() {
+        return this.currentEditedStudy?.name;
+      },
+      set(newValue) {
+        this.currentEditedStudy.name = newValue;
+      },
+    },
+    currentStudyPrivate: {
+      get() {
+        return this.currentEditedStudy?.private;
+      },
+      set(newValue) {
+        this.currentEditedStudy.private = newValue;
+      },
+    },
+    currentStudyShortcut: {
+      get() {
+        return this.currentEditedStudy?.shortcut;
+      },
+      set(newValue) {
+        this.currentEditedStudy.shortcut = newValue;
+      },
+    },
+    currentStudyDescription: {
+      get() {
+        return this.currentEditedStudy?.description;
+      },
+      set(newValue) {
+        this.currentEditedStudy.description = newValue;
+      },
+    },
+    currentStudyShortDescription: {
+      get() {
+        return this.currentEditedStudy?.shortDescription;
+      },
+      set(newValue) {
+        this.currentEditedStudy.shortDescription = newValue;
+      },
+    },
+    currentStudyLanguage: {
+      get() {
+        return this.currentEditedStudy?.language;
+      },
+      set(newValue) {
+        this.currentEditedStudy.language = newValue;
+      },
+    },
+    currentStudyActive: {
+      get() {
+        console.log("Updated value");
+        console.log(this.currentEditedStudy?.active);
+        return this.currentEditedStudy?.active;
+      },
+      set(newValue) {
+        console.log("Updating activity");
+        console.log(newValue);
+        console.log(this.currentEditedStudy);
+        this.currentEditedStudy.active = newValue;
+      },
+    },
     isStudyEditable() {
       return (
-        (this.currentStudy.UUID == null || this.hasWriteAccess) &&
+        (this.currentEditedStudy?.UUID == null || this.hasWriteAccess) &&
         (!this.availableData.participants ||
           this.availableData.participants.length == 0) && // This study cannot have any participants, if it does, the settings cannot be changed.
         !this.isActive
       );
     },
     isActive() {
-      return this.currentStudy.active;
+      return this.currentStudyActive;
     },
     hasWriteAccess() {
       return this.editableStudies
         .map((x) => x.UUID)
-        .includes(this.currentStudy.UUID);
+        .includes(this.currentEditedStudy?.UUID);
     },
     sourceProject: {
       get() {
         return this.elementStore.availableProjects.find(
-          (x) => x.UUID === this.currentStudy.sourceUUID
+          (x) => x.UUID === this.currentEditedStudy?.sourceUUID
         );
       },
       set(newValue) {
-        this.currentStudy.sourceUUID = newValue.UUID;
+        this.currentEditedStudy.sourceUUID = newValue.UUID;
       },
     },
     sourceVersion: {
       get() {
-        return this.currentStudy.version;
+        return this.currentEditedStudy?.version;
       },
       set(newValue) {
         console.log(newValue);
         if (newValue) {
-          this.currentStudy.version = newValue.version;
+          this.currentEditedStudy.version = newValue.version;
         } else {
-          this.currentStudy.version = undefined;
+          this.currentEditedStudy.version = undefined;
         }
       },
       additionalUsersExist: {},
     },
     currentStudyID() {
-      if (this.currentStudy != null && this.currentStudy.UUID) {
-        return this.currentStudy.UUID;
+      if (this.currentEditedStudy != null && this.currentEditedStudy?.UUID) {
+        return this.currentEditedStudy?.UUID;
       } else {
         return null;
       }
@@ -199,20 +256,16 @@ export default {
   },
   watch: {
     // on an updated project, we reparse it.
-    selectedStudy(newValue) {
-      console.log("Selected Project Changed");
-      this.currentStudy = reactive(
-        JSON.parse(JSON.stringify(this.selectedStudy))
-      );
-      this.updateData();
-    },
-    async "currentStudy.active"(newValue) {
+    async currentStudyActive(newValue) {
       console.log("Activity of current project changed");
       if (newValue) {
-        this.studyStore.activate(this.currentStudy.UUID);
+        this.studyStore.activate(this.currentEditedStudy.UUID);
       } else {
-        this.studyStore.deactivate(this.currentStudy.UUID);
+        this.studyStore.deactivate(this.currentEditedStudy.UUID);
       }
+    },
+    currentEditedStudy(newValue) {
+      this.updateData();
     },
   },
   methods: {
@@ -231,12 +284,17 @@ export default {
     pilotStudy() {
       this.elementStore
         .getElement(
-          this.currentStudy.sourceUUID,
-          this.currentStudy.version,
+          this.currentEditedStudy.sourceUUID,
+          this.currentEditedStudy.version,
           "project"
         )
         .then((element) => {
           this.pilotStore.setCurrentObject(element);
+          console.log(
+            "Setting language to study language: " +
+              this.currentEditedStudy.language
+          );
+          this.$i18n.locale = this.currentEditedStudy.language;
           this.$router.push("/pilot/");
         });
     },
@@ -253,7 +311,7 @@ export default {
     async updateTokenData() {
       console.log("Updating token data");
       const tokenInformation = await this.studyStore.getTokenInformation(
-        this.currentStudy.UUID
+        this.currentEditedStudy?.UUID
       );
       this.usedTokens = tokenInformation.usedTokens || [];
       this.accessTokens = tokenInformation.signupTokens || [];
@@ -261,7 +319,7 @@ export default {
     },
     async updateAvailableDLData() {
       this.availableData = await this.studyStore.getDownloadableData(
-        this.currentStudy.UUID
+        this.currentEditedStudy?.UUID
       );
     },
     async updateCollaborators() {
@@ -277,24 +335,24 @@ export default {
       }
     },
     async createAccessTokens(count) {
-      await this.studyStore.generateTokens(this.currentStudy.UUID, count);
+      await this.studyStore.generateTokens(this.currentEditedStudy.UUID, count);
       await this.updateTokenData();
     },
     async createMasterToken() {
-      await this.studyStore.generateMasterToken(this.currentStudy.UUID);
+      await this.studyStore.generateMasterToken(this.currentEditedStudy.UUID);
       await this.updateTokenData();
     },
     async updateStudy() {
-      await this.studyStore.updateStudy(this.currentStudy);
+      await this.studyStore.updateStudy(this.currentEditedStudy);
     },
     async resetStudy() {
-      await this.studyStore.resetStudy(this.currentStudy.UUID);
+      await this.studyStore.resetStudy(this.currentEditedStudy.UUID);
       this.updateData();
       this.showResetDialog = false;
     },
   },
   mounted() {
-    if (this.currentStudy && this.currentStudy.UUID) {
+    if (this.currentEditedStudy && this.currentEditedStudy.UUID) {
       console.log("StudyEditor Mounted");
       this.updateData();
     }

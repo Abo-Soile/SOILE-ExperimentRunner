@@ -1,40 +1,41 @@
 <template>
-  <div v-if="selectedProject">
-    <h2>{{ selectedProject.name }}</h2>
-    <p>{{ selectedProject.description }}</p>
+  <div v-if="selectedStudy">
+    <h2>{{ selectedStudy.name }}</h2>
+    <p>{{ selectedStudy.description }}</p>
     <!-- TODO: check whether already signed up if user is logged in or authed in a different way-->
-    <div v-if="signedUpStudies.includes(selectedProject.UUID)">
+    <div v-if="signedUpStudies.includes(selectedStudy.UUID)">
       <div v-if="authStore.isAnonymous">
-        <h2>Your token for this Project is:</h2>
+        <h2>{{ $t("tokenInfo") }}</h2>
         <p style="color: red">{{ authStore.projectToken }}</p>
         <h4>
-          Note this token carfully as it is needed to continue if you quit your
-          current execution.
+          {{ $t("tokenReminder") }}
         </h4>
       </div>
       <router-link
         :to="
           '/exp/' +
-          selectedProject.UUID +
+          selectedStudy.UUID +
           '/' +
           projectStore.currentTaskSettings.id +
           '/'
         "
         custom
         v-slot="{ navigate }"
-        @click="startProject(selectedProject.UUID)"
+        @click="startProject(selectedStudy.UUID)"
       >
-        <Button v-if="justSignedUp" @click="navigate" role="link"
-          >Start project</Button
+        <Button v-if="justSignedUp" @click="navigate" role="link">{{
+          $t("startStudy")
+        }}</Button>
+        <Button v-else @click="navigate" role="link"
+          >>{{ $t("continueStudy") }}</Button
         >
-        <Button v-else @click="navigate" role="link">Continue project</Button>
       </router-link>
     </div>
     <div v-else>
-      <Button v-if="authStore.user" @click="signUp(selectedProject.UUID)"
+      <Button v-if="authStore.user" @click="signUp(selectedStudy.UUID)"
         >Sign up as user</Button
       >
-      <Button v-else @click="signUp(selectedProject.UUID)">Sign up</Button>
+      <Button v-else @click="signUp(selectedStudy.UUID)">Sign up</Button>
     </div>
   </div>
   <router-link v-else to="/">Back to Start</router-link>
@@ -49,15 +50,15 @@ import { onMounted, watch } from "vue";
 export default {
   data() {
     return {
-      selectedProject: undefined,
+      selectedStudy: undefined,
       justSignedUp: false,
     };
   },
   computed: {
     isSignedUp() {
-      if (this.selectedProject) {
+      if (this.selectedStudy) {
         if (
-          this.signedUpStudies.find((x) => x.UUID === this.selectedProject.UUID)
+          this.signedUpStudies.find((x) => x.UUID === this.selectedStudy.UUID)
         ) {
           return true;
         }
@@ -81,9 +82,10 @@ export default {
 
           if (token) {
             await this.projectStore.updateAvailableStudies();
-            this.selectedProject = await this.projectStore.getStudyDetails(
+            this.selectedStudy = await this.projectStore.getStudyDetails(
               this.$router.currentRoute.value.params.id
             );
+            this.$i18n.locale = this.selectedStudy.language;
           }
         } else {
           console.log("Signup unsuccessful");
@@ -111,9 +113,10 @@ export default {
     } else {
       await this.projectStore.updateAvailableStudies();
       await this.projectStore.fetchSignedUpStudies();
-      this.selectedProject = this.projectStore.getStudyDetails(
+      this.selectedStudy = this.projectStore.getStudyDetails(
         currentRoute.params.id
       );
+      this.$i18n.locale = this.selectedStudy.language;
     }
   },
 };

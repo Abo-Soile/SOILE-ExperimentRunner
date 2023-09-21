@@ -21,8 +21,12 @@ import Tooltip from "primevue/tooltip";
 // primeflex for layouting
 import "primeflex/primeflex.css";
 
+// localisation support
+import i18n from "./i18n";
+
 const app = createApp(App);
 app
+  .use(i18n)
   .directive("tooltip", Tooltip)
   .use(createPinia())
   .use(PrimeVue)

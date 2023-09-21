@@ -5,17 +5,17 @@
         <div
           class="flex flex-wrap align-items-center justify-content-between gap-2"
         >
-          <span class="text-xl text-900 font-bold">Available Studies</span>
+          <span class="text-xl text-900 font-bold">{{
+            $t("availableStudies")
+          }}</span>
           <span v-if="!authStore.user">
             <InputText
               v-model="continueToken"
-              placeholder="User Identification Token"
-              v-tooltip="
-                'If you have already signed up to a project use the token you were provided to continue'
-              "
+              :placeholder="$t('userIdentificationToken')"
+              v-tooltip="$t('tokenTip')"
             ></InputText>
             <Button
-              label="Set token"
+              :label="$t('setToken')"
               @click="
                 authStore.setProjectToken(continueToken);
                 authStore.updateLoginStatus();
@@ -25,12 +25,12 @@
           </span>
         </div>
       </template>
-      <Column field="name" header="Name">
+      <Column field="name" :header="$t('name')">
         <template #body="{ data, index }" let-index="index">
           <span v-tooltip="data.shortDescription">{{ data.name }}</span>
         </template></Column
       >
-      <Column header="Sign Up to Study">
+      <Column :header="$t('signuptitle')">
         <template #body="{ data, index }" let-index="index">
           <div>
             <router-link v-if="!isSignedUp(data)" :to="'/signup/' + data.UUID"
@@ -39,23 +39,23 @@
           </div>
         </template>
       </Column>
-      <Column :header="items.some((x) => isSignedUp(x)) ? 'Continue' : ''">
+      <Column :header="items.some((x) => isSignedUp(x)) ? $t('continue') : ''">
         <template #body="{ data, index }" let-index="index">
           <div>
             <Button
               v-if="isSignedUp(data)"
-              label="Continue"
+              :label="$t('continue')"
               @click="(event) => runProject(index, event)"
             ></Button>
           </div>
         </template>
       </Column>
-      <Column :header="items.some((x) => isSignedUp(x)) ? 'Withdraw' : ''">
+      <Column :header="items.some((x) => isSignedUp(x)) ? $t('withdraw') : ''">
         <template #body="{ data, index }" let-index="index">
           <div>
             <Button
               v-if="isSignedUp(data)"
-              label="Withdraw"
+              :label="$t('withdraw')"
               @click="showWithDrawConfirmation(index)"
             ></Button>
           </div>
@@ -66,12 +66,8 @@
   <ConfirmDialog
     v-if="withDrawConfirm"
     v-model:isVisible="withDrawConfirm"
-    :message="
-      'Do you really want to withdraw from the following study: ' +
-      selectedStudy.name +
-      '? All your data and progress will be permanently deleted and your access key will no longer work.'
-    "
-    title="Withdraw from Study"
+    :message="$t('withdrawQuestion', { name: selectedStudy.name })"
+    :title="$t('withdrawTitle')"
     @reject="
       selectedStudy = null;
       withDrawConfirm = false;
@@ -145,7 +141,6 @@ async function confirmWithDraw() {
 }
 
 function isSignedUp(data) {
-  console.log(projectStore.signedUpStudies.includes(data.UUID));
   return projectStore.signedUpStudies.includes(data.UUID);
 }
 </script>

@@ -11,7 +11,8 @@ import {
   ProfileView,
   PilotView,
 } from "@/views";
-import { useProjectStore, useAuthStore } from "@/stores";
+import { useProjectStore } from "@/stores";
+import i18n from "../i18n";
 
 const routes = [
   {
@@ -88,6 +89,7 @@ export const router = createRouter({
 });
 
 router.beforeEach(async (to) => {
+  console.log("Updating route");
   // redirect to login page if not logged in and trying to access a restricted page
   const projectStore = useProjectStore();
   // regardless on where we are, we are NOt currently running a task.

@@ -1,9 +1,6 @@
 <template>
   <div v-if="currentEditedStudy">
-    <StudyEditor
-      :selectedStudy="currentEditedStudy"
-      :editableStudies="editableStudies"
-    ></StudyEditor>
+    <StudyEditor :editableStudies="editableStudies"></StudyEditor>
   </div>
 </template>
 

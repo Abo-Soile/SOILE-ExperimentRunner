@@ -18,7 +18,7 @@
     ></CodeRunner>
   </div>
   <div v-else>
-    <Button @click="setTaskActive">Start Next Task</Button>
+    <Button @click="setTaskActive">{{ $t("startNext") }}</Button>
   </div>
 </template>
 

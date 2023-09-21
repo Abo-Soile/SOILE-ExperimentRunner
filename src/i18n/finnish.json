@@ -1,0 +1,21 @@
+{
+    "name" : "Nimi",
+    "signuptitle" : "Ilmoittaudu opiskelemaan",
+    "signup": "Ilmoittaudu",
+    "continue" : "Jatka",
+    "continueStudy": "Jatka tutkimus",
+    "startStudy" : "Aloita tutkimus",
+    "Withdraw" : "Vetäytä",    
+    "Signupasuser" : "Rekisteröidy käyttäjäksi",
+    "tokenInfo" : "Sinun tunnus tähän tutkimukseen on",
+    "tokenReminder" : "Huomaa tämä tunnusmerkki huolellisesti, koska se on tarpeen tutkimuksen jatkamiseksi, jos poistut sivulta missä tahansa vaiheessa tutkimuksen aikana.",
+    "startNext" : "Aloita seuraava tehtävä",
+    "userIdentificationToken" : "Käyttäjän tunnusmerkki",
+    "setToken" : "Aseta tunnusmerkki",
+    "tokenTip" : "Jos olet jo rekisteröitynyt projektiin, käytä sinulle annettua tokenia jatkaaksesi",
+    "login" : "Kirjaidu",
+    "withdrawQuestion" : "Haluatko todella vetäytyä seuraavasta tutkimuksesta: { name }? Kaikki tietosi ja edistymisesi poistetaan pysyvästi, eikä pääsyavaimesi enää toimi.",
+    "withdrawTitle" : "Vetäytä tutkimusesta",
+    "submit": "Lähettää",
+    "availableStudies": "Saatavilla tutkimukset"
+}

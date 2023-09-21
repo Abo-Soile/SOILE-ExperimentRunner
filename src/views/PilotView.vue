@@ -1,5 +1,5 @@
 <template>
-  <Button v-if="!started" :diabled="study" @click="start"
+  <Button v-if="!started" :disabled="!pilotedElement" @click="start"
     >Start Study Pilot</Button
   >
   <div v-if="started && !finished">
@@ -10,7 +10,7 @@
         loading = false;
       "
     >
-      Start next task
+      {{ $t("startNext") }}
     </Button>
     <CodeRunner
       v-else
@@ -47,7 +47,7 @@
  * walk through process of a participant.
  */
 import CodeRunner from "@/components/coderunner/CodeRunner.vue";
-import { useElementStore, usePilotStore } from "@/stores";
+import { useElementStore, usePilotStore, useLanguageStore } from "@/stores";
 import axios from "axios";
 import JsonViewer from "vue-json-viewer";
 import Button from "primevue/button";
@@ -293,6 +293,10 @@ export default {
      * Parse a study such that we can run it.
      */
     async parseElement() {
+      if (!this.pilotedElement) {
+        // We have nothing to parse...
+        return;
+      }
       const elementType = this.isExperiment ? "experiment" : "project";
       // get the project run by the study.
 
@@ -369,11 +373,26 @@ export default {
     this.reset();
     await this.parseElement();
   },
+  beforeRouteLeave(to, from, next) {
+    console.log(to);
+    console.log(from);
+    if (from.name === "PilotTask" || from.name === "PilotView") {
+      if (to.name != "PilotTask" && to.name != "PilotView") {
+        console.log("yay");
+        this.languageStore.restoreDefault();
+        console.log("done");
+      }
+    }
+    console.log(next);
+    next();
+    return true;
+  },
   setup() {
     const elementStore = useElementStore();
     const pilotStore = usePilotStore();
+    const languageStore = useLanguageStore();
     const { pilotedElement, isExperiment } = storeToRefs(pilotStore);
-    return { elementStore, pilotedElement, isExperiment };
+    return { elementStore, pilotedElement, isExperiment, languageStore };
   },
 };
 </script>
