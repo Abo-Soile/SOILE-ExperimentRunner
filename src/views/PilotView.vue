@@ -52,6 +52,7 @@ import axios from "axios";
 import JsonViewer from "vue-json-viewer";
 import Button from "primevue/button";
 import { storeToRefs } from "pinia";
+import { nextTick } from "vue";
 
 export default {
   name: "PilotView",
@@ -153,6 +154,17 @@ export default {
       } else {
         this.currentElement = null;
         this.finished = true;
+      }
+      if (this.currentElement != null) {
+        this.$router.push(
+          "/pilot/" +
+            this.currentElement.UUID +
+            "/" +
+            this.currentElement.version +
+            "/"
+        );
+      } else {
+        this.$router.push("/pilot/");
       }
     },
     /**
@@ -267,6 +279,7 @@ export default {
         (x) => (this.outputData[currentInstanceID + "." + x.name] = x.value)
       );
       await this.getNext();
+      // and switch to the next route
     },
     /**
      * Handle errors, mainly a referral to the error store.
@@ -341,14 +354,7 @@ export default {
     /**
      * Start, i.e. run the task by adding uuid and version to the path so that files can be loaded
      */
-    start() {
-      this.$router.push(
-        "/pilot/" +
-          this.currentElement.UUID +
-          "/" +
-          this.currentElement.version +
-          "/"
-      );
+    async start() {
       this.started = true;
     },
     reset() {
