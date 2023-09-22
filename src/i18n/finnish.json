@@ -17,5 +17,6 @@
     "withdrawQuestion" : "Haluatko todella vetäytyä seuraavasta tutkimuksesta: { name }? Kaikki tietosi ja edistymisesi poistetaan pysyvästi, eikä pääsyavaimesi enää toimi.",
     "withdrawTitle" : "Vetäytä tutkimusesta",
     "submit": "Lähettää",
-    "availableStudies": "Saatavilla tutkimukset"
+    "availableStudies": "Saatavilla tutkimukset",
+    "backToMain" : "Takasin pääsivu"
 }

@@ -34,7 +34,7 @@
         <template #body="{ data, index }" let-index="index">
           <div>
             <router-link v-if="!isSignedUp(data)" :to="'/signup/' + data.UUID"
-              >Sign Up</router-link
+              >{{$t('signup')}}</router-link
             >
           </div>
         </template>

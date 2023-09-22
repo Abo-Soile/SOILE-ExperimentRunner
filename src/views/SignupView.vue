@@ -35,10 +35,10 @@
       <Button v-if="authStore.user" @click="signUp(selectedStudy.UUID)">{{
         $t("signupUser")
       }}</Button>
-      <Button v-else @click="signUp(selectedStudy.UUID)">Sign up</Button>
+      <Button v-else @click="signUp(selectedStudy.UUID)">{{$t('signup')}}</Button>
     </div>
   </div>
-  <router-link v-else to="/">Back to Start</router-link>
+  <router-link v-else to="/">{{$t("backToMain")}}</router-link>
 </template>
 
 <script>
