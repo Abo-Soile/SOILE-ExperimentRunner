@@ -47,6 +47,7 @@
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.2.0",
+    "@vitejs/plugin-basic-ssl": "^1.0.1",
     "@vitejs/plugin-vue": "^4.0.0",
     "@vue/eslint-config-prettier": "^7.1.0",
     "@vue/eslint-config-typescript": "^11.0.2",
