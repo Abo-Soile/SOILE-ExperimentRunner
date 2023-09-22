@@ -16,6 +16,10 @@
       >
         {{ content }}
       </a>
+      <QuestionnairePeronsalLink
+        v-if="data.type == 'personalLink'"
+        :data="data"
+      ></QuestionnairePeronsalLink>
     </span>
     <span class="mb-2 mr-sm-2 mb-sm-0" v-else>
       <div v-if="data.type == 'text'">{{ content }}</div>
@@ -24,11 +28,16 @@
       <a v-else-if="data.type == 'link'" :href="data.href" target="_blank">
         {{ content }}
       </a>
+      <QuestionnairePeronsalLink
+        v-if="data.type == 'personalLink'"
+        :data="data"
+      ></QuestionnairePeronsalLink>
     </span>
   </div>
 </template>
 
 <script>
+import QuestionnairePeronsalLink from "./QuestionnairePersonalLink.vue";
 export default {
   props: {
     data: {
@@ -36,6 +45,7 @@ export default {
       required: true,
     },
   },
+  components: { QuestionnairePeronsalLink },
   computed: {
     content() {
       return this.data.text;

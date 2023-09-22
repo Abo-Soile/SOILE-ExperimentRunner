@@ -32,9 +32,9 @@
       </router-link>
     </div>
     <div v-else>
-      <Button v-if="authStore.user" @click="signUp(selectedStudy.UUID)"
-        >Sign up as user</Button
-      >
+      <Button v-if="authStore.user" @click="signUp(selectedStudy.UUID)">{{
+        $t("signupUser")
+      }}</Button>
       <Button v-else @click="signUp(selectedStudy.UUID)">Sign up</Button>
     </div>
   </div>
@@ -43,7 +43,7 @@
 
 <script>
 import Button from "primevue/button";
-import { useProjectStore, useAuthStore } from "@/stores";
+import { useProjectStore, useAuthStore, useLanguageStore } from "@/stores";
 import { storeToRefs } from "pinia";
 import { onMounted, watch } from "vue";
 
@@ -85,7 +85,7 @@ export default {
             this.selectedStudy = await this.projectStore.getStudyDetails(
               this.$router.currentRoute.value.params.id
             );
-            this.$i18n.locale = this.selectedStudy.language;
+            this.languageStore.setLocale(this.selectedStudy.language);
           }
         } else {
           console.log("Signup unsuccessful");
@@ -98,8 +98,9 @@ export default {
   setup() {
     const authStore = useAuthStore();
     const projectStore = useProjectStore();
+    const languageStore = useLanguageStore();
     const { signedUpStudies: signedUpStudies } = storeToRefs(projectStore);
-    return { authStore, projectStore, signedUpStudies };
+    return { authStore, projectStore, signedUpStudies, languageStore };
   },
   async mounted() {
     this.justSignedUp = !this.isSignedUp;
@@ -116,7 +117,8 @@ export default {
       this.selectedStudy = this.projectStore.getStudyDetails(
         currentRoute.params.id
       );
-      this.$i18n.locale = this.selectedStudy.language;
+
+      this.languageStore.setLocale(this.selectedStudy.language);
     }
   },
 };

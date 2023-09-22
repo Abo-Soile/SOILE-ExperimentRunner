@@ -6,7 +6,7 @@
     "continueStudy": "Jatka tutkimus",
     "startStudy" : "Aloita tutkimus",
     "Withdraw" : "Vetäytä",    
-    "Signupasuser" : "Rekisteröidy käyttäjäksi",
+    "signupUser" : "Rekisteröidy käyttäjäksi",
     "tokenInfo" : "Sinun tunnus tähän tutkimukseen on",
     "tokenReminder" : "Huomaa tämä tunnusmerkki huolellisesti, koska se on tarpeen tutkimuksen jatkamiseksi, jos poistut sivulta missä tahansa vaiheessa tutkimuksen aikana.",
     "startNext" : "Aloita seuraava tehtävä",

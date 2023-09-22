@@ -4,7 +4,7 @@
     "signup": "Sign up",
     "continue" : "Continue",
     "Withdraw" : "Writhdraw",
-    "Signup as user" : "Sign up as user",
+    "signupUser" : "Sign up as user",
     "startStudy" : "Start study",
     "continueStudy" : "Continue study",
     "tokenInfo" : "Your token for this Study is",

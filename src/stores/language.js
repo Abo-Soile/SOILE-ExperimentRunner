@@ -14,6 +14,7 @@ export const useLanguageStore = defineStore({
      * @param {*} locale
      */
     setLocale(locale) {
+      console.log("Setting locale to : " + locale);
       i18n.locale = locale;
     },
     /**
