@@ -16,6 +16,7 @@
         </template>
         <CodeEditor
           :inputText="sourceCode"
+          :inputLanguage="sourceLanguage"
           @update:inputText="
             $emit('update:sourceCode', $event);
             sourceChanged = true;
@@ -74,6 +75,10 @@ export default {
     selectedFile: {
       type: Number,
       required: true,
+    },
+    sourceLanguage: {
+      type: String,
+      default: null,
     },
   },
   data() {

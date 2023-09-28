@@ -65,13 +65,11 @@ export default {
       if (this.inputLanguage) {
         switch (this.inputLanguage) {
           case "javascript":
-            return javascript();
-          case "css":
-            return css();
-          case "html":
             return html();
-          case "json":
-            return json();
+          case "psychopy":
+            return html();
+          default:
+            return null;
         }
       } else {
         return this.detectLanguage(this.text);
@@ -99,16 +97,26 @@ export default {
         this.text = this.editor.state.doc.toString();
       }
     });
-    this.editor = new EditorView({
-      doc: this.text,
-      extensions: [
-        basicSetup,
-        this.languageConf.of(this.language),
-        this.autoLanguage,
-        listener,
-      ],
-      parent: this.$refs.editorContainer,
-    });
+    // we only set a language if we can properly detect it.
+    // TODO: try to implement language support for elang and qlang
+    if (this.language != null) {
+      this.editor = new EditorView({
+        doc: this.text,
+        extensions: [
+          basicSetup,
+          this.languageConf.of(this.language),
+          this.autoLanguage,
+          listener,
+        ],
+        parent: this.$refs.editorContainer,
+      });
+    } else {
+      this.editor = new EditorView({
+        doc: this.text,
+        extensions: [basicSetup, listener],
+        parent: this.$refs.editorContainer,
+      });
+    }
     /*this.editor.updateListener((value) => {
       console.log(value);
     });*/

@@ -34,6 +34,7 @@
     <div class="col-6">
       <DataEditor
         v-model:sourceCode="currentObject.code"
+        :sourceLanguage="currentObject.codeType.language"
         :tabs="editedFiles"
         @saveFile="saveEditedFile"
         @saveSource="updateTagsAndShowSave"
