@@ -16,7 +16,17 @@
         class="baklava-input"
         v-model="newFilter"
         name="addOutput"
+        :disabled="true"
       />
+    </div>
+    <div class="col-12">
+      <FormulaEditingDialog
+        :formula="newFilter"
+        :variables="graphOutputs"
+        buttonClass="baklava-button"
+        buttonText="Edit Expression"
+      >
+      </FormulaEditingDialog>
     </div>
     <div class="col-6">
       <button class="baklava-button" @click="updateFilter()">
@@ -40,7 +50,7 @@ import { defineComponent } from "vue";
 import { ComponentInterface } from "../../NodeInterfaces/ComponentInterface";
 import FilterNode from "../../NodeTypes/FilterNode";
 import { useGraphStore } from "@/stores/graph";
-
+import { FormulaEditingDialog } from "@/components/dialogs";
 //TODO: Have Checks for the Filters.
 export default defineComponent({
   props: {
@@ -67,6 +77,9 @@ export default defineComponent({
   setup() {
     const graphStore = useGraphStore();
     return { graphStore };
+  },
+  components: {
+    FormulaEditingDialog,
   },
   data() {
     return {
@@ -101,6 +114,9 @@ export default defineComponent({
         this.filterValue = newValue;
         this.$emit("update:filterString", newValue);
       },
+    },
+    graphOutputs() {
+      return this.graphStore.getOutputsForGraph(this.node);
     },
   },
   watch: {},

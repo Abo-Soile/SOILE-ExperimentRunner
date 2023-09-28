@@ -9,6 +9,11 @@ import OutputListOption from "../NodeOptions/OutputListOption.vue";
 import { ComponentInterface } from "../NodeInterfaces/ComponentInterface";
 import { InputInterface } from "../NodeInterfaces/InputInterface";
 import SoileVersionedNode from "./SoileVersionedNode";
+import {
+  getOutputsForExperiment,
+  instantiateExperimentInProject,
+} from "@/helpers/projecteditor/experimentConverter";
+import SoileNode from "./SoileNode";
 
 export default class ExperimentNode extends SoileVersionedNode {
   public type = "ExperimentNode";
@@ -22,7 +27,6 @@ export default class ExperimentNode extends SoileVersionedNode {
     this.id = "Experiment " + uuidv4();
     this.initializeIo();
   }
-
   public inputs = {
     previous: new InputInterface("Previous", "InputConnection").use(
       allowMultipleConnections
@@ -76,7 +80,20 @@ export default class ExperimentNode extends SoileVersionedNode {
       this.objectData.version,
       "experiment"
     );
+    console.log("Updating outputs");
+    this.updateOutputs();
   }
+  public updateOutputs() {
+    getOutputsForExperiment(
+      this.objectData.UUID,
+      this.objectData.version,
+      this.myTitle
+    ).then((newOutputs) => {
+      this.nodeOutputs.length = 0;
+      this.nodeOutputs.push(...newOutputs);
+    });
+  }
+
   isValid() {
     return this.objectData.UUID != "" && this.objectData.version != "";
   }

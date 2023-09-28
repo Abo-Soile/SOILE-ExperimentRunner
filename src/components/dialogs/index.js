@@ -8,4 +8,5 @@ export { default as SelectNewVersionDialog } from "./SelectNewVersionDialog.vue"
 export { default as UserDialog } from "./UserDialog.vue";
 export { default as ElementSaveDialog } from "./ElementSaveDialog.vue";
 export { default as ElementSettingsDialog } from "./ElementSettingsDialog.vue";
-export { default as ObjectSelectionDialog } from "./ElementSettingsDialog.vue";
+export { default as ObjectSelectionDialog } from "./ObjectSelectionDialog.vue";
+export { default as FormulaEditingDialog } from "./FormulaEditingDialog.vue";

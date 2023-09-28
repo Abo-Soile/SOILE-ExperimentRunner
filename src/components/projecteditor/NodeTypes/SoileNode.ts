@@ -45,10 +45,14 @@ export default abstract class SoileNode
   subgraph: Graph;
   public set title(newTitle: string) {
     //console.log("Setting title")
+    this.updateTitle(newTitle);
+  }
+  public get title(): string {
+    return this.myTitle;
+  }
+
+  public updateTitle(newTitle: string) {
     if (this.graphStore.isNameOk(this, newTitle)) {
-      console.log(this.graph);
-      console.log("Name was ok, changing");
-      //console.log("updating title to" + newTitle);
       const changedTitle = this.graphStore.updateName(
         this,
         this.myTitle,
@@ -58,10 +62,6 @@ export default abstract class SoileNode
       this.myTitle = changedTitle;
     }
   }
-  public get title(): string {
-    return this.myTitle;
-  }
-
   public isStartNode() {
     return this.graphStore.isStartNode(this);
   }

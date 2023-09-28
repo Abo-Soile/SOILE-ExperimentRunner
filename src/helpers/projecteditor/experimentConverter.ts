@@ -8,10 +8,10 @@ import {
 import { useElementStore } from "@/stores/elements";
 
 /**
- * This file contains functionality to convert an experiment into an experimentInstance, by converting the corresponding json representation
+ * This file contains functionality to convert an experiment into an experimentInstance,
+ * by converting the corresponding json representation
  * For now, we will handle this by simple replacement actions in the Json.
  */
-
 export async function instantiateExperimentInProject(
   UUID: string,
   Version: string,
@@ -143,4 +143,41 @@ function updateExperimentInstance(
       (stringifyedExp = stringifyedExp.split(key).join(value))
   );
   return JSON.parse(stringifyedExp) as ExperimentInstance;
+}
+
+export async function getOutputsForExperiment(
+  UUID: string,
+  Version: string,
+  InstanceID: string
+): Promise<Array<string>> {
+  const expInstance = await instantiateExperimentInProject(
+    UUID,
+    Version,
+    false,
+    InstanceID
+  );
+  return extractOutputs(expInstance).map((x) =>
+    x.substring(InstanceID.length + 1)
+  );
+}
+
+function extractOutputs(experimentData: ExperimentInstance): Array<string> {
+  const outputs = [];
+  console.log(experimentData);
+  for (const element of experimentData.elements) {
+    if (element.elementType === "task") {
+      console.log(element);
+      const taskElement = element.data as TaskInstance;
+      console.log(taskElement.outputs);
+      outputs.push(
+        ...taskElement.outputs.map((x) => `${taskElement.instanceID}.${x}`)
+      );
+    }
+    if (element.elementType === "experiment") {
+      const expElement = element.data as ExperimentInstance;
+      outputs.push(...extractOutputs(expElement));
+    }
+  }
+  console.log(outputs);
+  return outputs;
 }

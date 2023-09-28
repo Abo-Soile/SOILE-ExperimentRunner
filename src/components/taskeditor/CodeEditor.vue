@@ -103,6 +103,7 @@ export default {
       this.editor = new EditorView({
         doc: this.text,
         extensions: [
+          EditorView.lineWrapping,
           basicSetup,
           this.languageConf.of(this.language),
           this.autoLanguage,
@@ -113,7 +114,7 @@ export default {
     } else {
       this.editor = new EditorView({
         doc: this.text,
-        extensions: [basicSetup, listener],
+        extensions: [basicSetup, listener, EditorView.lineWrapping],
         parent: this.$refs.editorContainer,
       });
     }

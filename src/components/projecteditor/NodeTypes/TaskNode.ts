@@ -41,7 +41,10 @@ export default class TaskNode extends SoileVersionedNode {
     ).setPort(false),
     outputs: new ComponentInterface(
       "Outputs",
-      { items: this.nodeOutputs, title: "Outputs" },
+      {
+        items: this.nodeOutputs,
+        title: "Outputs",
+      },
       OutputListOption
     ).setPort(false),
     persistent: new ComponentInterface(

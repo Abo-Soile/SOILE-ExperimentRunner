@@ -21,7 +21,7 @@ export const useGraphStore = defineStore({
     // initialize the state. We don't update from the local storage, because this could contain privilegded data
     nodePersistentInformation: new Map<string, Map<string, string[]>>(),
     nodeOutputInformation: new Map<string, Map<string, string[]>>(),
-    nodeNames: new Map<string, Map<any, string>>(),
+    nodeNames: new Map<string, Map<string, string>>(),
     startNodes: new Map<string, string>(),
     graphs: new Map<string, Graph>(),
     graphsForElements: new Map<String, Graph>(),
@@ -30,7 +30,7 @@ export const useGraphStore = defineStore({
     clearData() {
       this.nodePersistentInformation = new Map<string, Map<string, string[]>>();
       this.nodeOutputInformation = new Map<string, Map<string, string[]>>();
-      this.nodeNames = new Map<string, Map<any, string>>();
+      this.nodeNames = new Map<string, Map<string, string>>();
       this.startNodes = new Map<string, string>();
       this.graphs = new Map<string, Graph>();
     },
@@ -73,9 +73,9 @@ export const useGraphStore = defineStore({
       if (!(graph.id in this.graphs)) {
         this.graphs.set(graph.id, graph);
         this.graphsForElements.set(this.getElementString(element), graph);
-        const nodeNameMap = new Map<any, string>();
+        const nodeNameMap = new Map<string, string>();
         for (const node of graph.nodes) {
-          nodeNameMap.set(node, node.title);
+          nodeNameMap.set(node.id, node.title);
         }
         this.nodeNames.set(graph.id, nodeNameMap);
         this.nodeOutputInformation.set(graph.id, new Map());
@@ -115,7 +115,7 @@ export const useGraphStore = defineStore({
       const graphid = node.graph?.id;
       if (this.isNameOk(node, newName)) {
         //console.log("New Name is ok")
-        this.nodeNames.get(graphid).set(node, this.refineName(newName));
+        this.nodeNames.get(graphid).set(node.id, this.refineName(newName));
         return this.refineName(newName);
       } else {
         //console.log("New Name is not ok")
@@ -128,7 +128,7 @@ export const useGraphStore = defineStore({
       const nodeID = node.id;
       const nodeNames = this.nodeNames.get(graph?.id);
       node.myTitle = uniqueName;
-      nodeNames.set(node, uniqueName);
+      nodeNames.set(node.id, uniqueName);
     },
     getUniqueName(node: SoileBaseNode) {
       const graph = node.graph;
@@ -150,6 +150,23 @@ export const useGraphStore = defineStore({
         i = i + 1;
       }
       return this.refineName(node.type + " " + i);
+    },
+    /**
+     * Get the outputs for the graph the indicated node is part of.
+     * @param node
+     * @returns
+     */
+    getOutputsForGraph(node: SoileBaseNode): Array<string> {
+      const outputNames = [];
+      const outputMap = this.nodeOutputInformation.get(node.graph.id);
+      const nodeNames = this.nodeNames.get(node.graph.id);
+      for (const [ouputNodeID, outputs] of outputMap) {
+        outputNames.push(
+          ...outputs.map((x) => `${nodeNames.get(ouputNodeID)}.${x}`)
+        );
+      }
+
+      return outputNames;
     },
     setupNode(node: SoileBaseNode) {
       //this.setupGraph(node.graph);
@@ -181,7 +198,7 @@ export const useGraphStore = defineStore({
       console.log(this.startNodes.get(node.graph?.id));
       this.nodeOutputInformation.get(node.graph?.id).delete(node.id);
       this.nodePersistentInformation.get(node.graph?.id).delete(node.id);
-      this.nodeNames.get(node.graph?.id).delete(node);
+      this.nodeNames.get(node.graph?.id).delete(node.id);
       if (this.startNodes.get(node.graph?.id) === node.id) {
         console.log("Removed Start Node need to select a new one!");
         this.startNodes.delete(node.graph?.id);
