@@ -41,6 +41,19 @@ export interface TaskInstance {
   position: Position;
 }
 
+export interface Task {
+  UUID: string;
+  name: string;
+  version: string;
+  tag: string;
+  codeType: {
+    language: string;
+    version: string;
+  };
+  code: String;
+  private?: boolean;
+}
+
 // For NOW we don't allow experiments in experiments.
 export interface Experiment {
   UUID: string;
