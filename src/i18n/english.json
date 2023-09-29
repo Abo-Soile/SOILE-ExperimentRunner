@@ -1,9 +1,9 @@
 {
     "name" : "Name",
     "signuptitle" : "Sign up to Study",
-    "signup": "Sign up",
-    "continue" : "Continue",
-    "Withdraw" : "Writhdraw",
+    "signup" : "Sign up",
+    "withdraw" : "Withdraw",
+    "proceed" : "Continue",
     "signupUser" : "Sign up as user",
     "startStudy" : "Start study",
     "continueStudy" : "Continue study",
