@@ -33,18 +33,20 @@
       <Column :header="$t('signuptitle')">
         <template #body="{ data, index }" let-index="index">
           <div>
-            <router-link v-if="!isSignedUp(data)" :to="'/signup/' + data.UUID"
-              >{{$t('signup')}}</router-link
+            <router-link
+              v-if="!isSignedUp(data)"
+              :to="'/signup/' + data.UUID"
+              >{{ $t("signup") }}</router-link
             >
           </div>
         </template>
       </Column>
-      <Column :header="items.some((x) => isSignedUp(x)) ? $t('continue') : ''">
+      <Column :header="items.some((x) => isSignedUp(x)) ? $t('proceed') : ''">
         <template #body="{ data, index }" let-index="index">
           <div>
             <Button
               v-if="isSignedUp(data)"
-              :label="$t('continue')"
+              :label="$t('proceed')"
               @click="(event) => runProject(index, event)"
             ></Button>
           </div>

@@ -12,77 +12,22 @@
       >
       </ObjectAndVersionSelectorWithProps>
     </div>
-    <div class="grid border-white border-solid border-1 border-round-sm mb-2">
-      <div class="col-12">Add Output</div>
-      <div class="col-12">Variable Name:</div>
-      <div
-        class="col-6"
-        v-tooltip="{
-          value: `Create an output that can be used as in a Filter. <b>Note</b>: The Task must produce this output`,
-          escape: true,
-        }"
-      >
-        <input
-          class="baklava-input w-full"
-          type="text"
-          v-model="newOutput"
-          name="addOutput"
-        />
-      </div>
-
-      <div class="col-6">
-        <button class="baklava-button" @click="createOutput()">
-          Add output
-        </button>
-      </div>
-      <div class="col-12">
-        Existing Outputs:
-        <ul>
-          <li v-for="output in currentOutputs">
-            <div class="flex align-items-center justify-content-between">
-              {{ output }}
-              <button class="baklava-button" @click="removeOutput(output)">
-                Remove output
-              </button>
-            </div>
-          </li>
-        </ul>
-      </div>
-    </div>
-    <div class="grid border-white border-solid border-1 border-round-sm mt-2">
-      <div class="col-12">Add Persistent Data</div>
-      <div class="col-12">Variable Name:</div>
-      <div class="col-6">
-        <input
-          class="baklava-input w-full"
-          type="text"
-          v-model="newPersistent"
-          name="addPersistent"
-        />
-      </div>
-      <div class="col-6">
-        <button class="baklava-button" @click="createPersistent()">
-          Add Persistent
-        </button>
-      </div>
-      <div class="col-12">
-        Existing Persistent Values:
-        <ul>
-          <li v-for="persistent in currentPersistent">
-            <div class="flex align-items-center justify-content-between">
-              {{ persistent }}
-              <button
-                class="baklava-button"
-                :name="persistent"
-                @click="removePersistent(persistent)"
-              >
-                Remove Persistent
-              </button>
-            </div>
-          </li>
-        </ul>
-      </div>
-    </div>
+    <TaskPropertySelection
+      :existingValues="currentOutputs"
+      :possibleValues="outputOptions"
+      :selectionType="outSelectionType"
+      elementDescription="Output"
+      @removeElement="removeOutput"
+      @addElement="createOutput"
+    ></TaskPropertySelection>
+    <TaskPropertySelection
+      :existingValues="currentPersistent"
+      :possibleValues="persistentOptions"
+      :selectionType="outSelectionType"
+      elementDescription="Persistent"
+      @removeElement="removePersistent"
+      @addElement="createPersistent"
+    ></TaskPropertySelection>
     <div>
       <Button
         class="baklava-button mt-2"
@@ -107,9 +52,14 @@ import {
   useErrorStore,
 } from "@/stores";
 import ObjectAndVersionSelectorWithProps from "@/components/utils/ObjectAndVersionSelectorWithProps.vue";
+import TaskPropertySelection from "./elements/TaskPropertySelection.vue";
 
 export default defineComponent({
-  components: { ObjectAndVersionSelectorWithProps, Button },
+  components: {
+    ObjectAndVersionSelectorWithProps,
+    Button,
+    TaskPropertySelection,
+  },
   props: {
     intf: {
       type: Object as () => ComponentInterface<TaskNode>,
@@ -119,8 +69,6 @@ export default defineComponent({
   data() {
     return {
       nodeID: "",
-      newOutput: "",
-      newPersistent: "",
       objectType: "task",
       taskVersions: [],
     };
@@ -133,32 +81,20 @@ export default defineComponent({
     return { elementStore, errorStore, graphStore, editorStore };
   },
   methods: {
-    createOutput() {
-      if (this.newOutput) {
-        2;
-        console.log("Adding output");
-        if (
-          this.graphStore.canAddTaskOutput(this.currentNode, this.newOutput)
-        ) {
-          console.log("Yes ");
-          this.currentNode.addElementOutput(this.newOutput);
-        } else {
-          console.log("No ");
-          this.errorStore.raiseError(
-            "warn",
-            "The output is already defined for this Node"
-          );
-        }
-      }
-      this.newOutput = "";
-    },
-    createPersistent() {
-      if (this.newPersistent) {
-        console.log("Adding Persistent");
+    createOutput(newOutput: string) {
+      console.log("Adding output");
+      if (this.graphStore.canAddTaskOutput(this.currentNode, newOutput)) {
         console.log("Yes ");
-        this.currentNode.addPersistent(this.newPersistent);
+        this.currentNode.addElementOutput(newOutput);
+      } else {
+        this.errorStore.raiseError(
+          "warn",
+          "The output is already defined for this Node"
+        );
       }
-      this.newPersistent = "";
+    },
+    createPersistent(newPersistent: string) {
+      this.currentNode.addPersistent(newPersistent);
     },
     removeOutput(output: string) {
       console.log("removing output: " + output);
@@ -182,6 +118,19 @@ export default defineComponent({
       return (
         this.currentTask.UUID == null || this.currentVersion.version == null
       );
+    },
+    outputOptions() {
+      return this.currentNode.outputOptions.filter(
+        (x: string) => !this.currentOutputs.includes(x)
+      );
+    },
+    persistentOptions() {
+      return this.currentNode.persisitentOptions.filter(
+        (x: string) => !this.currentPersistent.includes(x)
+      );
+    },
+    outSelectionType() {
+      return this.currentNode.outputOptionType;
     },
     currentNode(): TaskNode {
       return this.intf.data;

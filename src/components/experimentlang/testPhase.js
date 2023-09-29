@@ -26,7 +26,8 @@ function startFunc() {
 
 function sendData(d) {
   // Placeholder till we ge this right.
-  console.log(d);
+  console.log(d.exp);
+  console.log(d.exp.single);
   const outputData = [];
   for (const output of window.outputs) {
     if (output in d.exp.single) {
@@ -88,7 +89,7 @@ function end(expdata, duration, score, persistentData) {
 
 function startSoile(data) {
   console.log("Starting soile");
-  console.log(window.persistentData)
+  console.log(window.persistentData);
   SOILE2.util.enableLoadScreen();
   SOILE2.util.setPersistantData(window.persistentData);
   SOILE2.util.setDebug((event) => {

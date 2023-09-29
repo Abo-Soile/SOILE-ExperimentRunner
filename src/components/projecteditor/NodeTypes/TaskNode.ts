@@ -21,8 +21,10 @@ export default class TaskNode extends SoileVersionedNode {
   public type = "TaskNode";
 
   public objectType = "task";
-  public codeType = reactive({ language: "", version: "string" });
-
+  public codeType = reactive({ language: "", version: "" });
+  public outputOptions = [];
+  public persisitentOptions = [];
+  public outputOptionType = "";
   public inputs = {
     previous: new InputInterface("Previous", "InputConnection").use(
       allowMultipleConnections
@@ -87,6 +89,16 @@ export default class TaskNode extends SoileVersionedNode {
     this.codeType = elementInfo.codeType;
     this.inputs.type.value =
       "Type: " + this.codeType.language + "@" + this.codeType.version;
+    this.checkOutputOptions();
+    const outputInfo = await this.elementStore.getTaskOutputs(elementInfo);
+    this.outputOptionType = outputInfo.outputInfoType;
+    this.outputOptions = outputInfo.outputs;
+    this.persisitentOptions = outputInfo.persistent;
+  }
+
+  async checkOutputOptions() {
+    if (this.codeType.language === "qmarkup") {
+    }
   }
   public constructor() {
     super();
