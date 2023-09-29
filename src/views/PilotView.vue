@@ -271,13 +271,17 @@ export default {
         resultData,
       });
       // update the persistent data.
-      results.persistentData.forEach(
-        (x) => (this.persistentData[x.name] = x.value)
-      );
-      // update the output data.
-      results.outputData.forEach(
-        (x) => (this.outputData[currentInstanceID + "." + x.name] = x.value)
-      );
+      if (results.persistentData) {
+        results.persistentData.forEach(
+          (x) => (this.persistentData[x.name] = x.value)
+        );
+      }
+      if (results.outputData) {
+        // update the output data.
+        results.outputData.forEach(
+          (x) => (this.outputData[currentInstanceID + "." + x.name] = x.value)
+        );
+      }
       await this.getNext();
       // and switch to the next route
     },
