@@ -1,8 +1,7 @@
 <template>
-  <div class="grid">
+  <div v-if="!source_data.horizontal" class="grid">
     <div
       v-for="option in source_data.options"
-      :key="option.id"
       class="col-12 align-items-center"
     >
       <RadioButton
@@ -12,6 +11,21 @@
         :value="{ value: option.selectedValue, id: option.id }"
       />
       <label :for="option.id" class="ml-2">{{ option.label }}</label>
+    </div>
+  </div>
+  <div v-else class="grid justify-content-between">
+    <div v-for="option in source_data.options" class="ml-2 mr-2">
+      <div class="flex flex-column justify-content-center">
+        <label :for="option.id" class="w-full mb-1 justify-content-center">{{
+          option.label
+        }}</label>
+        <RadioButton
+          class="w-full justify-content-center"
+          v-model="value"
+          :inputId="option.id"
+          :value="{ value: option.selectedValue, id: option.id }"
+        />
+      </div>
     </div>
   </div>
 </template>
