@@ -1,7 +1,8 @@
 import { defineStore } from "pinia";
 import axios from "axios";
 import { useErrorStore } from "./errors";
-
+import { extractQMarkUpOutputOptions } from "@/helpers/projecteditor/taskProcessor";
+import { extractElangOutputOptions } from "../helpers/projecteditor/taskProcessor";
 export const useElementStore = defineStore({
   id: "elements",
   state: () => ({
@@ -14,6 +15,7 @@ export const useElementStore = defineStore({
     existingProjects: [],
     codeOptions: [],
     elements: { task: {}, project: {}, experiment: {} },
+    outputOptions: new Map(),
   }),
   actions: {
     clearData() {
@@ -25,6 +27,7 @@ export const useElementStore = defineStore({
       this.existingProjects = [];
       this.codeOptions = [];
       this.elements = { task: {}, project: {}, experiment: {} };
+      this.outputOptions = new Map();
     },
 
     /**
@@ -161,6 +164,67 @@ export const useElementStore = defineStore({
         this.processAxiosError(e);
       }
     },
+    /**
+     * Get the compiled code for the specified task at the specified version
+     */
+    async compileTask(UUID, version) {
+      try {
+        const element = await this.getElement(UUID, version, "task");
+        if (element) {
+          const response = await axios.post("/task/compile/", {
+            code: element.code,
+            type: element.codeType.language,
+          });
+          return response?.data;
+        }
+      } catch (err) {
+        this.processAxiosError(err);
+      }
+    },
+    /**
+     * Get the outputs of a task
+     * @param {*} task the task (with UUID, version and codeType)
+     * @returns
+     */
+    async getTaskOutputs(task) {
+      console.log("Trying to obtain Outputs");
+      const taskKey = `${task.UUID}.${task.version}`;
+      console.log("Key is " + taskKey);
+      console.log(task);
+      if (!this.outputOptions.has(taskKey)) {
+        if (task.codeType.language === "qmarkup") {
+          const compiled = await this.compileTask(task.UUID, task.version);
+          if (compiled) {
+            this.outputOptions.set(
+              taskKey,
+              extractQMarkUpOutputOptions(compiled)
+            );
+          } else {
+            this.outputOptions.set({
+              outputs: [],
+              persistent: [],
+              outputInfoType: "impossible",
+            });
+          }
+        } else if (task.codeType.language === "elang") {
+          this.outputOptions.set(taskKey, extractElangOutputOptions(task.code));
+        } else if (task.codeType.language === "psychopy") {
+          this.outputOptions.set(taskKey, {
+            outputs: [],
+            persistent: [],
+            outputInfoType: "impossible",
+          });
+        } else {
+          this.outputOptions.set(taskKey, {
+            outputs: [],
+            persistent: [],
+            outputInfoType: "manual",
+          });
+        }
+      }
+      return this.outputOptions.get(taskKey);
+    },
+
     /**
      * Get the available versions for a specific project
      * @param {string} UUID the UUID of the project
