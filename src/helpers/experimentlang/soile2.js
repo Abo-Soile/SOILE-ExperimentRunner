@@ -1325,8 +1325,10 @@ SOILE2 = (function () {
   };
 
   bin.savevariable = function (varName, value) {
-    console.log("Trying to save variable " + varName + " with value " + value)
+    console.log("Trying to save variable " + varName + " with value " + value);
     soile2.rt.persistantDataHandler.save(varName, value);
+    //MODIFICATION_TP we will Also store a saved variable in the singles.
+    soile2.rt.dataHandler.storeSingle(varName, value);
   };
 
   bin.loadvariable = function (varName, defaultValue) {
@@ -1999,7 +2001,7 @@ SOILE2 = (function () {
       save: function (name, value) {
         name = name.toString();
         _variables[name] = value;
-        console.log(_variables)
+        console.log(_variables);
       },
       load: function (name) {
         console.log("LOADING VARIABLE " + JSON.stringify(_variables));
@@ -2509,7 +2511,7 @@ SOILE2 = (function () {
     var duration = SOILE2.testDuration;
     var score = soile2.rt.scoreHandler.get();
     var persistantData = soile2.rt.persistantDataHandler.get();
-    console.log(persistantData)
+    console.log(persistantData);
     //endFunc(soile2.rt.dataHandler.getData());
     endFunc(data, duration, score, persistantData);
   };
@@ -2684,8 +2686,8 @@ SOILE2 = (function () {
   };
 
   util.setPersistantData = function (data) {
-    console.log("Setting persistent data to")
-    console.log(data)
+    console.log("Setting persistent data to");
+    console.log(data);
     soile2.rt.persistantDataHandler.set(data);
   };
 
