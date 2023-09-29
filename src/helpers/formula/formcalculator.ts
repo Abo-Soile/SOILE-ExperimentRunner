@@ -1,8 +1,8 @@
 import { FilterFunctions, type FilterFunction } from "./functions";
 import { Operator, Operators } from "./operators";
 
-const functionNames = FilterFunctions.map((f) => f.name);
-const operatorCharacters = Operators.map((op: Operator) => op.symbol)
+export const functionNames = FilterFunctions.map((f) => f.name);
+export const operatorCharacters = Operators.map((op: Operator) => op.symbol)
   .join("")
   .replace(/[\/\-\\^$*+?.()|[\]{}]/g, "\\$&");
 

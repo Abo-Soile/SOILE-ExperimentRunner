@@ -99,7 +99,7 @@
 
 <script lang="ts">
 import InputText from "primevue/inputtext";
-import { Operators, FilterFunctions, checkFormula } from "./formula";
+import { Operators, FilterFunctions, checkFormula } from "@/helpers/formula";
 import { nextTick } from "vue";
 
 export default {
