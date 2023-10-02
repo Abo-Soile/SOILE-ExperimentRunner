@@ -80,10 +80,23 @@ export default {
     /**
      * Parse the persistent object to the array required.
      * @param {*} objectToConvert
+     * @param {boolean} resultHasToBeNumber
      */
-    buildArrayFromObject(objectToConvert) {
+    buildArrayFromObject(objectToConvert, checkResult) {
       const result = [];
       Object.keys(objectToConvert).forEach((element) => {
+        objectOK = true;
+        isJSON = true;
+        try {
+          JSON.stringify(objectToConvert[element]);
+        } catch (err) {
+          throw "Result object is not in a valid format.";
+        }
+        if (resultHasToBeNumber) {
+          if (isNaN(objectToConvert[element])) {
+            throw "Cannot convert Output to number";
+          }
+        }
         result.push({ name: element, value: objectToConvert[element] });
       });
       return result;
@@ -107,7 +120,7 @@ export default {
         jsonResults.push({ name: field, value: this.results[field] });
       }
       return {
-        outputData: this.buildArrayFromObject(this.outputValues),
+        outputData: this.buildArrayFromObject(this.outputValues, true),
         resultData: { fileData: [], jsonData: jsonResults }, // files are handled at a higher level and added there.
         persistentData: this.buildArrayFromObject(this.persistent),
       };
@@ -132,6 +145,7 @@ export default {
     iframeWindow.submitResults = this.submit;
     iframeWindow.handleError = this.handleError;
     iframeWindow.setOutput = this.setOutput;
+    iframeWindow.setPersistent = this.saveData;
   },
   watch: {
     code() {

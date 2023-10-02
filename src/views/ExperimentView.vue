@@ -162,7 +162,10 @@ export default {
         });
     },
     handleError(error) {
-      this.errorStore.raiseError(undefined, error);
+      this.errorStore.raiseError(
+        "error",
+        error + "\n Please contact the Study controller"
+      );
     },
   },
   async beforeMount() {
