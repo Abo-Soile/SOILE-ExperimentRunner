@@ -1,11 +1,15 @@
 import { defineConfig, loadEnv } from "vite";
 import vue from "@vitejs/plugin-vue";
 import { fileURLToPath, URL } from "url";
-import basicSsl from '@vitejs/plugin-basic-ssl'
+import basicSsl from "@vitejs/plugin-basic-ssl";
 
 // https://vitejs.dev/config/
-export default  ({mode})  => { 
-  process.env = {...process.env, ...loadEnv(mode, process.cwd())};  
+export default ({ mode }) => {
+  process.env = { ...process.env, ...loadEnv(mode, process.cwd()) };
+  const SERVER_URL = `${process.env.VITE_BACKENDDOMAIN}${
+    process.env.VITE_BACKENDPORT != "" ? ":" + process.env.VITE_BACKENDPORT : ""
+  }`;
+  console.log(SERVER_URL);
   return defineConfig({
     resolve: {
       alias: [
@@ -20,8 +24,8 @@ export default  ({mode})  => {
     server: {
       proxy: {
         "^/exp/.*/.*/.+": {
-          target: `https://${process.env.VITE_BACKENDDOMAIN}:${process.env.VITE_BACKENDPORT}`,
-          rewrite: (path) => path.replace(/^\/exp/, "/run"),
+          target: `${SERVER_URL}`,
+          rewrite: (path) => path.replace(/^\/exp\//, "/run/"),
           configure: (proxy, _options) => {
             proxy.on("error", (err, _req, _res) => {
               console.log("proxy error", err);
@@ -51,18 +55,18 @@ export default  ({mode})  => {
           secure: false,
         },
         "^/api/.*": {
-          target: `https://${process.env.VITE_BACKENDDOMAIN}:${process.env.VITE_BACKENDPORT}`,
+          target: `${SERVER_URL}`,
           rewrite: (path) => path.replace(/^\/api/, ""),
           secure: false,
         },
         "^/pilot/.*/.*/.+": {
-          target: `https://${process.env.VITE_BACKENDDOMAIN}:${process.env.VITE_BACKENDPORT}`,
+          target: `${SERVER_URL}`,
           rewrite: (path) =>
             path.replace(/^\/pilot(\/\w+\/\w+)(\/.*)$/, "/task$1/execute$2"),
           secure: false,
         },
         "^/editing/.*/.*/.+": {
-          target: `https://${process.env.VITE_BACKENDDOMAIN}:${process.env.VITE_BACKENDPORT}`,
+          target: `${SERVER_URL}`,
           rewrite: (path) =>
             path.replace(/^\/editing(\/\w+\/\w+)(\/.*)$/, "/task$1/execute$2"),
           secure: false,
@@ -96,4 +100,4 @@ export default  ({mode})  => {
       },
     },
   });
-}
+};
