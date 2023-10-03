@@ -10,7 +10,9 @@ import { ProjectList } from "../../components";
 import { setupAxios } from "@/axios";
 import axios from "axios";
 import { useProjectStore, useAuthStore } from "../../stores";
-import { nextTick } from "vue";
+import { router } from "@/helpers/router";
+import i18n from "@/i18n";
+
 //TODO: Do proper test...
 beforeEach(async () => {
   // creates a fresh pinia and make it active so it's automatically picked
@@ -37,12 +39,12 @@ beforeEach(async () => {
 
 describe("WelcomeView", () => {
   it("renders correctly", async () => {
+    console.log("Trying to mount it.");
     const wrapper = mount(WelcomeView, {
       global: {
-        plugins: [createTestingPinia(), PrimeVue],
+        plugins: [createTestingPinia(), PrimeVue, router, i18n],
       },
     });
-    await nextTick();
     expect(wrapper.findComponent(ProjectList).exists()).toBe(true);
   });
 });

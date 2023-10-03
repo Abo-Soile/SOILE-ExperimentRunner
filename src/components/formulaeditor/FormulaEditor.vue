@@ -9,6 +9,7 @@
             class="col-6 p-button m-1 justify-content-center"
             v-for="(variable, index) in variables"
             :key="index"
+            :id="variable"
             @dragstart="
               (event) => startDrag(event, variable, index, 'variable')
             "
@@ -28,6 +29,7 @@
             class="col-1 p-button m-1 justify-content-center"
             v-for="(operator, index) in operators"
             :key="index"
+            :id="operator.symbol"
             @dragstart="
               (event) => startDrag(event, operator.symbol, index, 'operator')
             "
@@ -46,6 +48,7 @@
             class="col-3 p-button m-1 justify-content-center"
             v-for="(func, index) in filterFunctions"
             :key="index"
+            :id="func.symbol"
             @dragstart="
               (event) => startDrag(event, func.symbol, index, 'function')
             "
@@ -56,7 +59,7 @@
           </div>
         </div>
       </div>
-      <!-- Functions Panel -->
+      <!-- Number Panel -->
       <div class="col-3">
         <h3>Numbers</h3>
         <div class="grid">
@@ -64,6 +67,7 @@
             class="col-3 p-button m-1 justify-content-center"
             v-for="(number, index) in [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, '.']"
             :key="index"
+            :id="number.toString()"
             @dragstart="
               (event) => startDrag(event, number.toString(), index, 'number')
             "
