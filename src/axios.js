@@ -8,7 +8,9 @@ export function setupAxios(env) {
   }`;
 
   axios.defaults.baseURL = env.VITE_BACKENDDOMAIN
-    ? `${SERVER_URL}${env.VITE_BASE_URL ? env.VITE_BASE_URL : ""}`
+    ? `${env.VITE_HTTPS === "true" ? "https://" : "http://"}${SERVER_URL}${
+        env.VITE_BASE_URL ? env.VITE_BASE_URL : ""
+      }`
     : "https://localhost:8081";
 
   console.error("Setting baseurl to:" + axios.defaults.baseURL);

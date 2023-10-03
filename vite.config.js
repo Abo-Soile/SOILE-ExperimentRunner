@@ -6,9 +6,12 @@ import basicSsl from "@vitejs/plugin-basic-ssl";
 // https://vitejs.dev/config/
 export default ({ mode }) => {
   process.env = { ...process.env, ...loadEnv(mode, process.cwd()) };
-  const SERVER_URL = `${process.env.VITE_BACKENDDOMAIN}${
+  const SERVER_URL = `${
+    process.env.VITE_HTTPS === "true" ? "https://" : "http://"
+  }${process.env.VITE_BACKENDDOMAIN}${
     process.env.VITE_BACKENDPORT != "" ? ":" + process.env.VITE_BACKENDPORT : ""
   }`;
+
   console.log(SERVER_URL);
   return defineConfig({
     resolve: {
