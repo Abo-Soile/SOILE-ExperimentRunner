@@ -1,4 +1,8 @@
 <template>
+  <HelpItem
+    helpSubject="FiltersideBar"
+    buttonClass="baklava-button absolute top-0 right-0 mr-1 mt-1"
+  ></HelpItem>
   <div>
     <div class="grid border-white border-solid border-1 border-round-sm mb-2">
       <div class="col-12">
@@ -63,6 +67,7 @@ import { defineComponent } from "vue";
 import FilterNode from "../NodeTypes/FilterNode";
 import { ComponentInterface } from "../NodeInterfaces/ComponentInterface";
 import FilterSetup from "./elements/FilterSetup.vue";
+import HelpItem from "@/components/helppages/HelpItem.vue";
 
 export default defineComponent({
   props: {
@@ -71,7 +76,7 @@ export default defineComponent({
       required: true,
     },
   },
-  components: { FilterSetup },
+  components: { FilterSetup, HelpItem },
   data() {
     return {
       newFilterName: "",

@@ -1,0 +1,43 @@
+<h3>Setting up a filter</h3>
+<p>
+    Here you can modify a Filter node and add new Filter expressions. 
+</p>
+<h4> New Filter Options</h4>
+<p> 
+    If you want to create a new Filter option, enter a name in the Filter Name field of the Create New Filter block.
+    Then, click on edit expressions and a Formula editor will open offering all outputs previously defined 
+    in Task nodes. You can then create a formula which will be evaluated when a participant reaches this node.
+    The Formula has to evaluate to 0 in order for the filter not to be selected. 
+    Once you have created a formula and entered a name, you can click on "Create Filter" to  add the Filter Option to the edited node.
+</p>
+
+<h4> Modify existing Filters </h4>
+<p> 
+    To modify an existing Filter option, click on the "Edit" button beside the Filter option. 
+    This will open an editing view where you can modify the Name or edit the formula by clicking on 
+    "Edit Expression"
+    After you have made all edits, press "Update Node" to update the node with the new values. 
+    Keep in mind, that you will still have to save the experiment/project before the changed node can be used in
+    a study.
+</p>
+
+<h4> Valid Formulas </h4>
+<p>
+    In addition to numbers and output variables and numbers, formulas can contain the following functions and operators
+     <ul>
+        <li>
+            Operators such as  "+", "-", "*", "^" (power)
+        </li>
+        <li>
+            The functions <code>mean(val1, val2, ...)</code>, <code>median(val1,val2,...)</code>, <code>min(val1,val2,...)</code>, <code>max(val1,val2,...)</code>
+        </li>
+        <li>
+            An approximation function that checks, whether two values are the same within a given tolerance: 
+            <code>approx(A,B,tol)</code>, Where <code> abs(A - B) &lt; tol</code>
+        </li>
+        <li>
+            logical operators: <code> | </code> (or), <code> & </code> (and), <code> = </code> (equal), <code> &lt; </code> (smaller), <code> &gt; </code> (larger)             
+        </li>
+     </ul>
+     You can build any formaula with these operators. Best use parenthesis to make operation precedence clear.
+</p>

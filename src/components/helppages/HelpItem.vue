@@ -9,7 +9,7 @@
   </button>
   <Dialog v-if="hasHelp" v-model:visible="showHelp" class="w-9">
     <div class="w-full">
-      <img v-if="hasScreenShot" class="w-9" width="80%" :src="screenshot" />
+      <img v-if="hasScreenShot" style="max-width: 80%" :src="screenshot" />
       <div class="w-full" v-html="html"></div>
     </div>
   </Dialog>
