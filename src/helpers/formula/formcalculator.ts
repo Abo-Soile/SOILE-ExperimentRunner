@@ -26,23 +26,19 @@ export function checkFormula(formulaString: string, variables: Array<string>) {
   if (invalid) {
     throw "InvalidVariables";
   }
-  console.log(formulaString);
   var updatedFormula = formulaString
     .replace(new RegExp(" *([,\\(\\)" + operatorCharacters + "]) *", "g"), "$1")
     .trim();
-  console.log(updatedFormula);
   var currentFormulaString = handleInnermostParenthesis(
     updatedFormula,
     sortedVariables
   );
-  console.log(currentFormulaString);
   while (updatedFormula != currentFormulaString) {
     updatedFormula = currentFormulaString;
     currentFormulaString = handleInnermostParenthesis(
       updatedFormula,
       sortedVariables
     );
-    console.log(currentFormulaString);
   }
   return checkExpression(currentFormulaString, sortedVariables);
 }
@@ -71,7 +67,6 @@ function handleInnermostParenthesis(
     const stop = parenthesisPair[1];
     const preFix = inputString.substring(0, start);
     var content = inputString.substring(start + 1, stop);
-    console.log(content);
     const isFunction =
       content.includes(",") ||
       preFix.match(new RegExp("(^|[," + operatorCharacters + "])$")) == null;
@@ -164,7 +159,11 @@ function checkExpression(
   const exprOk = currentContent.match(/^-?[0-9]+(\.[0-9]+)?$/g);
   return exprOk != null && exprOk.length > 0;
 }
-
+/**
+ * Find all innermost parenthesis, so that we can parse the innermost parts.
+ * @param input
+ * @returns
+ */
 function findAllInnermostParentheses(input: string): Array<[number, number]> {
   var openPosition = 0;
   var isOpen = false;

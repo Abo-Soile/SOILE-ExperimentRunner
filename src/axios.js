@@ -13,7 +13,6 @@ export function setupAxios(env) {
       }`
     : "https://localhost:8081";
 
-  console.error("Setting baseurl to:" + axios.defaults.baseURL);
   // This probably needs to change and rather the certificates need to be set appropriately.
   axios.defaults.rejectUnauthorized = false;
 }

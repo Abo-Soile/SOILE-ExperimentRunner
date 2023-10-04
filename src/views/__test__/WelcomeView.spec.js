@@ -8,7 +8,6 @@ import { createTestingPinia } from "@pinia/testing";
 import WelcomeView from "@/views/WelcomeView.vue";
 import { ProjectList } from "../../components";
 import { setupAxios } from "@/axios";
-import axios from "axios";
 import { useProjectStore, useAuthStore } from "../../stores";
 import { router } from "@/helpers/router";
 import i18n from "@/i18n";
@@ -25,11 +24,8 @@ beforeEach(async () => {
       ? ":" + import.meta.env.VITE_BACKENDPORT
       : ""
   }`;
-  console.log(SERVER_URL);
-  console.log("Set up");
-  console.log(axios.defaults);
+
   setupAxios(import.meta.env);
-  console.log(axios.defaults);
   const authStore = useAuthStore();
   const projectStore = useProjectStore();
   await authStore.refreshSession();
@@ -39,7 +35,6 @@ beforeEach(async () => {
 
 describe("WelcomeView", () => {
   it("renders correctly", async () => {
-    console.log("Trying to mount it.");
     const wrapper = mount(WelcomeView, {
       global: {
         plugins: [createTestingPinia(), PrimeVue, router, i18n],

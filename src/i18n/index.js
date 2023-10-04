@@ -3,7 +3,6 @@ import { createI18n } from "vue-i18n";
 import * as en from "./english.json";
 import * as fi from "./finnish.json";
 
-console.log(fi);
 const instance = createI18n({
   messages: {
     en,
