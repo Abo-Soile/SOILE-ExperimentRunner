@@ -548,9 +548,12 @@ SOILE2 = (function () {
   bin.hide = function (id) {
     for (var i = 0; i < arguments.length; i++) {
       var id = soile2.util.getid(arguments[i]);
-      var elem = jQuery(id);
-      //jQuery(id).addClass("hiddenelem");
-      elem.addClass("invisibleElement");
+      // This is no element whatsoever
+      if (id !== "#") {
+        var elem = jQuery(id);
+        //jQuery(id).addClass("hiddenelem");
+        elem.addClass("invisibleElement");
+      }
     }
 
     /*id = soile2.util.getid(id);
@@ -583,7 +586,6 @@ SOILE2 = (function () {
     } else if (args.length === 1) {
       id = soile2.util.getid(args[0]);
     }
-
     if (args.length === 3 && args[2] && window.requestAnimationFrame) {
       rt.dowait = true;
       rt.waitfor = 0;
@@ -600,9 +602,9 @@ SOILE2 = (function () {
       });
       return;
     }
-
     if (typeof id !== "undefined") {
-      if (jQuery(id).length > 0) {
+      // Has to be an element to make it appear, if it's empty, nothing happens
+      if (id !== "#" && jQuery(id).length > 0) {
         jQuery(id).removeClass("hiddenelem");
         jQuery(id).removeClass("invisibleElement");
         if (typeof pos !== "undefined") {
@@ -671,7 +673,7 @@ SOILE2 = (function () {
     //if (soile2.util.debug) {
     console.log("ImageLoaderror");
     img.on("error", function (e) {
-      console.log("Could not load image");
+      console.error("Could not load image");
       soile2.util.debugFunction({ message: "Failed to load image " + url });
     });
     //}
@@ -1856,9 +1858,6 @@ SOILE2 = (function () {
         var count = 0;
         var arr = _fieldToArray(field);
 
-        console.log(arr);
-        console.log(arr.length);
-
         return arr.length;
       },
       countValue: function (field, value) {
@@ -2001,7 +2000,6 @@ SOILE2 = (function () {
       save: function (name, value) {
         name = name.toString();
         _variables[name] = value;
-        console.log(_variables);
       },
       load: function (name) {
         console.log("LOADING VARIABLE " + JSON.stringify(_variables));
@@ -2350,7 +2348,7 @@ SOILE2 = (function () {
         }
       }
     } catch (e) {
-      console.log(e);
+      console.error(e);
       if (soile2.util.debug) {
         //console.log("error");
         //console.log(e);
@@ -2511,7 +2509,6 @@ SOILE2 = (function () {
     var duration = SOILE2.testDuration;
     var score = soile2.rt.scoreHandler.get();
     var persistantData = soile2.rt.persistantDataHandler.get();
-    console.log(persistantData);
     //endFunc(soile2.rt.dataHandler.getData());
     endFunc(data, duration, score, persistantData);
   };
