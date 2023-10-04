@@ -75,6 +75,11 @@ export default {
       this.isVisible = false;
     },
   },
+  watch: {
+    formula(newValue) {
+      this.internalFormula = newValue;
+    },
+  },
   mounted() {
     this.internalFormula = this.formula;
   },

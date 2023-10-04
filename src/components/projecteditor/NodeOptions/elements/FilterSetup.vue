@@ -12,6 +12,7 @@
     <div class="col-12">
       <label for="addOutput">Filter expression:</label>
       <input
+        v-tooltip="newFilter"
         type="text"
         class="baklava-input"
         v-model="newFilter"
@@ -25,6 +26,7 @@
         :variables="graphOutputs"
         buttonClass="baklava-button"
         buttonText="Edit Expression"
+        @updateFormula="updateFormula"
       >
       </FormulaEditingDialog>
     </div>
@@ -73,7 +75,7 @@ export default defineComponent({
       default: false,
     },
   },
-  emits: ["update:filterName", "update:filterString", "saveFilter", "cancel"],
+  emits: ["saveFilter", "cancel"],
   setup() {
     const graphStore = useGraphStore();
     return { graphStore };
@@ -83,43 +85,32 @@ export default defineComponent({
   },
   data() {
     return {
-      editedFilterName: undefined,
-      filterValue: undefined,
+      newFilterName: undefined,
+      newFilter: undefined,
     };
   },
   methods: {
     updateFilter() {
       this.$emit("saveFilter", {
         oldName: this.filterName,
-        name: this.editedFilterName,
-        value: this.filterValue,
+        name: this.newFilterName,
+        value: this.newFilter,
       });
+    },
+    updateFormula(formulaString: string) {
+      console.log(formulaString);
+      this.newFilter = formulaString;
     },
   },
   computed: {
-    newFilterName: {
-      get() {
-        return this.filterName;
-      },
-      set(newValue: string) {
-        this.editedFilterName = newValue;
-        this.$emit("update:filterName", newValue);
-      },
-    },
-    newFilter: {
-      get() {
-        return this.filterString;
-      },
-      set(newValue: string) {
-        this.filterValue = newValue;
-        this.$emit("update:filterString", newValue);
-      },
-    },
     graphOutputs() {
       return this.graphStore.getOutputsForGraph(this.node);
     },
   },
   watch: {},
-  async mounted() {},
+  async mounted() {
+    this.newFilterName = this.filterName;
+    this.newFilter = this.filterString;
+  },
 });
 </script>
