@@ -43,6 +43,16 @@ const EQUALS = {
   symbol: "=",
 };
 
+const LARGER = {
+  name: "larger than",
+  symbol: ">",
+};
+
+const SMALLER = {
+  name: "smaller than",
+  symbol: "<",
+};
+
 export const Operators = [
   DIVIDE,
   TIMES,
@@ -53,4 +63,6 @@ export const Operators = [
   OR,
   AND,
   EQUALS,
+  LARGER,
+  SMALLER,
 ];
