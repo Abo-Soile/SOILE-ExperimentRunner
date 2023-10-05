@@ -20,11 +20,7 @@ export default class FilterNode extends SoileNode {
     edit: new NodeInterface("Edit", uuidv4())
       .setComponent(markRaw(SideBarButton))
       .setPort(false),
-    sideBarOption1: new ComponentInterface<FilterNode>(
-      "SideBar",
-      this,
-      FilterSideBarOption
-    )
+    sideBarOption1: new ComponentInterface("SideBar", this, FilterSideBarOption)
       .setHidden(true)
       .use(displayInSideBar, true)
       .setPort(false),

@@ -184,6 +184,7 @@ export default {
         originalLength -
         (type === "function" ? 2 : 0);
       this.$refs.formulaInput.setSelectionRange(newPosition, newPosition);
+      this.$refs.formulaInput.focus();
     },
     addToFormula(text: string, type: string) {
       var offset = type === "number" ? "" : " ";
@@ -201,6 +202,7 @@ export default {
           textAfterCursor
         ).replace("  ", " ");
       }
+      this.$refs.formulaInput.focus();
     },
   },
   computed: {

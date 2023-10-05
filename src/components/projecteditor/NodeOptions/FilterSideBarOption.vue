@@ -1,60 +1,63 @@
 <template>
-  <HelpItem
-    helpSubject="FiltersideBar"
-    buttonClass="baklava-button absolute top-0 right-0 mr-1 mt-1"
-  ></HelpItem>
   <div>
-    <div class="grid border-white border-solid border-1 border-round-sm mb-2">
-      <div class="col-12">
-        <div class="mb-2">Create New Filter</div>
-        <FilterSetup
-          :node="intf.data"
-          v-model:filterName="newFilterName"
-          v-model:filterString="newFilter"
-          @saveFilter="createFilter()"
-          buttonLabel="Create Filter"
-        ></FilterSetup>
+    <HelpItem
+      helpSubject="FiltersideBar"
+      buttonClass="baklava-button absolute top-0 right-0 mr-1 mt-1"
+    ></HelpItem>
+    <div>
+      <div class="grid border-white border-solid border-1 border-round-sm mb-2">
+        <div class="col-12">
+          <div class="mb-2">Create New Filter</div>
+          <FilterSetup
+            :node="intf.data"
+            filterName=""
+            filterString=""
+            @saveFilter="createFilter"
+            v-model:reset="resetCreation"
+            buttonLabel="Create Filter"
+          ></FilterSetup>
+        </div>
       </div>
-    </div>
 
-    <div class="grid border-white border-solid border-1 border-round-sm mt-2">
-      <div class="col-12">
-        Existing Filters
-        <div class="grid mt-2" v-for="(output, key) in currentFilters">
-          <div
-            v-tooltip="output[1].filterstring"
-            class="col-6 flex align-items-center"
-          >
-            {{ output[0] }}
-          </div>
-          <div class="col-3">
-            <button
-              class="baklava-button flex align-items-center"
-              @click="removeFilter(output[0])"
+      <div class="grid border-white border-solid border-1 border-round-sm mt-2">
+        <div class="col-12">
+          Existing Filters
+          <div class="grid mt-2" v-for="(output, key) in currentFilters">
+            <div
+              v-tooltip="output[1].filterstring"
+              class="col-6 flex align-items-center"
             >
-              Remove
-            </button>
-          </div>
-          <div class="col-3 flex align-items-center justify-content-center">
-            <button
-              v-if="!isEditing(key)"
-              class="baklava-button"
-              @click="editFilter(key, false)"
-            >
-              Edit
-            </button>
-          </div>
-          <div class="col-12" v-if="isEditing(key)">
-            <FilterSetup
-              :filterName="output[0]"
-              :filterString="output[1].filterstring"
-              :node="intf.data"
-              buttonLabel="Update Node"
-              :allowCancel="true"
-              @saveFilter="(event) => saveFilter(event, key)"
-              @cancel="editFilter(key, true)"
-            ></FilterSetup>
-            <div></div>
+              {{ output[0] }}
+            </div>
+            <div class="col-3">
+              <button
+                class="baklava-button flex align-items-center"
+                @click="removeFilter(output[0])"
+              >
+                Remove
+              </button>
+            </div>
+            <div class="col-3 flex align-items-center justify-content-center">
+              <button
+                v-if="!isEditing(key)"
+                class="baklava-button"
+                @click="editFilter(key, false)"
+              >
+                Edit
+              </button>
+            </div>
+            <div class="col-12" v-if="isEditing(key)">
+              <FilterSetup
+                :filterName="output[0]"
+                :filterString="output[1].filterstring"
+                :node="intf.data"
+                buttonLabel="Update Node"
+                :allowCancel="true"
+                @saveFilter="(event) => saveFilter(event, key)"
+                @cancel="editFilter(key, true)"
+              ></FilterSetup>
+              <div></div>
+            </div>
           </div>
         </div>
       </div>
@@ -79,8 +82,7 @@ export default defineComponent({
   components: { FilterSetup, HelpItem },
   data() {
     return {
-      newFilterName: "",
-      newFilter: "",
+      resetCreation: false,
       editing: [],
     };
   },
@@ -91,17 +93,14 @@ export default defineComponent({
     return { currentNode, nodeID, currentFilters };
   },
   methods: {
-    createFilter() {
-      if (this.newFilterName) {
+    createFilter(data) {
+      // create one if we have a name
+      if (data.name && data.value) {
         console.log("Adding output");
-        this.currentNode.addFilter(this.newFilterName, this.newFilter);
+        this.currentNode.addFilter(data.name, data.value);
+        this.resetCreation = true;
       }
-      // we reset the editing, if we have
-      this.editing = [];
-      this.newFilterName = "";
-      this.newFilter = "";
     },
-
     removeFilter(output: string) {
       console.log("removing output: " + output);
       this.currentNode.removeFilter(output);
@@ -117,7 +116,6 @@ export default defineComponent({
     isEditing(index: number): boolean {
       return this.editing.includes(index);
     },
-    updateNodeData() {},
     saveFilter(
       event: { oldName: string; name: string; value: string },
       index: number
@@ -127,21 +125,10 @@ export default defineComponent({
       this.editing = this.editing.filter((e: number) => e != index);
     },
   },
-  watch: {
-    currentNode() {
-      this.updateNodeData();
-    },
-  },
   computed: {
     currentNode() {
       return this.intf.data;
     },
-    nodeID() {
-      this.updateNodeData.id;
-    },
-  },
-  mounted() {
-    this.updateNodeData();
   },
 });
 </script>

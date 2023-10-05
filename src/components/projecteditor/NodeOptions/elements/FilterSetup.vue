@@ -57,7 +57,7 @@ import { FormulaEditingDialog } from "@/components/dialogs";
 export default defineComponent({
   props: {
     node: {
-      type: Object as () => ComponentInterface<FilterNode>,
+      type: Object as () => FilterNode,
       required: true,
     },
     filterName: {
@@ -74,8 +74,12 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+    reset: {
+      type: Boolean,
+      default: false,
+    },
   },
-  emits: ["saveFilter", "cancel"],
+  emits: ["saveFilter", "cancel", "update:reset"],
   setup() {
     const graphStore = useGraphStore();
     return { graphStore };
@@ -107,7 +111,16 @@ export default defineComponent({
       return this.graphStore.getOutputsForGraph(this.node);
     },
   },
-  watch: {},
+  watch: {
+    reset(newValue) {
+      if (newValue) {
+        console.log("resetting");
+        this.newFilterName = this.filterName;
+        this.newFilter = this.filterString;
+        this.$emit("update:reset", false);
+      }
+    },
+  },
   async mounted() {
     this.newFilterName = this.filterName;
     this.newFilter = this.filterString;
