@@ -1,42 +1,44 @@
 <template>
-  <Button v-if="!started" :disabled="!pilotedElement" @click="start"
-    >Start Study Pilot</Button
-  >
-  <div v-if="started && !finished">
-    <Button
-      v-if="loading"
-      @click="
-        start();
-        loading = false;
-      "
+  <div>
+    <Button v-if="!started" :disabled="!pilotedElement" @click="start"
+      >Start Study Pilot</Button
     >
-      {{ $t("startNext") }}
-    </Button>
-    <CodeRunner
-      v-else
-      class="h-screen w-full"
-      :currentTaskSettings="taskInfo"
-      :code="code"
-      @handleUpload="handleFileUpload"
-      @submitResults="submitResults"
-      @handleError="handleError"
-    ></CodeRunner>
-  </div>
-  <div v-if="finished">
-    <h3>Results</h3>
-    <JsonViewer :value="results"></JsonViewer>
-    <div v-if="outputData.length > 0">
-      <h3>OUtputs</h3>
-      <JsonViewer :value="outputData"></JsonViewer>
+    <div v-if="started && !finished">
+      <Button
+        v-if="loading"
+        @click="
+          start();
+          loading = false;
+        "
+      >
+        {{ $t("startNext") }}
+      </Button>
+      <CodeRunner
+        v-else
+        class="h-screen w-full"
+        :currentTaskSettings="taskInfo"
+        :code="code"
+        @handleUpload="handleFileUpload"
+        @submitResults="submitResults"
+        @handleError="handleError"
+      ></CodeRunner>
     </div>
-    <div v-if="persistentData.length > 0">
-      <h3>Persistent Data</h3>
-      <JsonViewer :value="persistentData"></JsonViewer>
-    </div>
+    <div v-if="finished">
+      <h3>Results</h3>
+      <JsonViewer :value="results"></JsonViewer>
+      <div v-if="outputData.length > 0">
+        <h3>OUtputs</h3>
+        <JsonViewer :value="outputData"></JsonViewer>
+      </div>
+      <div v-if="persistentData.length > 0">
+        <h3>Persistent Data</h3>
+        <JsonViewer :value="persistentData"></JsonViewer>
+      </div>
 
-    <div v-if="randomAssignments.length > 0">
-      <h3>Random Assigments</h3>
-      <JsonViewer :value="randomAssignments"></JsonViewer>
+      <div v-if="randomAssignments.length > 0">
+        <h3>Random Assigments</h3>
+        <JsonViewer :value="randomAssignments"></JsonViewer>
+      </div>
     </div>
   </div>
 </template>
@@ -122,11 +124,9 @@ export default {
           // obtain the next element of the filter and check whether thats a task
           if (nextElement.elementType === "filter") {
             nextElement = await this.getFilterNext(nextElement);
-          }
-          if (nextElement.elementType === "experiment") {
+          } else if (nextElement.elementType === "experiment") {
             nextElement = this.getExperimentNext(nextElement);
-          }
-          if (nextElement.elementType === "randomizer") {
+          } else if (nextElement.elementType === "randomizer") {
             console.log("Found randomizer");
             nextElement = this.getRandomizerNext(nextElement);
           }
@@ -220,20 +220,30 @@ export default {
      * @param {*} experiment
      */
     getExperimentNext(experiment) {
+      console.log("Running experiment " + experiment.instanceID);
       console.log(experiment);
-      console.log(this.elements[experiment.elements[0].data.instanceID]);
       if (experiment.randomize) {
+        console.log("Randomizing Experiment");
         if (!experiment.done) {
           experiment.done = [];
         }
-        const available = experiment.elements.filter(
-          (x) => !experiment.done.includes(x.instanceID)
-        ).length;
-        if (available > 0) {
-          const nextPos = Math.floor(Math.random() * available);
-          experiment.done.push(experiment.elements[nextPos].data.instanceID);
-          return this.elements[experiment.elements[nextPos].data.instanceID];
+        const available = experiment.elements
+          .filter((x) => !experiment.done.includes(x.data.instanceID))
+          .map((x) => x.data.instanceID);
+        console.log("Available elements are: " + available.join(", "));
+        if (available.length > 0) {
+          const nextPos = Math.floor(Math.random() * available.length);
+          console.log(
+            "Choosing positon " +
+              nextPos +
+              " which has ID: " +
+              available[nextPos]
+          );
+          experiment.done.push(available[nextPos]);
+          return this.elements[available[nextPos]];
         } else {
+          console.log("Experiment Done");
+          console.log("Next is: " + experiment.next);
           return this.elements[experiment.next];
         }
       } else {
