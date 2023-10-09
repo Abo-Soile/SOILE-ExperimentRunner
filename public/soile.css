@@ -25,7 +25,14 @@
 }
 
 .hidden {
-  display: none
+  display: none;
+}
+
+#loadAnim {
+  position: absolute;
+  left: 400px;
+  top: 150px;
+  left: 450px;
 }
 
 .sk-wave {
@@ -95,4 +102,99 @@
     -webkit-transform: scaleY(1);
     transform: scaleY(1);
   }
+}
+
+#display > * {
+  pointer-events: none;
+}
+#display > p {
+  padding-left: 0px;
+  display: inline;
+  line-height: 1.2;
+  cursor: default;
+  /*text-align: justify;*/
+  padding-right: 5px;
+  padding-bottom: 5px;
+}
+#display .activeDropzone {
+  /*position:relative;*/
+  outline: 3px dotted blue;
+  pointer-events: auto;
+}
+#display input[type="text"],
+#display textarea {
+  border-radius: 5px;
+  border: gray solid 1px;
+  padding: 4px;
+  pointer-events: auto;
+}
+#display textarea:focus,
+#display input[type="text"]:focus {
+  border-color: #66afe9;
+  outline: 0;
+  pointer-events: auto;
+}
+#display > .mouselistener {
+  pointer-events: auto;
+}
+
+.pauseAnimation {
+  animation-play-state: paused !important;
+  -webkit-animation-play-state: paused !important;
+  -moz-animation-play-state: paused !important;
+  -o-animation-play-state: paused !important;
+}
+
+.playAnimation {
+  animation-play-state: running !important;
+  -webkit-animation-play-state: running !important;
+  -moz-animation-play-state: running !important;
+  -o-animation-play-state: running !important;
+}
+
+.animatedChild {
+  animation-play-state: inherit !important;
+  -webkit-animation-play-state: inherit !important;
+  -moz-animation-play-state: inherit !important;
+  -o-animation-play-state: inherit !important;
+}
+
+.noAnimation {
+  animation: none !important;
+  -webkit-animation: none !important;
+  -moz-animation: none !important;
+  -o-animation: none !important;
+}
+
+#main {
+  min-height: 850px;
+  background-color: white;
+  margin-top: -20px;
+  margin-bottom: 20px;
+  padding-top: 10px;
+
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+.main {
+  min-height: 900px;
+  background-color: white;
+  margin-top: -20px;
+  padding-top: 25px;
+}
+
+.placeholder50px {
+  height: 50px;
+}
+
+body > .container {
+  padding-bottom: 50px;
+}
+
+#message {
+  display: none;
+  position: absolute;
+  font-size: x-large;
+  width: 90%;
 }

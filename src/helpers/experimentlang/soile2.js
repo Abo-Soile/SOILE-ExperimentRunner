@@ -219,6 +219,7 @@ SOILE2 = (function () {
   };
 
   bin.showmsg = function (msg) {
+    console.log(msg);
     var id = soile2.util.getid("message");
     jQuery(id).css("display", "block");
     jQuery(id).css("left", "50px");
@@ -271,7 +272,7 @@ SOILE2 = (function () {
       /*"text": msg*/
       //"src": url
     };
-
+    console.log(props);
     if (typeof maxwidth === "number") {
       props.style += "max-width:" + maxwidth + "px;";
     }
@@ -579,7 +580,7 @@ SOILE2 = (function () {
   bin.show = function (mId) {
     var args = Array.prototype.slice.call(arguments);
     var id, pos;
-
+    //console.log(args);
     if (args.length === 2 || args.length === 3) {
       id = soile2.util.getid(args[0]);
       pos = args[1];
@@ -607,6 +608,7 @@ SOILE2 = (function () {
       if (id !== "#" && jQuery(id).length > 0) {
         jQuery(id).removeClass("hiddenelem");
         jQuery(id).removeClass("invisibleElement");
+        //console.log(pos);
         if (typeof pos !== "undefined") {
           soile2.bin.position(id, pos);
           return;
@@ -893,14 +895,13 @@ SOILE2 = (function () {
 
       var posLeft = jQuery("#display").width() / 2 - imgWidth / 2;
       var posTop = jQuery("#display").height() / 2 - imgHeight / 2;
-
       left = posLeft;
       top = posTop;
 
       //console.log("width: " + imgWidth + " height " + imgHeight);
       //soile2.bin.position(id, {"top":posTop, "left":posLeft})
     }
-
+    //console.log("repositioning" + id + " to " + top + "/" + left);
     if (soile2.util.is_number(top) && soile2.util.is_number(left)) {
       // http://stackoverflow.com/questions/4724794/how-do-i-give-a-jquery-element-absolute-positioning-on-a-page
       jQuery(id).css({
@@ -2343,7 +2344,7 @@ SOILE2 = (function () {
               waitfor = 1;
             }
           }
-          console.log(opcode);
+          //console.log(opcode);
           break;
         }
       }
