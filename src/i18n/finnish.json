@@ -1,22 +1,24 @@
 {
-    "name" : "Nimi",
-    "signuptitle" : "Ilmoittaudu opiskelemaan",
-    "signup": "Ilmoittaudu",
+    "name" : "Nimi",        
     "proceed" : "Jatka",
-    "continueStudy": "Jatka tutkimus",
-    "startStudy" : "Aloita tutkimus",
-    "withdraw" : "Vetäytä",    
     "signupUser" : "Rekisteröidy käyttäjäksi",
-    "tokenInfo" : "Sinun tunnus tähän tutkimukseen on",
-    "tokenReminder" : "Huomaa tämä tunnusmerkki huolellisesti, koska se on tarpeen tutkimuksen jatkamiseksi, jos poistut sivulta missä tahansa vaiheessa tutkimuksen aikana.",
     "startNext" : "Aloita seuraava tehtävä",
-    "userIdentificationToken" : "Käyttäjän tunnusmerkki",
-    "setToken" : "Aseta tunnusmerkki",
-    "tokenTip" : "Jos olet jo rekisteröitynyt projektiin, käytä sinulle annettua tokenia jatkaaksesi",
-    "login" : "Kirjaidu",
-    "withdrawQuestion" : "Haluatko todella vetäytyä seuraavasta tutkimuksesta: { name }? Kaikki tietosi ja edistymisesi poistetaan pysyvästi, eikä pääsyavaimesi enää toimi.",
-    "withdrawTitle" : "Vetäytä tutkimusesta",
-    "submit": "Lähettää",
-    "availableStudies": "Saatavilla tutkimukset",
-    "backToMain" : "Takasin pääsivu"
+    "signup": "Osallistu",
+    "continueStudy": "Jatka tutkimusta",    
+    "startStudy": "Aloita tutkimus",    
+    "withdraw": "Peru osallistuminen",    
+    "tokenInfo" : "Sinun tunnisteesi tähän tutkimukseen on",    
+    "tokenReminder" : "Ota tämä tunniste talteen, sillä tarvitset sitä palataksesi takaisin tutkimukseen, jos poistut sivulta tutkimuksen aikana.",    
+    "userIdentificationToken" : "Käyttäjän tunniste",    
+    "setToken" : "Aseta tunniste",    
+    "tokenTip" : "Jos olet jo rekisteröitynyt tutkimukseen, käytä sinulle annettua tunnistetta jatkaaksesi",    
+    "login" : "Kirjaudu",    
+    "withdrawQuestion" : "Haluatko todella perua osallistumisesi seuraavaan tutkimukseen: { name }? Kaikki tietosi ja edistymisesi poistetaan pysyvästi, eikä pääsyavaimesi enää toimi.",    
+    "withdrawTitle" : "Peru osallistuminen tutkimukseen",    
+    "submit": "Lähetä",    
+    "availableStudies": "Saatavilla olevat tutkimukset",    
+    "backToMain" : "Takaisin pääsivulle"
 }
+
+
+
