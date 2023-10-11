@@ -4,7 +4,7 @@ export function setupAxios(env) {
   axios.defaults.withCredentials = true;
 
   const SERVER_URL = `${env.VITE_BACKENDDOMAIN}${
-    env.VITE_BACKENDPORT != "" ? ":" + env.VITE_BACKENDPORT : ""
+    env.VITE_BACKENDPORT != undefined ? ":" + env.VITE_BACKENDPORT : ""
   }`;
 
   axios.defaults.baseURL = env.VITE_BACKENDDOMAIN

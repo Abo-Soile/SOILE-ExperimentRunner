@@ -9,10 +9,12 @@ export default ({ mode }) => {
   const SERVER_URL = `${
     process.env.VITE_HTTPS === "true" ? "https://" : "http://"
   }${process.env.VITE_BACKENDDOMAIN}${
-    process.env.VITE_BACKENDPORT != "" ? ":" + process.env.VITE_BACKENDPORT : ""
+    process.env.VITE_BACKENDPORT != undefined
+      ? ":" + process.env.VITE_BACKENDPORT
+      : ""
   }`;
 
-  console.log(SERVER_URL);
+  console.log("Server URL: " + SERVER_URL);
   return defineConfig({
     resolve: {
       alias: [
