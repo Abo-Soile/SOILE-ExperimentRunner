@@ -1,7 +1,11 @@
 <template>
   <div>
     <span class="mb-2 mr-sm-2 mb-sm-0" v-if="hasStyle">
-      <div v-if="data.type == 'text'" :style="computedStyle">{{ content }}</div>
+      <div
+        v-if="data.type == 'text'"
+        :style="computedStyle"
+        v-html="content"
+      ></div>
       <h3
         v-else-if="data.type == 'subtitle'"
         :style="computedStyle"
