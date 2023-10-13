@@ -1,7 +1,7 @@
 <template>
   <div v-if="selectedStudy">
     <h2>{{ selectedStudy.name }}</h2>
-    <p>{{ selectedStudy.description }}</p>
+    <p>{{ markdownDescription }}</p>
     <!-- TODO: check whether already signed up if user is logged in or authed in a different way-->
     <div v-if="signedUpStudies.includes(selectedStudy.UUID)">
       <div v-if="authStore.isAnonymous">
@@ -35,13 +35,16 @@
       <Button v-if="authStore.user" @click="signUp(selectedStudy.UUID)">{{
         $t("signupUser")
       }}</Button>
-      <Button v-else @click="signUp(selectedStudy.UUID)">{{$t('signup')}}</Button>
+      <Button v-else @click="signUp(selectedStudy.UUID)">{{
+        $t("signup")
+      }}</Button>
     </div>
   </div>
-  <router-link v-else to="/">{{$t("backToMain")}}</router-link>
+  <router-link v-else to="/">{{ $t("backToMain") }}</router-link>
 </template>
 
 <script>
+import { getMarkDownContent } from "@/helpers/markDownHelper";
 import Button from "primevue/button";
 import { useProjectStore, useAuthStore, useLanguageStore } from "@/stores";
 import { storeToRefs } from "pinia";
@@ -64,6 +67,9 @@ export default {
         }
       }
       return false;
+    },
+    markdownDescription() {
+      return getMarkDownContent(markdown);
     },
   },
   methods: {

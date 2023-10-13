@@ -2,31 +2,39 @@
   <div>
     <span class="mb-2 mr-sm-2 mb-sm-0" v-if="hasStyle">
       <div v-if="data.type == 'text'" :style="computedStyle">{{ content }}</div>
-      <h3 v-else-if="data.type == 'subtitle'" :style="computedStyle">
-        {{ content }}
-      </h3>
-      <h1 v-else-if="data.type == 'title'" :style="computedStyle">
-        {{ content }}
-      </h1>
+      <h3
+        v-else-if="data.type == 'subtitle'"
+        :style="computedStyle"
+        v-html="content"
+      ></h3>
+      <h1
+        v-else-if="data.type == 'title'"
+        :style="computedStyle"
+        v-html="content"
+      ></h1>
       <a
         v-else-if="data.type == 'link'"
         :href="data.target"
         target="_blank"
         :style="computedStyle"
+        v-html="content"
       >
-        {{ content }}
       </a>
       <QuestionnairePeronsalLink
         v-if="data.type == 'personalLink'"
         :data="data"
       ></QuestionnairePeronsalLink>
     </span>
-    <span class="mb-2 mr-sm-2 mb-sm-0" v-else>
-      <div v-if="data.type == 'text'">{{ content }}</div>
-      <h3 v-else-if="data.type == 'subtitle'">{{ content }}</h3>
-      <h1 v-else-if="data.type == 'title'">{{ content }}</h1>
-      <a v-else-if="data.type == 'link'" :href="data.href" target="_blank">
-        {{ content }}
+    <span class="mb-2 mr-sm-2 mb-sm-0 align-content-center" v-else>
+      <div v-if="data.type == 'text'" class="flex" v-html="content"></div>
+      <h3 v-else-if="data.type == 'subtitle'" v-html="content"></h3>
+      <h1 v-else-if="data.type == 'title'" v-html="content"></h1>
+      <a
+        v-else-if="data.type == 'link'"
+        :href="data.href"
+        target="_blank"
+        v-html="content"
+      >
       </a>
       <QuestionnairePeronsalLink
         v-if="data.type == 'personalLink'"
@@ -38,6 +46,8 @@
 
 <script>
 import QuestionnairePeronsalLink from "./QuestionnairePersonalLink.vue";
+import { getMarkDownContent } from "@/helpers/markDownHelper";
+
 export default {
   props: {
     data: {
@@ -48,7 +58,7 @@ export default {
   components: { QuestionnairePeronsalLink },
   computed: {
     content() {
-      return this.data.text;
+      return getMarkDownContent(this.data.text);
     },
     computedStyle() {
       return this.data.style

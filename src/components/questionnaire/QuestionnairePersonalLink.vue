@@ -1,5 +1,5 @@
 <template>
-  <a :href="href" target="_blank" :style="computedStyle"> {{ data.text }}</a>
+  <a :href="href" target="_blank" :style="computedStyle" v-html="content"></a>
 </template>
 
 <script>
@@ -21,6 +21,9 @@ export default {
           ? this.currentTaskSettings.participantID
           : "USER_ID")
       );
+    },
+    content() {
+      return getMarkDownContent(this.data.text);
     },
     computedStyle() {
       return this.data.style
