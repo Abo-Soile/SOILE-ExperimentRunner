@@ -1,44 +1,11 @@
 <template>
   <div v-if="selectedStudy">
-    <h2>{{ selectedStudy.name }}</h2>
-    <div v-html="markdownDescription"> </div>
-    <!-- TODO: check whether already signed up if user is logged in or authed in a different way-->
-    <div v-if="signedUpStudies.includes(selectedStudy.UUID)">
-      <div v-if="authStore.isAnonymous">
-        <h2>{{ $t("tokenInfo") }}</h2>
-        <p style="color: red">{{ authStore.projectToken }}</p>
-        <h4>
-          {{ $t("tokenReminder") }}
-        </h4>
-      </div>
-      <router-link
-        :to="
-          '/exp/' +
-          selectedStudy.UUID +
-          '/' +
-          projectStore.currentTaskSettings.id +
-          '/'
-        "
-        custom
-        v-slot="{ navigate }"
-        @click="startProject(selectedStudy.UUID)"
-      >
-        <Button v-if="justSignedUp" @click="navigate" role="link">{{
-          $t("startStudy")
-        }}</Button>
-        <Button v-else @click="navigate" role="link"
-          >>{{ $t("continueStudy") }}</Button
-        >
-      </router-link>
-    </div>
-    <div v-else>
-      <Button v-if="authStore.user" @click="signUp(selectedStudy.UUID)">{{
-        $t("signupUser")
-      }}</Button>
-      <Button v-else @click="signUp(selectedStudy.UUID)">{{
-        $t("signup")
-      }}</Button>
-    </div>
+    <StudyDescription v-if="signedUpStudies.includes(selectedStudy.UUID)"
+    :selectedStudy="selectedStudy"
+    :justSignedUp="justSignedUp"
+    @signUp="signUp"
+    >
+    </StudyDescription>   
   </div>
   <router-link v-else to="/">{{ $t("backToMain") }}</router-link>
 </template>
@@ -46,6 +13,7 @@
 <script>
 import { getMarkDownContent } from "@/helpers/markDownHelper";
 import Button from "primevue/button";
+import StudyDescription from "@/components/signup/StudyDescription.vue"
 import { useProjectStore, useAuthStore, useLanguageStore } from "@/stores";
 import { storeToRefs } from "pinia";
 import { onMounted, watch } from "vue";
@@ -99,7 +67,7 @@ export default {
       });
     },
   },
-  components: { Button },
+  components: { Button, StudyDescription },
   async beforeRouteEnter(to) {},
   setup() {
     const authStore = useAuthStore();
