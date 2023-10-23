@@ -1,11 +1,12 @@
 <template>
-  <div>
-    <span class="mb-2 mr-sm-2 mb-sm-0" v-if="hasStyle">
-      <div
+  <span>
+    <span class="mb-2 mr-sm-2 mb-sm-0 justify-content-center" v-if="hasStyle">
+      <span
+        class="flex"
         v-if="data.type == 'text'"
         :style="computedStyle"
         v-html="content"
-      ></div>
+      ></span>
       <h3
         v-else-if="data.type == 'subtitle'"
         :style="computedStyle"
@@ -18,6 +19,7 @@
       ></h1>
       <a
         v-else-if="data.type == 'link'"
+        class="flex"
         :href="data.target"
         target="_blank"
         :style="computedStyle"
@@ -29,11 +31,12 @@
         :data="data"
       ></QuestionnairePeronsalLink>
     </span>
-    <span class="mb-2 mr-sm-2 mb-sm-0 align-content-center" v-else>
-      <div v-if="data.type == 'text'" class="flex" v-html="content"></div>
+    <span class="mb-2 mr-sm-2 mb-sm-0 justify-items-center" v-else>
+      <span v-if="data.type == 'text'" class="flex" v-html="content"></span>
       <h3 v-else-if="data.type == 'subtitle'" v-html="content"></h3>
       <h1 v-else-if="data.type == 'title'" v-html="content"></h1>
       <a
+        class="flex"
         v-else-if="data.type == 'link'"
         :href="data.href"
         target="_blank"
@@ -45,7 +48,7 @@
         :data="data"
       ></QuestionnairePeronsalLink>
     </span>
-  </div>
+  </span>
 </template>
 
 <script>

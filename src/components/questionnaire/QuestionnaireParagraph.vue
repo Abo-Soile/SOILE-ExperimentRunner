@@ -1,5 +1,5 @@
 <template>
-  <div class="flex w-full align-items-center flex-row">
+  <div class="flex w-full flex-column">
     <QuestionnaireComponent
       v-for="(element, index) in inlineGroups"
       :key="'component_' + index"

@@ -1,6 +1,6 @@
 <template>
-  <span
-    class="flex align-items-center"
+  <div
+    class="flex align-items-center inlineComponent"
     v-for="(element, index) in component_data"
     :key="index"
   >
@@ -48,7 +48,7 @@
       v-else-if="element.type == 'html'"
       :data="element.data"
     />
-  </span>
+  </div>
 </template>
 
 <script>

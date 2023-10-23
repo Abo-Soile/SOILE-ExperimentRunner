@@ -175,7 +175,7 @@ export default {
       this.uploadedFiles.push(event.filename);
     },
     handleError(error) {
-      this.errorStore.raiseError(undefined, error);
+      this.errorStore.raiseError("error", error);
     },
   },
   mounted() {

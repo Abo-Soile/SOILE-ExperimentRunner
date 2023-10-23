@@ -1,7 +1,43 @@
 /* eslint-disable */
 //const jQuery = require('jquery')
-
 var SOILE2;
+
+function goFullScreen() {
+  if (typeof document.documentElement.requestFullscreen === "function") {
+    document.documentElement.requestFullscreen().catch(() => {
+      console.warn("Unable to go fullscreen.");
+    });
+  } else if (
+    typeof document.documentElement.mozRequestFullScreen === "function"
+  ) {
+    document.documentElement.mozRequestFullScreen();
+  } else if (
+    typeof document.documentElement.webkitRequestFullscreen === "function"
+  ) {
+    document.documentElement.webkitRequestFullscreen();
+  } else if (
+    typeof document.documentElement.msRequestFullscreen === "function"
+  ) {
+    document.documentElement.msRequestFullscreen();
+  } else {
+    console.warn("Unable to go fullscreen.");
+  }
+}
+function closeFullScreen() {
+  if (typeof document.exitFullscreen === "function") {
+    document.exitFullscreen().catch(() => {
+      console.warn("Unable to close fullscreen.");
+    });
+  } else if (typeof document.mozCancelFullScreen === "function") {
+    document.mozCancelFullScreen();
+  } else if (typeof document.webkitExitFullscreen === "function") {
+    document.webkitExitFullscreen();
+  } else if (typeof document.msExitFullscreen === "function") {
+    document.msExitFullscreen();
+  } else {
+    console.warn("Unable to close fullscreen.");
+  }
+}
 
 if (!("contains" in Array.prototype)) {
   Array.prototype.contains = function (arr, startIndex) {
@@ -2511,6 +2547,8 @@ SOILE2 = (function () {
     var score = soile2.rt.scoreHandler.get();
     var persistantData = soile2.rt.persistantDataHandler.get();
     //endFunc(soile2.rt.dataHandler.getData());
+    // leave Fullscreen
+    closeFullScreen();
     endFunc(data, duration, score, persistantData);
   };
 
@@ -2711,20 +2749,27 @@ SOILE2 = (function () {
 
   soile2.bin = soile2.rt.seal(bin);
 
-  soile2.start = function () {
-    if (toLoad > 0) {
-      console.log("loading images");
-    } else {
-      if (startFunc !== null) {
-        startFunc();
-      }
-      SOILE2.startTime = Date.now();
-      console.log("Starting to execute");
-      $("#loadAnim").toggleClass("hidden", true);
+  soile2.start = async function () {
+    try {
+      if (toLoad > 0) {
+        console.log("loading images");
+      } else {
+        // change to fullscreen
 
-      SOILE2.rt.exec_pi();
+        if (startFunc !== null) {
+          startFunc();
+        }
+        // requesting fullscreen
+        goFullScreen();
+        SOILE2.startTime = Date.now();
+        console.log("Starting to execute");
+        $("#loadAnim").toggleClass("hidden", true);
+        SOILE2.rt.exec_pi();
+      }
+      console.log("started");
+    } catch (err) {
+      window.handleError(err);
     }
-    console.log("started");
   };
 
   return soile2;

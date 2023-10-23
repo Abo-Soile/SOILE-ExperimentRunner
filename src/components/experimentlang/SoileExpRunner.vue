@@ -1,5 +1,11 @@
 <template>
-  <iframe ref="soilehtml" class="experimentview" :srcdoc="soilehtml"> </iframe>
+  <iframe
+    ref="soilehtml"
+    allowfullscreen
+    class="experimentview"
+    :srcdoc="soilehtml"
+  >
+  </iframe>
 </template>
 
 <script>
