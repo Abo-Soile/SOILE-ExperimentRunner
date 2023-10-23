@@ -4,15 +4,10 @@
       >Start Study Pilot</Button
     >
     <div v-if="started && !finished">
-      <Button
-        v-if="loading"
-        @click="
-          start();
-          loading = false;
-        "
-      >
-        {{ $t("startNext") }}
-      </Button>
+      <ProgressSpinner
+        v-if="loading"        
+      >        
+      </ProgressSpinner>
       <CodeRunner
         v-else
         class="h-screen w-full"
@@ -52,7 +47,11 @@ import CodeRunner from "@/components/coderunner/CodeRunner.vue";
 import { useElementStore, usePilotStore, useLanguageStore } from "@/stores";
 import axios from "axios";
 import JsonViewer from "vue-json-viewer";
+
 import Button from "primevue/button";
+import ProgressSpinner from 'primevue/progressspinner';
+
+
 import { storeToRefs } from "pinia";
 import { nextTick } from "vue";
 
@@ -108,6 +107,7 @@ export default {
      * @param {*} start
      */
     async getNext(start) {
+      
       // take next element if there is one.
       const nextElementID = this.elements[this.currentElementID].next;
       // except for the start element, we should always be in a Task when coming here.
@@ -163,6 +163,8 @@ export default {
             this.currentElement.version +
             "/"
         );
+        await nextTick();
+        this.loading = false;
       } else {
         this.$router.push("/pilot/");
       }
@@ -400,6 +402,10 @@ export default {
     console.log(next);
     next();
     return true;
+  },
+  async beforeRouteUpdate(to, from, next) {        
+    next();
+
   },
   setup() {
     const elementStore = useElementStore();
