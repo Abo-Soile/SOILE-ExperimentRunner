@@ -1,7 +1,7 @@
 <template>
   <div v-if="selectedStudy">
     <h2>{{ selectedStudy.name }}</h2>
-    <p>{{ markdownDescription }}</p>
+    <div v-html="markdownDescription"> </div>
     <!-- TODO: check whether already signed up if user is logged in or authed in a different way-->
     <div v-if="signedUpStudies.includes(selectedStudy.UUID)">
       <div v-if="authStore.isAnonymous">
@@ -69,7 +69,7 @@ export default {
       return false;
     },
     markdownDescription() {
-      return getMarkDownContent(markdown);
+      return getMarkDownContent(this.selectedStudy.description);
     },
   },
   methods: {

@@ -2,27 +2,6 @@
 //const jQuery = require('jquery')
 var SOILE2;
 
-function goFullScreen() {
-  if (typeof document.documentElement.requestFullscreen === "function") {
-    document.documentElement.requestFullscreen().catch(() => {
-      console.warn("Unable to go fullscreen.");
-    });
-  } else if (
-    typeof document.documentElement.mozRequestFullScreen === "function"
-  ) {
-    document.documentElement.mozRequestFullScreen();
-  } else if (
-    typeof document.documentElement.webkitRequestFullscreen === "function"
-  ) {
-    document.documentElement.webkitRequestFullscreen();
-  } else if (
-    typeof document.documentElement.msRequestFullscreen === "function"
-  ) {
-    document.documentElement.msRequestFullscreen();
-  } else {
-    console.warn("Unable to go fullscreen.");
-  }
-}
 function closeFullScreen() {
   if (typeof document.exitFullscreen === "function") {
     document.exitFullscreen().catch(() => {

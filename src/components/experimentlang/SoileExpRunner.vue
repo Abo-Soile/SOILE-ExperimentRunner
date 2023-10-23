@@ -45,7 +45,7 @@ export default {
       soilehtml: soilehtmlpage,
       soileStyle: null,
       testPhaseScript: null,
-      soileScript: null,
+      soileScript: null,      
     };
   },
   unmount() {
@@ -96,6 +96,7 @@ export default {
         this.testPhaseScript.id = "testPhase";
         this.testPhaseScript.innerHTML = testPhase;
         iFrameDocument.body.appendChild(this.testPhaseScript);
+        console.log("Starting Experiment Language task");
         iFrameWindow.start(currentCode);
       };
     },
@@ -117,8 +118,11 @@ export default {
     this.soileContentWindow.handleSubmit = this.handleSubmit;
     this.soileContentWindow.handleError = this.handleError;
     this.soileContentWindow.levenshtein = this.levenshtein;
-    this.soileContentWindow.outputs = this.outputs;
+    this.soileContentWindow.outputs = this.outputs;    
     this.soileContentWindow.persistentData = { ...this.persistentData };
+    this.soileContentWindow.soileconfig = {
+      startText : this.$i18n.t("startNext")
+    }
     this.setupTask();
   },
 };

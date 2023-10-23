@@ -1,4 +1,4 @@
-<template>
+<template>  
   <div v-if="isRunningTask" class="h-screen">
     <CodeRunner
       class="h-full w-full"
@@ -17,18 +17,26 @@
       @handleError="handleError"
     ></CodeRunner>
   </div>
-  <div v-else>
-    <Button @click="setTaskActive">{{ $t("startNext") }}</Button>
+  <div v-else-if="running">
+    Submitting data
+    <ProgressSpinner />
+  </div>
+  <div v-else>    
+    Loading
+    <ProgressSpinner />
   </div>
 </template>
 
 <script>
 import axios from "axios";
 import CodeRunner from "@/components/coderunner/CodeRunner.vue";
+
 import { mapState } from "pinia";
-import { useErrorStore } from "@/stores";
-import { useProjectStore } from "@/stores/project";
+import { useErrorStore,useProjectStore  } from "@/stores";
+//import { useProjectStore } from "@/stores/project";
+
 import Button from "primevue/button";
+import ProgressSpinner from 'primevue/progressspinner';
 
 export default {
   name: "ExperimentView",
@@ -74,6 +82,7 @@ export default {
             )
             .then((response) => {
               this.code = response?.data;
+              this.loadNext();
             })
             .catch((error) => {
               this.projectStore.setTaskNotRunning();
@@ -101,6 +110,7 @@ export default {
      */
     async submitResults(results) {
       console.log(results);
+      this.running = true;
       var TaskData = {};
       TaskData.taskID = this.projectStore.currentTaskSettings.id;
       TaskData.outputData = results.outputData ? results.outputData : [];
@@ -124,6 +134,7 @@ export default {
             );
           } else {
             console.log(response);
+            this.running = false;
             reportError(
               response.status,
               "Unexpected issue while submitting the results"
@@ -131,12 +142,19 @@ export default {
           }
         })
         .catch((error) => {
+          this.running = false;
           console.log(error);
         })
         .finally(() => {
           this.projectStore.setTaskNotRunning();
         });
     },
+
+    loadNext()
+    {
+      this.projectStore.setTaskActive();
+    },
+
     /**
      * Upload file data to the back-end
      * @param {*} file The file to upload

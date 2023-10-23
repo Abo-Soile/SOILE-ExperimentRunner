@@ -1,7 +1,7 @@
 var SOILE2 = window.SOILE2;
-
 console.log(window);
 console.log(SOILE2);
+var currentCode;
 function suppressKeys(e) {
   //Preventing scroll on arrowkeys 37-40 and navigation on backspace 8
   if ([37, 38, 39, 40, 8, 32].indexOf(e.keyCode) > -1) {
@@ -67,10 +67,6 @@ function sendData(d) {
   });
 }
 
-function startFunc() {
-  console.log("Starting!!!");
-}
-
 function end(expdata, duration, score, persistentData) {
   console.log("Test over");
   console.log(expdata);
@@ -112,5 +108,42 @@ function startSoile(data) {
     window.handleError(e);
   }
 }
+function goFullScreen() {
+  if (typeof document.documentElement.requestFullscreen === "function") {
+    document.documentElement.requestFullscreen().catch(() => {
+      console.warn("Unable to go fullscreen.");
+    });
+  } else if (
+    typeof document.documentElement.mozRequestFullScreen === "function"
+  ) {
+    document.documentElement.mozRequestFullScreen();
+  } else if (
+    typeof document.documentElement.webkitRequestFullscreen === "function"
+  ) {
+    document.documentElement.webkitRequestFullscreen();
+  } else if (
+    typeof document.documentElement.msRequestFullscreen === "function"
+  ) {
+    document.documentElement.msRequestFullscreen();
+  } else {
+    console.warn("Unable to go fullscreen.");
+  }
+}
 
-window.start = startSoile;
+
+const button = document.getElementById("startButton");
+button.textContent = window.soileconfig.startText;
+const startArea = document.getElementById("startArea");
+button.addEventListener("click", function() {
+  startArea.classList.add("hiddenelem")
+  goFullScreen();
+  startSoile(currentCode);
+})
+
+function setCode(code)
+{
+  console.log("Setting code");
+  currentCode = code;
+}
+
+window.start = setCode;
