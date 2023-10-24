@@ -1,4 +1,5 @@
 <template>
+  <div v-if="!authStore.isUser() && authStore.isAuthed()"></div>
   <div class="mt-3">
     {{ $t("tokenRequired") }}
     <div class="mt-3">
@@ -37,6 +38,21 @@ export default {
           true
         );
         if (!accessSuccess) {
+          if (this.authStore.isUser()) {
+            // a user should not have gotten an access token, and those are incompatible
+            this.errorStore.raiseError(
+              "error",
+              "The provided token was not a valid sign up token. Since you are logged in, you cannot use an Access token, as those are for anonymous use."
+            );
+            return;
+          }
+          if (this.authStore.isAuthed()) {
+            this.errorStore.raiseError(
+              "warn",
+              "Only one study can be active for anonymous use at each time. Logging out of the old study."
+            );
+            await this.authStore.logout();
+          }
           // a user never gets an access token, so we are ok.
           this.authStore.setProjectToken(this.token);
           await this.authStore.updateLoginStatus();
@@ -51,10 +67,10 @@ export default {
             await this.projectStore.fetchSignedUpStudies();
             await this.projectStore.updateAvailableStudies();
             if (
-              this.projectStore.signedUpStudies.includes(studyID) || // we are now signed up to this study - acces via study ID
+              this.projectStore.signedUpStudies.includes(this.studyID) || // we are now signed up to this study - acces via study ID
               this.projectStore.availableStudies
                 .map((x) => x.shortCut)
-                .includes(studyID) // the studyID is the shortCut and it is now available.
+                .includes(this.studyID) // the studyID is the shortCut and it is now available.
             ) {
               this.$emit("loginSuccess");
             } else {
@@ -78,7 +94,7 @@ export default {
     const projectStore = useProjectStore();
     const authStore = useAuthStore();
     const errorStore = useErrorStore();
-    return { authStore, authStore, errorStore };
+    return { projectStore, authStore, errorStore };
   },
 };
 </script>
