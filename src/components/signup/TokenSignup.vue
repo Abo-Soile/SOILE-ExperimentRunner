@@ -55,6 +55,7 @@ export default {
           }
           // a user never gets an access token, so we are ok.
           this.authStore.setProjectToken(this.token);
+          console.log("Tying to refresh the login using an access token");
           await this.authStore.updateLoginStatus();
           if (!this.authStore.authed) {
             this.errorStore.raiseError(
@@ -66,10 +67,19 @@ export default {
           } else {
             await this.projectStore.fetchSignedUpStudies();
             await this.projectStore.updateAvailableStudies();
+            console.log("Fetching study updates");
+            console.log(
+              this.projectStore.signedUpStudies.includes(this.studyID)
+            );
+            console.log(
+              this.projectStore.availableStudies
+                .map((x) => x.shortCut)
+                .includes(this.studyID)
+            );
             if (
               this.projectStore.signedUpStudies.includes(this.studyID) || // we are now signed up to this study - acces via study ID
               this.projectStore.availableStudies
-                .map((x) => x.shortCut)
+                .map((x) => x.shortcut)
                 .includes(this.studyID) // the studyID is the shortCut and it is now available.
             ) {
               this.$emit("loginSuccess");
