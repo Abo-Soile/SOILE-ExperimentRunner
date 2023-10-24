@@ -24,14 +24,14 @@
         />
       </div>
       <div v-else>
-        <div>Permanent Access token is : {{ permanentToken }}</div>
+        <div>Permanent Sign Up token is : {{ permanentToken }}</div>
         <div>
           SignUp Link:
           <a :href="baseTokenURL + permanentToken"> Right Click to Copy </a>
         </div>
       </div>
       <div v-if="accessTokens != null && accessTokens.length > 0">
-        <h3>Access Tokens</h3>
+        <h3>Sign Up Tokens</h3>
         <ScrollPanel :style="{ width: '100%', height: maxSignupSize + 'rem' }">
           <ul>
             <li v-for="token in accessTokens">{{ token }}</li>
@@ -44,7 +44,7 @@
         @click="showCreateTokensDialog = true"
       />
       <div v-if="usedTokens != null && usedTokens.length > 0">
-        <h3>Used Access tokens</h3>
+        <h3>Used Sign Up tokens</h3>
         <ScrollPanel :style="{ width: '100%', height: maxUsedSize + 'rem' }">
           <ul>
             <li v-for="token in usedTokens">{{ token }}</li>
