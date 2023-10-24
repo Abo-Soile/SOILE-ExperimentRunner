@@ -18,5 +18,6 @@
     "withdrawTitle" : "Withdraw from Study",
     "submit" : "Submit",
     "availableStudies" : "Available Studies",
-    "backToMain" : "Back to Main Page"
+    "backToMain" : "Back to Main Page",
+    "tokenRequired" : "You are trying to access a non public study. In order to proceed you will need to provide an access the sign up key you were given by the study organisers, or if you already signed up, you need to provide the access token you received."
 }

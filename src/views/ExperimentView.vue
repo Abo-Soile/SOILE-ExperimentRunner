@@ -1,29 +1,45 @@
-<template>  
-  <div v-if="isRunningTask" class="h-screen">
-    <CodeRunner
-      class="h-full w-full"
-      :currentTaskSettings="taskInfo"
-      :code="code"
-      @handleUpload="
-        (event) =>
-          uploadFile(
-            event.file,
-            event.fileName,
-            event.idCallBack,
-            event.errorCallBack
-          )
-      "
-      @submitResults="submitResults"
-      @handleError="handleError"
-    ></CodeRunner>
+<template>
+  <div
+    class="flex flex-column h-screen align-content-center justify-content-center"
+    v-if="loading"
+  >
+    <div class="flex justify-content-center">Loading...</div>
+    <div class="flex">
+      <ProgressSpinner />
+    </div>
   </div>
-  <div v-else-if="running">
-    Submitting data
-    <ProgressSpinner />
-  </div>
-  <div v-else>    
-    Loading
-    <ProgressSpinner />
+  <div v-else>
+    <div v-if="isRunningTask" class="h-screen">
+      <CodeRunner
+        class="h-full w-full"
+        :currentTaskSettings="taskInfo"
+        :code="code"
+        @handleUpload="
+          (event) =>
+            uploadFile(
+              event.file,
+              event.fileName,
+              event.idCallBack,
+              event.errorCallBack
+            )
+        "
+        @submitResults="submitResults"
+        @handleError="handleError"
+      ></CodeRunner>
+    </div>
+    <div v-else-if="running">
+      Submitting data
+      <ProgressSpinner />
+    </div>
+    <div
+      class="flex flex-column h-screen align-content-center justify-content-center"
+      v-if="loading"
+    >
+      <div class="flex justify-content-center">Loading...</div>
+      <div class="flex">
+        <ProgressSpinner />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -32,17 +48,18 @@ import axios from "axios";
 import CodeRunner from "@/components/coderunner/CodeRunner.vue";
 
 import { mapState } from "pinia";
-import { useErrorStore,useProjectStore  } from "@/stores";
+import { useErrorStore, useProjectStore } from "@/stores";
 //import { useProjectStore } from "@/stores/project";
 
 import Button from "primevue/button";
-import ProgressSpinner from 'primevue/progressspinner';
+import ProgressSpinner from "primevue/progressspinner";
 
 export default {
   name: "ExperimentView",
   components: {
     Button,
     CodeRunner,
+    ProgressSpinner,
   },
   data() {
     return {
@@ -150,8 +167,7 @@ export default {
         });
     },
 
-    loadNext()
-    {
+    loadNext() {
       this.projectStore.setTaskActive();
     },
 
@@ -205,6 +221,14 @@ export default {
         persistentFields: this.currentTaskSettings.persistent,
       };
     },
+    loading() {
+      return this.taskInfo.codeType == undefined;
+    },
+  },
+  async mounted() {
+    if (this.loading) {
+      await this.projectStore.updateTaskSettings(this.$route.params.id);
+    }
   },
 };
 </script>

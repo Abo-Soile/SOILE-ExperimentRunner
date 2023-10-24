@@ -1,19 +1,23 @@
 <template>
   <div v-if="selectedStudy">
-    <StudyDescription v-if="signedUpStudies.includes(selectedStudy.UUID)"
-    :selectedStudy="selectedStudy"
-    :justSignedUp="justSignedUp"
-    @signUp="signUp"
-    >
-    </StudyDescription>   
+    <StudyDescription :selectedStudy="selectedStudy" @signUp="signUp">
+    </StudyDescription>
   </div>
-  <router-link v-else to="/">{{ $t("backToMain") }}</router-link>
+  <div v-else>
+    <TokenSignup
+      :studyID="routeID"
+      @loginSuccess="updateSelectedStudy(true, routeID)"
+    >
+    </TokenSignup>
+    <router-link to="/">{{ $t("backToMain") }}</router-link>
+  </div>
 </template>
 
 <script>
 import { getMarkDownContent } from "@/helpers/markDownHelper";
 import Button from "primevue/button";
-import StudyDescription from "@/components/signup/StudyDescription.vue"
+import StudyDescription from "@/components/signup/StudyDescription.vue";
+import TokenSignup from "@/components/signup/TokenSignup.vue";
 import { useProjectStore, useAuthStore, useLanguageStore } from "@/stores";
 import { storeToRefs } from "pinia";
 import { onMounted, watch } from "vue";
@@ -23,6 +27,8 @@ export default {
     return {
       selectedStudy: undefined,
       justSignedUp: false,
+      signUpToken: "",
+      routeID: "",
     };
   },
   computed: {
@@ -49,25 +55,27 @@ export default {
       this.authStore.signUp(UUID, token).then(async (res) => {
         if (res) {
           console.log("Signup successfull");
-          this.justSignedUp = true;
-          await this.authStore.refreshSession();
-          await this.projectStore.fetchSignedUpStudies();
-          await this.projectStore.updateTaskSettings(UUID);
-
-          if (token) {
-            await this.projectStore.updateAvailableStudies();
-            this.selectedStudy = await this.projectStore.getStudyDetails(
-              this.$router.currentRoute.value.params.id
-            );
-            this.languageStore.setLocale(this.selectedStudy.language);
-          }
+          updateSelectedStudy(token, UUID);
         } else {
           console.log("Signup unsuccessful");
         }
       });
     },
+    async updateSelectedStudy(token, UUID) {
+      await this.authStore.refreshSession();
+      await this.projectStore.fetchSignedUpStudies();
+      await this.projectStore.updateTaskSettings(UUID);
+      if (token) {
+        await this.projectStore.updateAvailableStudies();
+        this.selectedStudy = await this.projectStore.getStudyDetails(
+          this.$router.currentRoute.value.params.id
+        );
+        this.languageStore.setLocale(this.selectedStudy.language);
+      }
+    },
   },
-  components: { Button, StudyDescription },
+
+  components: { Button, StudyDescription, TokenSignup },
   async beforeRouteEnter(to) {},
   setup() {
     const authStore = useAuthStore();
@@ -77,9 +85,10 @@ export default {
     return { authStore, projectStore, signedUpStudies, languageStore };
   },
   async mounted() {
-    this.justSignedUp = !this.isSignedUp;
     const currentRoute = this.$router.currentRoute.value;
+    this.routeID = currentRoute.params.id;
     const token = currentRoute.query.token;
+    this.signUpToken = token;
     if (token) {
       // we have a signup with a token. Directly sign up to this project with the token, and display retrieved information.
       console.log("Signing up to study");
@@ -91,8 +100,9 @@ export default {
       this.selectedStudy = this.projectStore.getStudyDetails(
         currentRoute.params.id
       );
-
-      this.languageStore.setLocale(this.selectedStudy.language);
+      if (this.selectedStudy) {
+        this.languageStore.setLocale(this.selectedStudy.language);
+      }
     }
   },
 };

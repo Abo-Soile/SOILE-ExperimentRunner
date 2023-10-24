@@ -4,10 +4,7 @@
       >Start Study Pilot</Button
     >
     <div v-if="started && !finished">
-      <ProgressSpinner
-        v-if="loading"        
-      >        
-      </ProgressSpinner>
+      <ProgressSpinner v-if="loading"> </ProgressSpinner>
       <CodeRunner
         v-else
         class="h-screen w-full"
@@ -49,15 +46,14 @@ import axios from "axios";
 import JsonViewer from "vue-json-viewer";
 
 import Button from "primevue/button";
-import ProgressSpinner from 'primevue/progressspinner';
-
+import ProgressSpinner from "primevue/progressspinner";
 
 import { storeToRefs } from "pinia";
 import { nextTick } from "vue";
 
 export default {
   name: "PilotView",
-  components: { CodeRunner, JsonViewer, Button },
+  components: { CodeRunner, JsonViewer, Button, ProgressSpinner },
   data() {
     return {
       persistentData: {},
@@ -107,7 +103,6 @@ export default {
      * @param {*} start
      */
     async getNext(start) {
-      
       // take next element if there is one.
       const nextElementID = this.elements[this.currentElementID].next;
       // except for the start element, we should always be in a Task when coming here.
@@ -403,9 +398,8 @@ export default {
     next();
     return true;
   },
-  async beforeRouteUpdate(to, from, next) {        
+  async beforeRouteUpdate(to, from, next) {
     next();
-
   },
   setup() {
     const elementStore = useElementStore();

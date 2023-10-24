@@ -145,9 +145,10 @@ export const useAuthStore = defineStore({
      * Sign up a user with a given access token to the project with the given projectID.
      * @param {*} studyID
      * @param {*} accessToken
+     * @param {boolean} silent - whether to throw an error if unsuccessfull
      * @returns
      */
-    async signUp(studyID, accessToken) {
+    async signUp(studyID, accessToken, silent) {
       const params = accessToken ? { token: accessToken } : {};
       try {
         const response = await axios.post(
@@ -161,9 +162,9 @@ export const useAuthStore = defineStore({
         console.log("Signup was successful");
         return true;
       } catch (failed) {
-        console.log("Caught error");
-        console.log(failed);
-        this.processAxiosError(failed);
+        if (!silent) {
+          this.processAxiosError(failed);
+        }
         return false;
       }
     },

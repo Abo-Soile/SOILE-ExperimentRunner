@@ -5,6 +5,9 @@
 <script>
 import { mapState } from "pinia";
 import { useProjectStore } from "@/stores";
+
+import { getMarkDownContent } from "@/helpers/markDownHelper";
+
 export default {
   props: {
     data: {
