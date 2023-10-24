@@ -3,7 +3,9 @@
     <h2>{{ selectedStudy.name }}</h2>
     <div v-html="markdownDescription"></div>
     <div v-if="signedUpStudies.includes(selectedStudy.UUID)">
-      <div v-if="authStore.isAnonymous && justSignedUp">
+      <div
+        v-if="authStore.isAnonymous && (justSignedUp || accessToken != null)"
+      >
         <h2>{{ $t("tokenInfo") }}</h2>
         <p style="color: red">{{ authStore.projectToken }}</p>
         <h4>
@@ -21,9 +23,12 @@
         custom
         v-slot="{ navigate }"
       >
-        <Button v-if="justSignedUp" @click="navigate" role="link">{{
-          $t("startStudy")
-        }}</Button>
+        <Button
+          v-if="justSignedUp || accessToken != null"
+          @click="navigate"
+          role="link"
+          >{{ $t("startStudy") }}</Button
+        >
         <Button v-else @click="navigate" role="link">{{
           $t("continueStudy")
         }}</Button>
@@ -47,6 +52,7 @@ import { storeToRefs } from "pinia";
 export default {
   props: {
     selectedStudy: { type: Object, required: true },
+    accessToken: { type: String, required: false },
   },
   data() {
     return {
@@ -71,6 +77,15 @@ export default {
     const authStore = useAuthStore();
     const { signedUpStudies } = storeToRefs(projectStore);
     return { projectStore, authStore, signedUpStudies };
+  },
+  mounted() {
+    if (
+      this.selectedStudy &&
+      this.signedUpStudies.includes(this.selectedStudy.UUID)
+    ) {
+      // we need to update this in order to get to the right task.
+      this.projectStore.updateTaskSettings(this.selectedStudy.UUID);
+    }
   },
 };
 </script>

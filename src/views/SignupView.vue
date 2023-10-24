@@ -1,12 +1,18 @@
 <template>
   <div v-if="selectedStudy">
-    <StudyDescription :selectedStudy="selectedStudy" @signUp="signUp">
+    <StudyDescription
+      :selectedStudy="selectedStudy"
+      :accessToken="accessToken"
+      @signUp="signUp"
+    >
     </StudyDescription>
   </div>
   <div v-else>
     <TokenSignup
       :studyID="routeID"
-      @loginSuccess="updateSelectedStudy(true, routeID)"
+      @loginSuccess="
+        (accessToken) => updateSelectedStudy(true, routeID, accessToken)
+      "
     >
     </TokenSignup>
     <router-link to="/">{{ $t("backToMain") }}</router-link>
@@ -26,7 +32,7 @@ export default {
   data() {
     return {
       selectedStudy: undefined,
-      justSignedUp: false,
+      accessToken: undefined,
       signUpToken: "",
       routeID: "",
     };
@@ -47,21 +53,19 @@ export default {
     },
   },
   methods: {
-    startProject(uuid) {
-      this.justSignedUp = false;
-    },
     signUp(UUID, token) {
       console.log("Trying to auth with " + UUID + "/" + token);
       this.authStore.signUp(UUID, token).then(async (res) => {
         if (res) {
           console.log("Signup successfull");
-          updateSelectedStudy(token, UUID);
+          this.updateSelectedStudy(token, UUID);
         } else {
           console.log("Signup unsuccessful");
         }
       });
     },
-    async updateSelectedStudy(token, UUID) {
+    async updateSelectedStudy(token, UUID, accessToken) {
+      this.accessToken = accessToken;
       await this.authStore.refreshSession();
       await this.projectStore.fetchSignedUpStudies();
       await this.projectStore.updateTaskSettings(UUID);

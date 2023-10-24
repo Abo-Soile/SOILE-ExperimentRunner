@@ -67,7 +67,7 @@ export default {
             }
           }
         } else {
-          this.$emit("loginSuccess");
+          this.$emit("loginSuccess", this.authStore.projectToken);
           return;
         }
       }
