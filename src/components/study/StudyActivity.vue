@@ -1,22 +1,28 @@
 <template>
   <div class="grid">
     <div class="col flex flex-column">
-      <Button
-        v-if="active"
-        label="Deactivate Study"
-        @click="$emit('update:active', false)"
-      ></Button>
-      <Button
-        v-else
-        label="Activate Study"
-        @click="$emit('update:active', true)"
-      ></Button>
-
-      <Button
-        v-if="permanentToken == null || permanentToken === ''"
-        label="Create Permanent Access Token"
-        @click="$emit('createMasterToken')"
-      />
+      <div v-if="active">
+        <Button
+          label="Deactivate Study"
+          @click="$emit('update:active', false)"
+        ></Button>
+        <div>
+          Link to study:
+          <a :href="baseURL"> Right Click to Copy </a>
+        </div>
+      </div>
+      <div v-else>
+        <Button
+          label="Activate Study"
+          @click="$emit('update:active', true)"
+        ></Button>
+      </div>
+      <div v-if="permanentToken == null || permanentToken === ''">
+        <Button
+          label="Create Permanent Access Token"
+          @click="$emit('createMasterToken')"
+        />
+      </div>
       <div v-else>
         <div>Permanent Access token is : {{ permanentToken }}</div>
         <div>
@@ -140,8 +146,12 @@ function getFullHost() {
 
 const baseTokenURL = computed(() => `${baseURL.value}?token=`);
 
-const maxSignupSize = computed(() => Math.max(props.accessTokens.length, 10));
-const maxUsedSize = computed(() => Math.max(props.usedtokens.length, 10));
+const maxSignupSize = computed(() =>
+  Math.max(props.accessTokens ? props.accessTokens.length : 0, 10)
+);
+const maxUsedSize = computed(() =>
+  Math.max(props.usedtokens ? props.usedtokens.length : 0, 10)
+);
 
 //TODO: Deactivate project.
 </script>
