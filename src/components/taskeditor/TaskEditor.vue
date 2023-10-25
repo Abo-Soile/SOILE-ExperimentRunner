@@ -31,7 +31,7 @@
       />
       <FilePreview v-if="previewFile" :file="previewFile"></FilePreview>
     </div>
-    <div class="col-6">
+    <div class="col-6 h-full">
       <DataEditor
         v-model:sourceCode="currentObject.code"
         :sourceLanguage="currentObject.codeType.language"
@@ -43,9 +43,9 @@
         v-model:selectedFile="activeFile"
       ></DataEditor>
     </div>
-    <div class="col-4 h-screen">
+    <div class="col-4 h-full">
       <CodePreview
-        class="h-screen preview"
+        class="h-full preview"
         :sourceCode="currentObject.code"
         :codeType="currentObject.codeType.language"
         :codeTypeVersion="currentObject.codeType.version"

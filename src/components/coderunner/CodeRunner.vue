@@ -33,7 +33,6 @@
     >
     </PsychoJsRunner>
     <SoileQuestionnaire
-      class="h-full w-full"
       v-if="currentTaskSettings.codeType.language == 'qmarkup'"
       :code="code"
       :outputs="currentTaskSettings.outputs"

@@ -36,9 +36,7 @@ watch(latestError, (newError) => {
 });
 </script>
 <template>
-  <div class="mainapp">
-    <TopNavBar v-if="!isRunningTask"> </TopNavBar>
-    <Toast />
-    <router-view></router-view>
-  </div>
+  <TopNavBar v-if="!isRunningTask"> </TopNavBar>
+  <Toast />
+  <router-view></router-view>
 </template>

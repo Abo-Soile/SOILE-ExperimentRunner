@@ -8,38 +8,26 @@
       <ProgressSpinner />
     </div>
   </div>
-  <div v-else>
-    <div v-if="isRunningTask" class="h-screen">
-      <CodeRunner
-        class="h-full w-full"
-        :currentTaskSettings="taskInfo"
-        :code="code"
-        @handleUpload="
-          (event) =>
-            uploadFile(
-              event.file,
-              event.fileName,
-              event.idCallBack,
-              event.errorCallBack
-            )
-        "
-        @submitResults="submitResults"
-        @handleError="handleError"
-      ></CodeRunner>
-    </div>
-    <div v-else-if="running">
-      Submitting data
-      <ProgressSpinner />
-    </div>
-    <div
-      class="flex flex-column h-screen align-content-center justify-content-center"
-      v-if="loading"
-    >
-      <div class="flex justify-content-center">Loading...</div>
-      <div class="flex">
-        <ProgressSpinner />
-      </div>
-    </div>
+  <CodeRunner
+    v-else-if="isRunningTask"
+    class="h-screen"
+    :currentTaskSettings="taskInfo"
+    :code="code"
+    @handleUpload="
+      (event) =>
+        uploadFile(
+          event.file,
+          event.fileName,
+          event.idCallBack,
+          event.errorCallBack
+        )
+    "
+    @submitResults="submitResults"
+    @handleError="handleError"
+  ></CodeRunner>
+  <div v-else-if="running">
+    Submitting data
+    <ProgressSpinner />
   </div>
 </template>
 

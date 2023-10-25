@@ -1,6 +1,6 @@
 <template>
   <div v-if="canRun">
-    <div class="h-screen" v-if="isRunningTask">
+    <div class="h-full" v-if="isRunningTask">
       <div>
         <Button @click="stopTask">Stop Task</Button>
       </div>
