@@ -196,8 +196,8 @@ export default {
         }
       }
       if (
-        (this.randomization[randomizer.instanceID] && assignOnce) ||
-        randomizer.type === "block"
+        this.randomization[randomizer.instanceID] &&
+        (assignOnce || randomizer.type === "block")
       ) {
         return this.elements[this.randomization[randomizer.instanceID]];
       } else {
