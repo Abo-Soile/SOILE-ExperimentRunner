@@ -10,7 +10,6 @@
       {{ file.label }}
       <ContextMenu
         v-if="!isDirectory"
-        global
         ref="menu"
         :model="menuOptions"
       ></ContextMenu>

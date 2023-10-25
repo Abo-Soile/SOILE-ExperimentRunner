@@ -177,11 +177,11 @@
   border-bottom-right-radius: 10px;
 }
 .startArea {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh; /* Ensure full viewport height */
-    margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; /* Ensure full viewport height */
+  margin: 0;
 }
 .startButton {
   padding: 10px 20px;
@@ -193,6 +193,9 @@
   background-color: white;
   margin-top: -20px;
   padding-top: 25px;
+}
+
+.wrapper {
 }
 
 .placeholder50px {
