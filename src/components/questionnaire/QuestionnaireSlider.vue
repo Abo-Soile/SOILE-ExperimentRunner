@@ -7,6 +7,7 @@
       :min="source_data.minimum"
       :max="source_data.maximum"
       v-model="value"
+      :pt="handleStyle"
     />
     <div class="sliderticks">
       <p v-for="(label, key) in source_data.labels" :key="key">
@@ -32,11 +33,41 @@ export default {
       value: undefined,
     };
   },
+  computed: {
+    handleStyle() {
+      const rootStyle = this.isValid ? {} : { class: "invalid" };
+      if (
+        this.value === undefined ||
+        this.value < this.source_data.minimum ||
+        this.value > this.source_data.maximum
+      ) {
+        return {
+          root: rootStyle,
+          handle: { class: "hidden" },
+          range: { class: "hidden" },
+        };
+      } else {
+        return { root: rootStyle, range: { class: "hidden" } };
+      }
+    },
+    isValid() {
+      if (
+        this.source_data.optional ||
+        (this.value >= this.source_data.minimum &&
+          this.value <= this.source_data.maximum)
+      ) {
+        return true;
+      } else {
+        return false;
+      }
+    },
+  },
+
   methods: {},
   watch: {
     value() {
       this.$emit("dataUpdate", {
-        isValid: true,
+        isValid: this.isValid,
         target: this.source_data.id,
         value: this.value,
       });
@@ -51,8 +82,19 @@ export default {
     },
   },
   mounted() {
-    // nitially select the value (updated in watcher)
-    this.value = this.source_data.select;
+    // initially select the value (updated in watcher)
+    if (
+      this.source_data.select >= this.source_data.minimum &&
+      this.source_data.select <= this.source_data.maximum
+    ) {
+      this.value = this.source_data.select;
+    } else {
+      this.$emit("dataUpdate", {
+        isValid: this.isValid,
+        target: this.source_data.id,
+        value: this.source_data.select,
+      });
+    }
   },
 };
 </script>
@@ -72,5 +114,8 @@ export default {
   height: 10px;
   line-height: 20px;
   margin: 0 0 20px 0;
+}
+.invalid {
+  border: 1px solid #e24c4c;
 }
 </style>

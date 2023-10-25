@@ -1,7 +1,7 @@
 <template>
-  <div class="grid w-full">
+  <div class="grid h-full col-12 questionnaire questionnaireArea">
     <QuestionnaireParagraph
-      class="col-12 questionnaire"
+      class="col-12"
       v-for="(paragraph, index) in usedCode.elements"
       :key="'paragraph_' + index"
       @dataUpdate="(event) => updateAndCheckData(event)"
@@ -186,6 +186,7 @@ export default {
 .questionnaire {
   margin-left: 20px;
   margin-right: 20px;
+  min-width: 600px;
 }
 </style>
 <style>

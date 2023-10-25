@@ -59,7 +59,7 @@ export default {
   },
   computed: {
     isValid() {
-      if (!this.source_data.required || (this.value && this.value != "")) {
+      if (this.source_data.optional || (this.value && this.value != "")) {
         return true;
       } else {
         return false;

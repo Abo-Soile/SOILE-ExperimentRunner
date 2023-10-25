@@ -1,12 +1,10 @@
 <template>
-  <a :href="href" target="_blank" :style="computedStyle" v-html="content"></a>
+  <a :href="href" target="_blank" :style="computedStyle">{{ content }}</a>
 </template>
 
 <script>
 import { mapState } from "pinia";
 import { useProjectStore } from "@/stores";
-
-import { getMarkDownContent } from "@/helpers/markDownHelper";
 
 export default {
   props: {
@@ -26,7 +24,7 @@ export default {
       );
     },
     content() {
-      return getMarkDownContent(this.data.text);
+      return this.data.text;
     },
     computedStyle() {
       return this.data.style
