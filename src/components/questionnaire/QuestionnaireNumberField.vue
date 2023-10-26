@@ -1,5 +1,5 @@
 <template>
-  <label class="questionnaire-label" :for="source_data.id">{{
+  <label class="questionnaire-label" :for="source_data.id" :style="style">{{
     source_data.label
   }}</label>
   <InputNumber
@@ -64,6 +64,11 @@ export default {
     },
     getComputedStyle() {
       return "width: " + (this.source_data.width + 2) + "em";
+    },
+    style() {
+      return Object.entries(this.source_data.style)
+        .map(([k, v]) => `${k}:${v}`)
+        .join(";");
     },
   },
   mounted() {},

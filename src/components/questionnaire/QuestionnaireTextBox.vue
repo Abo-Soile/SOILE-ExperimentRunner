@@ -1,8 +1,9 @@
 <template>
   <span class="align-items-start">
-    <label class="questionnaire-label" :for="source_data.id">{{
+    <label class="questionnaire-label" :for="source_data.id" :style="style">{{
       source_data.label
     }}</label>
+    <br v-if="source_data.linebreak" />
     <InputText
       class="mb-2 mr-sm-2 mb-sm-0"
       :step="source_data.increment"
@@ -12,7 +13,6 @@
       v-model="value"
     />
   </span>
-  <br v-if="source_data.linebreak" />
 </template>
 
 <script>
@@ -60,6 +60,11 @@ export default {
       } else {
         return false;
       }
+    },
+    style() {
+      return Object.entries(this.source_data.style)
+        .map(([k, v]) => `${k}:${v}`)
+        .join(";");
     },
     getComputedStyle() {
       return "width: " + (this.source_data.length + 4) + "em";

@@ -1,5 +1,5 @@
 <template>
-  <label :for="source_data.id">{{ source_data.label }}</label>
+  <label :style="style" :for="source_data.id">{{ source_data.label }}</label>
   <Dropdown
     class="ml-2"
     :class="isValid ? 'p-inputtext-sm' : 'p-invalid'"
@@ -55,6 +55,11 @@ export default {
     },
     getComputedStyle() {
       return "width: " + this.data.width + "em";
+    },
+    style() {
+      return Object.entries(this.source_data.style)
+        .map(([k, v]) => `${k}:${v}`)
+        .join(";");
     },
   },
   mounted() {},

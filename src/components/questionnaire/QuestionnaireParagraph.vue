@@ -29,6 +29,9 @@ export default {
       var groups = [];
       var currentgroup = [];
       for (const element of this.paragraph_data) {
+        console.log(element);
+        console.log(element.data.inline);
+
         if (element.data.inline) {
           currentgroup.push(element);
         } else {
@@ -37,9 +40,12 @@ export default {
           }
           // start with the new element
           currentgroup = [];
-          groups.push([element]);
+          currentgroup.push(element);
         }
+        console.log(currentgroup);
       }
+
+      // final item
       if (currentgroup.length > 0) {
         groups.push(currentgroup);
       }

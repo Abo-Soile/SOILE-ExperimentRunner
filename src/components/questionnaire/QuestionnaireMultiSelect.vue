@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!source_data.horizontal" class="grid">
+  <div v-if="!source_data.horizontal" :style="style" class="grid">
     <div
       v-for="option in options"
       :key="option.label"
@@ -15,7 +15,7 @@
       <label>{{ option.label }}</label>
     </div>
   </div>
-  <div v-else class="grid justify-content-between">
+  <div v-else class="grid justify-content-between" :style="style">
     <div v-for="option in source_data.options" class="ml-2 mr-2">
       <div class="flex flex-column justify-content-center">
         <label :for="option.id" class="w-full mb-1 justify-content-center">{{
@@ -72,6 +72,11 @@ export default {
         };
       }
       return optionValues;
+    },
+    style() {
+      return Object.entries(this.source_data.style)
+        .map(([k, v]) => `${k}:${v}`)
+        .join(";");
     },
   },
   methods: {

@@ -1,8 +1,12 @@
 <template>
   <div class="flex align-items-start">
-    <label class="questionnaire-label" v-if="hasLabel" :for="source_data.id">{{
-      source_data.label
-    }}</label>
+    <label
+      class="questionnaire-label"
+      v-if="hasLabel"
+      :for="source_data.id"
+      :style="style"
+      >{{ source_data.label }}</label
+    >
     <TextArea
       autoResize
       :class="isValid ? '' : 'p-invalid'"
@@ -74,6 +78,11 @@ export default {
     },
     getComputedStyle() {
       return "width: " + this.source_data.columns + "em";
+    },
+    style() {
+      return Object.entries(this.source_data.style)
+        .map(([k, v]) => `${k}:${v}`)
+        .join(";");
     },
   },
 };

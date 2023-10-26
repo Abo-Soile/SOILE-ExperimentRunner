@@ -1,5 +1,5 @@
 <template>
-  <div :style="source_data.style">
+  <div :style="style">
     <Slider
       type="range"
       :step="source_data.increment"
@@ -60,6 +60,11 @@ export default {
       } else {
         return false;
       }
+    },
+    style() {
+      return Object.entries(this.source_data.style)
+        .map(([k, v]) => `${k}:${v}`)
+        .join(";");
     },
   },
 

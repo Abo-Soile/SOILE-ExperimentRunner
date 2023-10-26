@@ -143,6 +143,8 @@ async function confirmWithDraw() {
 }
 
 function isSignedUp(data) {
-  return projectStore.signedUpStudies.includes(data.UUID);
+  return (
+    projectStore.signedUpStudies.includes(data.UUID) && authStore.isAuthed()
+  );
 }
 </script>

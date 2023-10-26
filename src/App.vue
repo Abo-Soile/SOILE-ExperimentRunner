@@ -19,7 +19,7 @@ authStore.refreshSession();
 projectStore.updateAvailableStudies();
 projectStore.fetchSignedUpStudies();
 const { latestError } = storeToRefs(errorStore);
-const { isRunningTask } = storeToRefs(userStore);
+const { isRunningTask } = storeToRefs(projectStore);
 function showErrorToast(severity, message) {
   console.log("Adding error Toast");
   console.log(severity);

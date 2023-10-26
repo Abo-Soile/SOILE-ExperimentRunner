@@ -1,17 +1,21 @@
 <template>
-  <div class="grid h-full col-12 questionnaire questionnaireArea">
-    <QuestionnaireParagraph
-      class="col-12"
-      v-for="(paragraph, index) in usedCode.elements"
-      :key="'paragraph_' + index"
-      @dataUpdate="(event) => updateAndCheckData(event)"
-      :paragraph_data="paragraph"
-    >
-    </QuestionnaireParagraph>
+  <div class="flex h-full justify-content-center overflow-x-auto">
+    <div class="flex flex-column questionnaire questionnaireArea">
+      <QuestionnaireParagraph
+        class="w-12 m-2"
+        v-for="(paragraph, index) in usedCode.elements"
+        :key="'paragraph_' + index"
+        @dataUpdate="(event) => updateAndCheckData(event)"
+        :paragraph_data="paragraph"
+      >
+      </QuestionnaireParagraph>
 
-    <Button :disabled="!canSubmit" @click="submitForm">{{
-      $t("submit")
-    }}</Button>
+      <div>
+        <Button :disabled="!canSubmit" @click="submitForm">{{
+          $t("submit")
+        }}</Button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -187,6 +191,7 @@ export default {
   margin-left: 20px;
   margin-right: 20px;
   min-width: 600px;
+  max-width: 1000px;
 }
 </style>
 <style>
