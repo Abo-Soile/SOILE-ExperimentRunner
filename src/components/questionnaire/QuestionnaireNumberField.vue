@@ -1,8 +1,9 @@
 <template>
-  <label class="questionnaire-label" :for="source_data.id" :style="style">{{
+  <label class="questionnaire-label" :for="source_data.id" :style="textStyle">{{
     source_data.label
   }}</label>
   <InputNumber
+    :style="widgetStyle"
     :class="isValid ? 'p-inputtext-sm' : 'p-invalid p-inputtext-sm'"
     :step="source_data.increment"
     mode="decimal"
@@ -15,6 +16,7 @@
 
 <script>
 import InputNumber from "primevue/inputnumber";
+import { getStyle } from "@/helpers/styleHelper.js";
 
 export default {
   props: {
@@ -65,10 +67,11 @@ export default {
     getComputedStyle() {
       return "width: " + (this.source_data.width + 2) + "em";
     },
-    style() {
-      return Object.entries(this.source_data.style)
-        .map(([k, v]) => `${k}:${v}`)
-        .join(";");
+    widgetStyle() {
+      return getStyle(this.source_data.widgetStyle);
+    },
+    textStyle() {
+      return getStyle(this.source_data.style);
     },
   },
   mounted() {},

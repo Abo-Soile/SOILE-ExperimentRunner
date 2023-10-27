@@ -1,16 +1,16 @@
 <template>
-  <span v-if="data.type == 'text'" :style="computedStyle">{{ content }}</span>
-  <h3 v-else-if="data.type == 'subtitle'" :style="computedStyle">
+  <span v-if="data.type == 'text'" :style="textStyle">{{ content }}</span>
+  <h3 v-else-if="data.type == 'subtitle'" :style="textStyle">
     {{ content }}
   </h3>
-  <h1 v-else-if="data.type == 'title'" :style="computedStyle">
+  <h1 v-else-if="data.type == 'title'" :style="textStyle">
     {{ content }}
   </h1>
   <a
     v-else-if="data.type == 'link'"
     :href="data.href"
     target="_blank"
-    :style="computedStyle"
+    :style="textStyle"
   >
     {{ content }}
   </a>
@@ -22,6 +22,7 @@
 
 <script>
 import QuestionnairePersonalLink from "./QuestionnairePersonalLink.vue";
+import { getStyle } from "@/helpers/styleHelper.js";
 
 export default {
   props: {
@@ -35,12 +36,8 @@ export default {
     content() {
       return this.data.text;
     },
-    computedStyle() {
-      return this.data.style
-        ? Object.entries(this.data.style)
-            .map(([k, v]) => `${k}:${v}`)
-            .join(";")
-        : ""; // empty if there is no style field.
+    textStyle() {
+      return getStyle(this.source_data.style);
     },
   },
 };

@@ -1,5 +1,5 @@
 <template>
-  <div :style="style">
+  <div :style="widgetStyle">
     <Slider
       class="h-1rem"
       type="range"
@@ -11,7 +11,11 @@
       :pt="handleStyle"
     />
     <div class="sliderticks">
-      <p v-for="(label, key) in source_data.labels" :key="key">
+      <p
+        :style="textStyle"
+        v-for="(label, key) in source_data.labels"
+        :key="key"
+      >
         {{ label }}
       </p>
     </div>
@@ -20,6 +24,7 @@
 
 <script>
 import Slider from "primevue/slider";
+import { getStyle } from "@/helpers/styleHelper.js";
 export default {
   props: {
     source_data: {
@@ -62,10 +67,11 @@ export default {
         return false;
       }
     },
-    style() {
-      return Object.entries(this.source_data.style)
-        .map(([k, v]) => `${k}:${v}`)
-        .join(";");
+    widgetStyle() {
+      return getStyle(this.source_data.widgetStyle);
+    },
+    textStyle() {
+      return getStyle(this.source_data.style);
     },
   },
   methods: {

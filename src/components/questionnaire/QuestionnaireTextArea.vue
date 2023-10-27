@@ -4,7 +4,7 @@
       class="questionnaire-label"
       v-if="hasLabel"
       :for="source_data.id"
-      :style="style"
+      :style="textStyle"
       >{{ source_data.label }}</label
     >
     <TextArea
@@ -20,6 +20,8 @@
 
 <script>
 import TextArea from "primevue/textarea";
+import { getStyle } from "@/helpers/styleHelper.js";
+
 export default {
   props: {
     source_data: {
@@ -78,10 +80,8 @@ export default {
     getComputedStyle() {
       return "width: " + this.source_data.columns + "em";
     },
-    style() {
-      return Object.entries(this.source_data.style)
-        .map(([k, v]) => `${k}:${v}`)
-        .join(";");
+    textStyle() {
+      return getStyle(this.source_data.style);
     },
   },
   mounted() {

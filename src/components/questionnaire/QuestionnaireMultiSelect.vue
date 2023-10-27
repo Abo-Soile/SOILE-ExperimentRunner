@@ -1,27 +1,32 @@
 <template>
-  <div v-if="!source_data.horizontal" :style="style" class="grid">
+  <div v-if="!source_data.horizontal" class="grid">
     <div
       v-for="option in options"
       :key="option.label"
       class="col-12 align-items-center"
     >
       <Checkbox
+        :style="widgetStyle"
         class="questionnaire-label"
         v-model="value"
         :inputId="option.label"
         name="category"
         :value="option.value"
       ></Checkbox>
-      <label>{{ option.label }}</label>
+      <label :style="textStyle">{{ option.label }}</label>
     </div>
   </div>
-  <div v-else class="grid justify-content-between" :style="style">
+  <div v-else class="grid justify-content-between">
     <div v-for="option in source_data.options" class="ml-2 mr-2">
       <div class="flex flex-column justify-content-center">
-        <label :for="option.id" class="w-full mb-1 justify-content-center">{{
-          option.label
-        }}</label>
+        <label
+          :style="textStyle"
+          :for="option.id"
+          class="w-full mb-1 justify-content-center"
+          >{{ option.label }}</label
+        >
         <Checkbox
+          :style="widgetStyle"
           class="w-full justify-content-center"
           v-model="value"
           :inputId="option.label"
@@ -35,6 +40,8 @@
 
 <script>
 import Checkbox from "primevue/checkbox";
+import { getStyle } from "@/helpers/styleHelper.js";
+
 export default {
   props: {
     source_data: {
@@ -73,10 +80,11 @@ export default {
       }
       return optionValues;
     },
-    style() {
-      return Object.entries(this.source_data.style)
-        .map(([k, v]) => `${k}:${v}`)
-        .join(";");
+    widgetStyle() {
+      return getStyle(this.source_data.widgetStyle);
+    },
+    textStyle() {
+      return getStyle(this.source_data.style);
     },
   },
   methods: {

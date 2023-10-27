@@ -1,10 +1,11 @@
 <template>
-  <a :href="href" target="_blank" :style="computedStyle">{{ content }}</a>
+  <a :href="href" target="_blank" :style="style">{{ content }}</a>
 </template>
 
 <script>
 import { mapState } from "pinia";
 import { useProjectStore } from "@/stores";
+import { getStyle } from "@/helpers/styleHelper.js";
 
 export default {
   props: {
@@ -26,12 +27,8 @@ export default {
     content() {
       return this.data.text;
     },
-    computedStyle() {
-      return this.data.style
-        ? Object.entries(this.data.style)
-            .map(([k, v]) => `${k}:${v}`)
-            .join(";")
-        : ""; // empty if there is no style field.
+    textStyle() {
+      return getStyle(this.source_data.style);
     },
   },
 };
