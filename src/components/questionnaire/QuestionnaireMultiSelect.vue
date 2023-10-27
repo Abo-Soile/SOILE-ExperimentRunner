@@ -83,8 +83,6 @@ export default {
     init(newData) {
       const values = [];
       for (const option of newData.options) {
-        console.log(option);
-
         if (option.checked) {
           values.push(option.id);
         }

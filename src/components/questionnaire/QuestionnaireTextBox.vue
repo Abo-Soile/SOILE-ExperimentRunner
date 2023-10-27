@@ -42,7 +42,6 @@ export default {
   },
   watch: {
     value() {
-      console.log("Emitting update");
       this.emitUpdate(this.isValid, this.source_data.id, this.value);
     },
     source_data(newValue) {
@@ -78,7 +77,9 @@ export default {
       );
     },
   },
-  mounted() {},
+  mounted() {
+    this.emitUpdate(this.isValid, this.source_data.id, this.value);
+  },
 };
 </script>
 

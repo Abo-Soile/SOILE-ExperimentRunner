@@ -1,6 +1,7 @@
 <template>
   <div :style="style">
     <Slider
+      class="h-1rem"
       type="range"
       :step="source_data.increment"
       :id="source_data.id"
@@ -67,10 +68,25 @@ export default {
         .join(";");
     },
   },
-
-  methods: {},
+  methods: {
+    roundStep() {
+      // this needs to be 0 otherwise we clicked at a plae that doesn't correspond to the
+      // increment
+      if (
+        (this.value - this.source_data.minimum) % this.source_data.increment !=
+        0
+      ) {
+        const newValue =
+          Math.round(
+            (this.value - this.source_data.minimum) / this.source_data.increment
+          ) * this.source_data.increment;
+        this.value = newValue;
+      }
+    },
+  },
   watch: {
     value() {
+      this.roundStep();
       this.$emit("dataUpdate", {
         isValid: this.isValid,
         target: this.source_data.id,

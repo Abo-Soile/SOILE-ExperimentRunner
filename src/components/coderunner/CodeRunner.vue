@@ -122,6 +122,7 @@ export default {
   },
   mounted() {
     console.log("codeRunner Mounted");
+    console.log(this.$route);
   },
   unmounted() {
     console.log("codeRunner unMounted");

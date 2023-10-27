@@ -1,19 +1,21 @@
 <template>
-  <div class="flex h-full justify-content-center overflow-x-auto">
-    <div class="flex flex-column questionnaire questionnaireArea">
-      <QuestionnaireParagraph
-        class="w-12 m-2"
-        v-for="(paragraph, index) in usedCode.elements"
-        :key="'paragraph_' + index"
-        @dataUpdate="(event) => updateAndCheckData(event)"
-        :paragraph_data="paragraph"
-      >
-      </QuestionnaireParagraph>
+  <div class="flex h-full overflow-x-auto">
+    <div class="flex questionnaire">
+      <div class="flex flex-column">
+        <QuestionnaireParagraph
+          class="w-12 m-2"
+          v-for="(paragraph, index) in usedCode.elements"
+          :key="'paragraph_' + index"
+          @dataUpdate="(event) => updateAndCheckData(event)"
+          :paragraph_data="paragraph"
+        >
+        </QuestionnaireParagraph>
 
-      <div>
-        <Button :disabled="!canSubmit" @click="submitForm">{{
-          $t("submit")
-        }}</Button>
+        <div>
+          <Button :disabled="!canSubmit" @click="submitForm">{{
+            $t("submit")
+          }}</Button>
+        </div>
       </div>
     </div>
   </div>
@@ -188,8 +190,8 @@ export default {
 
 <style scoped>
 .questionnaire {
-  margin-left: 20px;
-  margin-right: 20px;
+  margin-left: auto;
+  margin-right: auto;
   min-width: 600px;
   max-width: 1000px;
 }

@@ -38,7 +38,6 @@ export default {
   watch: {
     value() {
       if (this.isValid) {
-        console.log("Emitting update");
         this.$emit("dataUpdate", {
           isValid: true,
           target: this.source_data.id,
@@ -84,6 +83,13 @@ export default {
         .map(([k, v]) => `${k}:${v}`)
         .join(";");
     },
+  },
+  mounted() {
+    this.$emit("dataUpdate", {
+      isValid: this.isValid,
+      target: this.source_data.id,
+      value: this.value,
+    });
   },
 };
 </script>
