@@ -57,7 +57,6 @@ export default {
     checkScreenShot(route) {
       fetch(this.screenshot, { method: "HEAD" })
         .then((response) => {
-          console.log(response);
           if (response.ok) {
             this.hasScreenShot = true;
           } else {
