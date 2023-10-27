@@ -89,6 +89,9 @@ export default {
         persistentData: this.persistentData, // this is data that needs to be submitted and changed.
       };
     },
+    taskVersion() {
+      return this.$route.params.version;
+    },
   },
   methods: {
     async compileTask() {
@@ -159,7 +162,6 @@ export default {
             "/"
         );
         await nextTick();
-        this.loading = false;
       } else {
         this.$router.push("/pilot/");
       }
@@ -385,21 +387,28 @@ export default {
     await this.parseElement();
   },
   beforeRouteLeave(to, from, next) {
-    console.log(to);
-    console.log(from);
     if (from.name === "PilotTask" || from.name === "PilotView") {
       if (to.name != "PilotTask" && to.name != "PilotView") {
-        console.log("yay");
         this.languageStore.restoreDefault();
-        console.log("done");
       }
     }
-    console.log(next);
     next();
     return true;
   },
   async beforeRouteUpdate(to, from, next) {
+    if (
+      to.params.id === from.params.id &&
+      to.params.version === from.params.version
+    ) {
+      this.loading = false;
+    }
     next();
+  },
+  watch: {
+    taskVersion(newVal, oldVal) {
+      console.log("version changed");
+      this.loading = false;
+    },
   },
   setup() {
     const elementStore = useElementStore();
