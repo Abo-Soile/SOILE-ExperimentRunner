@@ -456,7 +456,14 @@ export const useElementStore = defineStore({
               this.elements[usedType][UUID][version].tag = response.data.tag;
             } catch (err) {
               // this needs to be caugth explicitly, as this indicates that the element has no Tag which can be ok.
+              console.log("Caught error");
               this.processAxiosError(err);
+              const errorStore = useErrorStore();
+              errorStore.raiseError(
+                "warn",
+                `No Tag found for ${this.elements[usedType][UUID][version].name}`
+              );
+              //errorStore.processAxiosError(err);
             }
           }
           return this.elements[usedType][UUID][version];
