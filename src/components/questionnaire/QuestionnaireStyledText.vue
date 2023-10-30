@@ -37,7 +37,7 @@ export default {
       return this.data.text;
     },
     textStyle() {
-      return getStyle(this.source_data.style);
+      return getStyle(this.data.style);
     },
   },
 };
