@@ -1,7 +1,8 @@
 <template>
-  <div v-if="currentEditedStudy">
-    <StudyEditor :editableStudies="editableStudies"></StudyEditor>
-  </div>
+  <StudyEditor
+    v-if="currentEditedStudy"
+    :editableStudies="editableStudies"
+  ></StudyEditor>
 </template>
 
 <script>

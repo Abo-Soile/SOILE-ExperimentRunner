@@ -183,6 +183,22 @@ export const useStudyStore = defineStore({
       }
     },
     /**
+     * Delete a given study.
+     * @param {*} studyID
+     */
+    async deleteStudy(studyID) {
+      try {
+        await axios.post(`/study/${studyID}/delete`);
+        this.clearData();
+        await this.updateResearchStudies();
+        await this.updateEditableStudies();
+        return true;
+      } catch (error) {
+        this.processAxiosError(error);
+        return false;
+      }
+    },
+    /**
      * Download results for the given Study ID and the given downloadID.
      * @param {*} studyID
      * @param {*} downloadID

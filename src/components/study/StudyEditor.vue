@@ -1,7 +1,7 @@
 <template>
   <h2>{{ currentEditedStudy?.name }}</h2>
-  <div class="grid studydisplay">
-    <div class="displaypart col-4 h-full">
+  <div class="grid h-full studydisplay">
+    <div class="displaypart col-4">
       <h3>Project Properties</h3>
       <ObjectAndVersionSelectorWithProps
         :dropDownClasses="isStudyEditable ? '' : 'p-disabled'"
@@ -20,33 +20,14 @@
         v-model:language="currentStudyLanguage"
         @update:valid="(event) => (dataValid = event)"
       />
-      <div class="grid">
-        <div
-          class="col-4 flex justify-content-start"
-          v-tooltip="
-            'You can only change the project if it is not active and there are no Participants yet'
-          "
-        >
-          <Button @click="updateStudy" :disabled="!isStudyEditable"
-            >Save Changes</Button
-          >
-        </div>
-        <div
-          class="col-4 flex justify-content-start"
-          v-tooltip="
-            'Pilot the study, without actually generating any data (only temporary data will be created)'
-          "
-        >
-          <Button @click="pilotStudy" :disabled="!isStudyEditable"
-            >Pilot</Button
-          >
-        </div>
-        <div class="col-4 flex justify-content-end">
-          <Button @click="showResetDialog = true" :disabled="isActive"
-            >Reset Study</Button
-          >
-        </div>
-      </div>
+      <StudyChanging
+        :isActive="isActive"
+        :isStudyEditable="isStudyEditable"
+        @resetStudy="resetStudy"
+        @deleteStudy="deleteStudy"
+        @updateStudy="updateStudy"
+        @pilotStudy="pilotStudy"
+      />
     </div>
     <div class="displaypart col-4">
       <StudyActivity
@@ -75,13 +56,6 @@
       ></StudyDataSelector>
     </div>
   </div>
-  <ConfirmDialog
-    v-if="showResetDialog"
-    v-model:isVisible="showResetDialog"
-    @confirm="resetStudy"
-    title="Reset Study"
-    message="This will irreversibly delete all participant data from this study! Are you sure you want to do this?"
-  ></ConfirmDialog>
 </template>
 
 <script>
@@ -99,6 +73,7 @@ import { reactive } from "vue";
 import { mapState } from "pinia";
 
 import { ConfirmDialog } from "@/components/dialogs";
+import StudyChanging from "./StudyChanging.vue";
 import StudyProperties from "./StudyProperties.vue";
 import StudyActivity from "./StudyActivity.vue";
 import CollaboratorManager from "./CollaboratorManager.vue";
@@ -116,6 +91,7 @@ export default {
     Button,
     CollaboratorManager,
     ConfirmDialog,
+    StudyChanging,
   },
   props: {
     editableStudies: {
@@ -133,6 +109,7 @@ export default {
       collaborators: [],
       showUserDialog: false,
       showResetDialog: false,
+      showDeleteDialog: false,
     };
   },
   setup(props) {
@@ -349,6 +326,13 @@ export default {
       await this.studyStore.resetStudy(this.currentEditedStudy.UUID);
       this.updateData();
       this.showResetDialog = false;
+    },
+    async deleteStudy() {
+      this.studyStore.deleteStudy(this.currentEditedStudy.UUID).then((done) => {
+        if (done) {
+          this.$router.push("/");
+        }
+      });
     },
   },
   mounted() {
