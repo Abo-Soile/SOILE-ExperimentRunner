@@ -443,10 +443,21 @@ export const useElementStore = defineStore({
           );
           this.elements[usedType][UUID][version] = response.data;
           if (!this.elements[usedType][UUID][version].tag) {
-            const response = await axios.get(
-              "/" + type.toLowerCase() + "/" + UUID + "/" + version + "/gettag"
-            );
-            this.elements[usedType][UUID][version].tag = response.data.tag;
+            try {
+              const response = await axios.get(
+                "/" +
+                  type.toLowerCase() +
+                  "/" +
+                  UUID +
+                  "/" +
+                  version +
+                  "/gettag"
+              );
+              this.elements[usedType][UUID][version].tag = response.data.tag;
+            } catch (err) {
+              // this needs to be caugth explicitly, as this indicates that the element has no Tag which can be ok.
+              this.processAxiosError(err);
+            }
           }
           return this.elements[usedType][UUID][version];
         }
