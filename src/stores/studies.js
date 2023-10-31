@@ -147,6 +147,17 @@ export const useStudyStore = defineStore({
       }
     },
     /**
+     * Update the stored study with up to date information.
+     */
+    updateStore(UUID) {
+      if (UUID === this.currentEditedStudy?.UUID) {
+        sessionStorage.setItem(
+          "soile:currentStudy",
+          JSON.stringify(this.currentEditedStudy)
+        );
+      }
+    },
+    /**
      * Update a given study.
      * @param {*} studyData
      */
@@ -156,12 +167,7 @@ export const useStudyStore = defineStore({
           `/study/${studyData.UUID}/update`,
           studyData
         );
-        if (studyData.UUID === this.currentEditedStudy?.UUID) {
-          sessionStorage.setItem(
-            "soile:currentStudy",
-            JSON.stringify(this.currentEditedStudy)
-          );
-        }
+        this.updateStore(studyData.UUID);
         return response.data;
       } catch (error) {
         console.error(error);
@@ -239,6 +245,7 @@ export const useStudyStore = defineStore({
     async activate(UUID) {
       try {
         const response = await axios.post("/study/" + UUID + "/start");
+        this.updateStore(UUID);
         return true;
       } catch (error) {
         this.processAxiosError(error);

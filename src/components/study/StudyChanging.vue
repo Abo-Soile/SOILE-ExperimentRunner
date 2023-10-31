@@ -37,14 +37,22 @@
   <ConfirmDialog
     v-if="showResetDialog"
     v-model:isVisible="showResetDialog"
-    @confirm="$emit('resetStudy')"
+    @confirm="
+      $emit('resetStudy');
+      showResetDialog = false;
+    "
+    @reject="showResetDialog = false"
     title="Reset Study"
     message="This will irreversibly delete all participant data from this study! Are you sure you want to do this?"
   ></ConfirmDialog>
   <ConfirmDialog
     v-if="showDeleteDialog"
     v-model:isVisible="showDeleteDialog"
-    @confirm="$emit('deleteStudy')"
+    @confirm="
+      $emit('deleteStudy');
+      showDeleteDialog = false;
+    "
+    @reject="showDeleteDialog = false"
     title="Reset Study"
     message="This will irreversibly delete this study and all particpant data? The underlying Projects will NOT be deleted."
   ></ConfirmDialog>

@@ -39,6 +39,12 @@ export const useProjectStore = defineStore({
     clearData() {
       this.signedUpStudies = [];
     },
+
+    async updateStudies() {
+      this.updateAvailableStudies();
+      this.fetchSignedUpStudies();
+    },
+
     /**
      * Fetch the studies the current user is signed up to.
      */

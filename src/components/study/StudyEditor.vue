@@ -68,6 +68,7 @@ import {
   useUserStore,
   useElementStore,
   usePilotStore,
+  useProjectStore,
 } from "@/stores";
 import { reactive } from "vue";
 import { mapState } from "pinia";
@@ -115,10 +116,11 @@ export default {
   setup(props) {
     console.log("Setting up StudyEditor");
     const studyStore = useStudyStore();
+    const projectStore = useProjectStore();
     const pilotStore = usePilotStore();
     const userStore = useUserStore();
     const elementStore = useElementStore();
-    return { elementStore, studyStore, userStore, pilotStore };
+    return { elementStore, studyStore, userStore, pilotStore, projectStore };
   },
   computed: {
     ...mapState(useStudyStore, ["currentEditedStudy"]),
@@ -236,10 +238,11 @@ export default {
     async currentStudyActive(newValue) {
       console.log("Activity of current project changed");
       if (newValue) {
-        this.studyStore.activate(this.currentEditedStudy.UUID);
+        await this.studyStore.activate(this.currentEditedStudy.UUID);
       } else {
-        this.studyStore.deactivate(this.currentEditedStudy.UUID);
+        await this.studyStore.deactivate(this.currentEditedStudy.UUID);
       }
+      this.projectStore.updateStudies();
     },
     currentEditedStudy(newValue) {
       this.updateData();
@@ -339,6 +342,7 @@ export default {
     if (this.currentEditedStudy && this.currentEditedStudy.UUID) {
       console.log("StudyEditor Mounted");
       this.updateData();
+      this.studyStore.selectCurrentStudy(this.currentEditedStudy.UUID);
     }
   },
 };
