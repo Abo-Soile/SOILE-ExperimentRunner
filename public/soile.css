@@ -141,9 +141,11 @@
 
 #display {
   max-width: 1440px;
+  min-width: 720px;
   position: relative;
   height: calc(100% - 2 * 25px);
   padding: 25px;
+  overflow-x: auto;
 }
 
 .pauseAnimation {
