@@ -130,18 +130,17 @@ function goFullScreen() {
   }
 }
 
-
 const button = document.getElementById("startButton");
 button.textContent = window.soileconfig.startText;
 const startArea = document.getElementById("startArea");
-button.addEventListener("click", function() {
-  startArea.classList.add("hiddenelem")
+button.addEventListener("click", function () {
+  startArea.classList.add("hiddenelem");
+  startArea.style.display = "none";
   goFullScreen();
   startSoile(currentCode);
-})
+});
 
-function setCode(code)
-{
+function setCode(code) {
   console.log("Setting code");
   currentCode = code;
 }
