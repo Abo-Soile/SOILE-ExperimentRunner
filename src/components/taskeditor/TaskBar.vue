@@ -21,7 +21,7 @@
           label="Code Style"
         />
       </div>
-      <div class="taskbarfield p-field">
+      <div v-if="selectedCodeType === 'psychopy'" class="taskbarfield p-field">
         <Dropdown
           v-model="selectedVersion"
           :options="codeTypeVersions"
@@ -79,10 +79,7 @@
     ></SelectNewVersionDialog>
     <ConfirmDialog
       v-if="showReloadConfirm"
-      @confirm="
-        reload;
-        showReloadConfirm = false;
-      "
+      @confirm="reload"
       @reject="showReloadConfirm = false"
       message="This will reset all changes made since the last save"
       v-model:isVisible="showReloadConfirm"
@@ -165,6 +162,11 @@ export default {
         if (this.currentType != newValue) {
           this.selectedVersion = null;
         }
+        if (newValue != "psychopy") {
+          this.selectedVersion = this.codeTypeOptions.find(
+            (x) => x.name === newValue
+          ).versions[0];
+        }
         this.currentType = newValue;
         this.$emit("update:codeType", newValue);
       },
@@ -216,7 +218,9 @@ export default {
 
     reload() {
       // Perform reload logic here
-      this.$emit("reload", this.taskVersion.version);
+      console.log("Reloading");
+      this.$emit("reload");
+      this.showReloadConfirm = false;
     },
     changeTaskVersion(updated) {
       if (updated) {

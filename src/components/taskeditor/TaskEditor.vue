@@ -360,13 +360,20 @@ export default {
         this.currentTags = [];
       }
     },
-    reload(version) {
+    /**
+     * Tell the editing store to reload this task, using the original version of the element
+     * To return to the last saved state.
+     */
+    reload() {
+      console.log("Reloading Task");
       this.$emit("changeTask", {
-        version: version,
+        version: this.target.version, // this is the last saved version. Currentobject might have a version from added files.
         UUID: this.currentObject.UUID,
       });
       this.updateFiles(this.target);
       this.updateFields(this.target);
+      console.log("Setting currentobject.code to " + this.target.code);
+      this.currentObject.code = this.target.code;
     },
     async updateTagsAndShowSave() {
       await this.updateCurrentTags();

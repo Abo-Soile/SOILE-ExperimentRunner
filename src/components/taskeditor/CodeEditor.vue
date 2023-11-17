@@ -84,6 +84,19 @@ export default {
       },
     },
   },
+  watch: {
+    inputText(newValue, oldValue) {
+      if (newValue != oldValue) {
+        this.editor.dispatch({
+          changes: {
+            from: 0,
+            to: this.editor.state.doc.length,
+            insert: newValue,
+          },
+        });
+      }
+    },
+  },
   mounted() {
     this.autoLanguage = EditorState.transactionExtender.of((tr) => {
       if (!tr.docChanged) return null;
