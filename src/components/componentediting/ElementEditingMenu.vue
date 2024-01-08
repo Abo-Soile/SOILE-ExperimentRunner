@@ -9,12 +9,19 @@
     @taskCreated="openTask"
   ></PsychoPyImporter>
   <ObjectSelectionDialog
-    v-if="showSelector"
+    v-if="showSelector && elementType !== 'Task'"
     v-model:visible="showSelector"
     :object-type="elementType"
     @selected="openTabForElement"
   >
   </ObjectSelectionDialog>
+  <TaskSelectionDialog
+    v-if="showSelector && elementType == 'Task'"
+    v-model:visible="showSelector"
+    :object-type="elementType"
+    @selected="openTabForElement"
+  >
+  </TaskSelectionDialog>
   <TaskUploader
     ref="uploadComponent"
     @elementSelected="openTask"
@@ -26,6 +33,7 @@ import PanelMenu from "primevue/panelmenu";
 
 import PsychoPyImporter from "@/components/psychopy/PsychoPyImporter.vue";
 import TaskUploader from "@/components/taskeditor/TaskUploader.vue";
+import TaskSelectionDialog from "@/components/taskeditor/TaskSelectionDialog.vue";
 import ObjectSelectionDialog from "@/components/dialogs/ObjectSelectionDialog.vue";
 import { useEditorStore } from "@/stores";
 
