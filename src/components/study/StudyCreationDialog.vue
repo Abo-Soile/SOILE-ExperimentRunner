@@ -22,6 +22,7 @@
       v-model:descriptionLong="descriptionLong"
       v-model:shortCut="shortCut"
       v-model:private="private"
+      v-model:language="language"
       @update:valid="(event) => (dataValid = event)"
     ></StudyProperties>
     <template #footer>
@@ -66,6 +67,7 @@ export default {
       shortCut: "",
       private: false,
       dataValid: false,
+      language: "",
     };
   },
   methods: {

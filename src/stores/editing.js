@@ -1,6 +1,5 @@
 import { defineStore } from "pinia";
 
-import axios from "axios";
 import { useErrorStore } from "./errors";
 import { useElementStore } from "./elements";
 import { useBaklava } from "@baklavajs/renderer-vue";
@@ -17,6 +16,11 @@ const defaultData = {
       language: undefined,
       version: undefined,
     },
+    description: undefined,
+    keywords: undefined,
+    author: undefined,
+    created: undefined,
+    type: undefined,
   },
   experiment: {
     name: undefined,
@@ -56,16 +60,24 @@ export const useEditorStore = defineStore({
       this.tasks = { active: 0, elements: [] };
       this.activeElement = "";
     },
-    createElement(type) {
+    getDefaultDataForType(type) {
+      return reactive(
+        JSON.parse(JSON.stringify(defaultData[type.toLowerCase()]))
+      );
+    },
+    createElement(type, data) {
+      console.log(data);
+      var elementData = this.getDefaultDataForType(type.toLowerCase());
+      var name = this.uniqueID(type, existentNames);
+      if (data) {
+        console.log(data);
+        elementData = data;
+        name = data.name;
+      }
       const store = this.getStoreForType(type);
       const existentNames = store.elements.map((x) => x.name);
-      const name = this.uniqueID(type, existentNames);
-      this.createElementForType(
-        type,
-        name,
-        reactive(JSON.parse(JSON.stringify(defaultData[type.toLowerCase()]))),
-        true
-      );
+
+      this.createElementForType(type, name, elementData, true);
       store.active = store.elements.length - 1;
       this.activeElement = type;
     },

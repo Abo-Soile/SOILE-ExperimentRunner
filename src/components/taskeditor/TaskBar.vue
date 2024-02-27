@@ -40,6 +40,14 @@
         @click="save"
       ></Button>
     </div>
+    <div class="taskbarfield">
+      <Button
+        class="taskbarfield"
+        label="Edit Properties"
+        icon="pi pi-pencil"
+        @click="$emit('editProperties')"
+      ></Button>
+    </div>
     <div v-if="!newTask" class="taskbarfield">
       <Button
         class="taskbarfield"
@@ -47,16 +55,12 @@
         icon="pi pi-refresh"
         @click="showReloadConfirm = true"
       ></Button>
-    </div>
-    <div v-if="!newTask" class="taskbarfield">
       <Button
         class="taskbarfield"
         label="Select Version"
-        icon="pi pi-pencil"
+        icon="pi pi-server"
         @click="showChangeVersion = true"
       ></Button>
-    </div>
-    <div v-if="!newTask" class="taskbarfield">
       <Button
         class="taskbarfield"
         label="Manage Versions"
@@ -231,7 +235,7 @@ export default {
       this.$emit("download");
     },
   },
-  emits: ["reload", "changeTaskVersion", "update:valid"],
+  emits: ["reload", "changeTaskVersion", "update:valid", "editProperties"],
   components: {
     Dropdown,
     Button,

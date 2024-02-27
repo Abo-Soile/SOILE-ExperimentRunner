@@ -16,6 +16,7 @@
         "
         @reload="reload"
         @download="download"
+        @editProperties="showProperties = true"
       >
       </TaskBar>
     </div>
@@ -73,6 +74,12 @@
     "
     @confirm="closeFile(currentClose)"
   />
+  <TaskPropertyDialog
+    v-if="showProperties"
+    :initialValues="currentObject"
+    v-model:visible="showProperties"
+    @submit="updateProperties"
+  ></TaskPropertyDialog>
 </template>
 
 <script>
@@ -82,6 +89,7 @@ import FileBrowser from "@/components/utils/filebrowser/FileBrowser.vue";
 import FilePreview from "@/components/utils/filebrowser/FilePreview.vue";
 import CodeEditor from "./CodeEditor.vue";
 import CodePreview from "./CodePreview.vue";
+import TaskPropertyDialog from "./TaskPropertyDialog.vue";
 import TaskBar from "./TaskBar.vue";
 import DataEditor from "./DataEditor.vue";
 import { ElementSaveDialog, ConfirmDialog } from "@/components/dialogs";
@@ -104,6 +112,7 @@ export default {
       confirmClose: false,
       currentClose: undefined,
       activeFile: 0,
+      showProperties: false,
     };
   },
   setup(props) {
@@ -131,6 +140,7 @@ export default {
     TaskBar,
     DataEditor,
     ConfirmDialog,
+    TaskPropertyDialog,
   },
   props: {
     target: {
@@ -175,6 +185,13 @@ export default {
     },
   },
   methods: {
+    updateProperties(data) {
+      console.log(data);
+      Object.entries(data).forEach(([key, value]) => {
+        this.currentObject[key] = value;
+      });
+      this.showProperties = false;
+    },
     download() {
       this.elementStore.downloadTask(
         this.currentObject.UUID,
@@ -273,8 +290,6 @@ export default {
           });
         }
       });
-      //this.currentObject = reactive(JSON.parse(JSON.stringify(newValue)));
-      //this.currentObject.codeType = reactive(this.currentObject.codeType);
       console.log("Forcing update");
       console.log(this.currentObject);
       this.$forceUpdate();

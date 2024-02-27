@@ -16,6 +16,7 @@ export const useElementStore = defineStore({
     codeOptions: [],
     elements: { task: {}, project: {}, experiment: {} },
     outputOptions: new Map(),
+    keywords: [],
   }),
   actions: {
     clearData() {
@@ -38,9 +39,22 @@ export const useElementStore = defineStore({
       const errorStore = useErrorStore();
       errorStore.processAxiosError(err);
     },
-
     /**
-     * Update the available options for the given type.
+     * Get the keywords available in the current tasks
+     */
+    async getKeywords() {
+      await this.updateAvailableTasks(false);
+      if (this.keywords.length == 0) {
+        const newKeywords = [];
+        for (const task of this.availableTasks) {
+          newKeywords.push(...task.keywords);
+        }
+        this.keywords = Array.from(new Set(newKeywords));
+      }
+      return this.keywords;
+    },
+    /**
+     * Get the options for the specified type
      * @param {String} type  One of "Task", "Experiment" or "Project"
      * @param {Boolean} full whether to obtain ALL elements available (also unaccessible, for checking purposes or not).
      */
@@ -49,10 +63,13 @@ export const useElementStore = defineStore({
       switch (usedType) {
         case "task":
           await this.updateAvailableTasks(full);
+          return full ? this.existingTasks : this.availableTasks;
         case "project":
           await this.updateAvailableProjects(full);
+          return full ? this.existingProjects : this.availableProjects;
         case "experiment":
           await this.updateAvailableExperiments(full);
+          return full ? this.existingExperiments : this.availableExperiments;
       }
     },
 
@@ -376,6 +393,54 @@ export const useElementStore = defineStore({
         console.log("Error" + e);
         this.processAxiosError(e);
         return null;
+      }
+    },
+    /**
+     * Get the options for  agiven type
+     * @param {*} type The type to check
+     * @param {*} full Wheter to only get the available options or the full options
+     *
+     */
+    async retrieveOptionsforType(type, full) {
+      // refresh if empty, otherwise we consider this ok.
+      if (this.getOptionsforType(type, full) == 0) {
+        this.updateAvailableOptions(type, full);
+      }
+      return this.getOptionsforType(type, full);
+    },
+    /**
+     *
+     * @param {*} type The type to check
+     * @param {*} full Wheter to only get the available options or the full options
+     *
+     */
+    async getOptionsforType(type, full) {
+      const lc_type = type.toLowerCase();
+      var options = undefined;
+      switch (lc_type) {
+        case "task":
+          return full ? this.existingTasks : this.availableTasks;
+          break;
+        case "project":
+          return full ? this.existingProjects : this.availableProjects;
+          break;
+        case "experiment":
+          return full ? this.existingExperiments : this.availableExperiments;
+          break;
+      }
+    },
+
+    /**
+     * Check whether a name is acceptable for a given type
+     * @param {*} name The name to check
+     * @param {*} type The type to check
+     */
+    async checkNameForType(name, type) {
+      const lc_type = type.toLowerCase();
+      switch (lc_type) {
+        case "task":
+        case "project":
+        case "experiment":
       }
     },
     /**

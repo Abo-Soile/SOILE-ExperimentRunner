@@ -252,8 +252,7 @@ async function updateElement(data, index, type) {
 }
 
 /**
- * Change the element at index i to reflect the UUID and version indicated in the
- * newObjectInfo parameter
+ * Update element Properties
  * @param {{UUID : string, version: string}} newObjectInfo the object info.
  * @param {number} index the index of the changed object
  * @param {string} type one of 'task', 'experiment' and 'project'

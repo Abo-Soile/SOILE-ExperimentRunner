@@ -26,6 +26,12 @@
     ref="uploadComponent"
     @elementSelected="openTask"
   ></TaskUploader>
+  <TaskCreationDialog
+    v-if="showCreationDialog"
+    v-model:visible="showCreationDialog"
+    @submit="createTask"
+    @cancel="showCreationDialog = false"
+  ></TaskCreationDialog>
 </template>
 
 <script setup>
@@ -34,12 +40,14 @@ import PanelMenu from "primevue/panelmenu";
 import PsychoPyImporter from "@/components/psychopy/PsychoPyImporter.vue";
 import TaskUploader from "@/components/taskeditor/TaskUploader.vue";
 import TaskSelectionDialog from "@/components/taskeditor/TaskSelectionDialog.vue";
+import TaskCreationDialog from "@/components/taskeditor/TaskPropertyDialog.vue";
 import ObjectSelectionDialog from "@/components/dialogs/ObjectSelectionDialog.vue";
 import { useEditorStore } from "@/stores";
 
 import { ref, computed, reactive } from "vue";
 
 const showSelector = ref(false);
+const showCreationDialog = ref(false);
 const showPsychoPyDialog = ref(false);
 const elementType = ref("");
 const uploadComponent = ref(null);
@@ -52,6 +60,22 @@ const editorStore = useEditorStore();
 function createElement(type) {
   console.log("Creating element of type: " + type);
   editorStore.createElement(type);
+}
+
+/**
+ * Create a Task
+ * @param {*} taskData
+ */
+function createTask(taskData) {
+  const data = editorStore.getDefaultDataForType("task");
+  console.log(taskData);
+  // TODO: Update data with taskData.
+  Object.entries(taskData).forEach(([key, value]) => {
+    data[key] = value;
+  });
+  console.log(data);
+  editorStore.createElement("task", data);
+  showCreationDialog.value = false;
 }
 
 /**
@@ -135,7 +159,7 @@ const items = computed(() => [
         icon: "pi pi-fw pi-plus",
         command: () => {
           console.log("Trying to create Task");
-          editorStore.createElement("Task");
+          showCreationDialog.value = true;
         },
       },
       {

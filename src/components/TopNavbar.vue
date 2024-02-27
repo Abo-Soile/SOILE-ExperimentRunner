@@ -45,6 +45,7 @@ import Login from "./LoginForm.vue";
 import StudyCreationDialog from "@/components/study/StudyCreationDialog.vue";
 import StudyLoadDialog from "@/components/study/StudyLoadDialog.vue";
 import HelpPage from "@/components/helppages/HelpPage.vue";
+import { router } from "@/helpers/router.js";
 
 export default {
   name: "TopNavbar",
@@ -81,29 +82,37 @@ export default {
       return {
         label: "Project Editing",
         icon: "pi pi-wrench",
-        to: "/editing",
+        command: () => {
+          router.push("/editing");
+        },
       };
     },
     studyMenu() {
       return {
         label: "Study Management",
         icon: "pi pi-file-edit",
-        to:
+        command:
           !this.isInManagement && this.studyStore.editingActive()
-            ? "/management"
+            ? () => {
+                router.push("/management");
+              }
             : null,
         items: [
           {
             label: "Create Study",
             icon: "pi pi-plus",
-            command: () => (this.creationDialogVisible = true),
-            to: "/management",
+            command: () => {
+              router.push("/management");
+              this.creationDialogVisible = true;
+            },
           },
           {
             label: "Load Study",
             icon: "pi pi-wrench",
-            command: () => (this.loadDialogVisible = true),
-            to: "/management",
+            command: () => {
+              this.loadDialogVisible = true;
+              router.push("/management");
+            },
           },
         ],
       };
@@ -115,7 +124,9 @@ export default {
           items.push({
             label: "Profile",
             icon: "pi pi-user",
-            to: "/profile",
+            command: () => {
+              this.$router.push("/profile");
+            },
           });
         }
         items.push({
@@ -130,15 +141,21 @@ export default {
       return {
         label: this.isLoggedIn ? "User" : this.$t("login"),
         icon: this.isLoggedIn ? "pi pi-user" : "pi pi-sign-in",
-        items: items,
-        to: this.isLoggedIn ? undefined : "/login",
+        items: this.isLoggedIn ? items : null,
+        command: !this.isLoggedIn
+          ? () => {
+              this.$router.push("/login");
+            }
+          : null,
       };
     },
     userManagementMenu() {
       return {
         label: "User Management",
         icon: "pi pi-user-edit",
-        to: "/usermanagement",
+        command: () => {
+          this.$router.push("/usermanagement");
+        },
       };
     },
 

@@ -29,7 +29,7 @@
     @createUser="
       (userDetails) =>
         userStore
-          .createUser(userData, false)
+          .createUser(userDetails, true)
           .then((res) => userStore.fetchUserData())
     "
     @updateUsers="userStore.fetchUsers()"

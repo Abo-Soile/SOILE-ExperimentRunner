@@ -54,10 +54,12 @@ export const useUserStore = defineStore({
     /**
      * Create a User
      * @param {*} userdata the data for the user
+     * @param {*} adminCreate Whether to create the user as an admin
      */
-    async createUser(userdata) {
+    async createUser(userdata, adminCreate) {
       try {
-        if (register) {
+        console.log(userdata);
+        if (adminCreate) {
           await axios.post("/user/create", userdata);
           return false;
         } else {

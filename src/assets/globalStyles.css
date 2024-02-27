@@ -23,3 +23,7 @@
 .disabled .baklava-button:hover {
   background-color: var(--baklava-control-color-background);
 }
+
+.textbutton:hover {
+  cursor: pointer;
+}

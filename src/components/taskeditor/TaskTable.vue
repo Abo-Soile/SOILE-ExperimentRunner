@@ -7,7 +7,14 @@
     dataKey="name"
     filterDisplay="row"
     :loading="loading"
-    :globalFilterFields="['name', 'description', 'author', 'type', 'language']"
+    :globalFilterFields="[
+      'keywords',
+      'name',
+      'description',
+      'author',
+      'type',
+      'language',
+    ]"
     v-model:selection="selectedTask"
     selectionMode="single"
   >
@@ -146,7 +153,7 @@ const typeOptions = computed(() =>
 );
 
 const languageOptions = computed(() =>
-  Array.from(new Set(elementStore.availableTasks.map((x: any) => x.type)))
+  Array.from(new Set(elementStore.availableTasks.map((x: any) => x.language)))
 );
 
 const authorOptions = computed(() =>
