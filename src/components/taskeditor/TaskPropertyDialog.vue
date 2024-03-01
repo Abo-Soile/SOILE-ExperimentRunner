@@ -95,7 +95,7 @@
       <Button
         label="Cancel"
         icon="pi pi-times"
-        @click="$emit('cancel', false)"
+        @click="dialogVisible = false"
         text
       />
       <Button
