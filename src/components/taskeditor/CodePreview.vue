@@ -26,7 +26,12 @@
         Persistent: <JsonViewer :value="persistent"></JsonViewer>
       </div>
       <div v-if="uploadedFiles.length > 0" class="uploadedFiles">
-        Uploaded Files: <JsonViewer :value="uploadedFiles"></JsonViewer>
+        Uploaded Files:
+        <FileViewerDialog
+          v-for="file in uploadedFiles"
+          :fileName="file.name"
+          :file="file.file"
+        ></FileViewerDialog>
       </div>
     </div>
   </div>
@@ -38,12 +43,15 @@ import SoileQuestionnaire from "@/components/questionnaire/SoileQuestionnaire.vu
 import SoileExpRunner from "@/components/experimentlang/SoileExpRunner.vue";
 import PsychoJsRunner from "@/components/psychopy/PsychoJsRunner.vue";
 import JsRunner from "@/components/jsrunner/JsRunner.vue";
-import { useErrorStore } from "@/stores";
 import CodeRunner from "@/components/coderunner/CodeRunner.vue";
-import { mapState } from "pinia";
-import axios from "axios";
+import FileViewerDialog from "@/components/utils/FileViewerDialog.vue";
 import Button from "primevue/button";
 import JsonViewer from "vue-json-viewer";
+
+import { useErrorStore } from "@/stores";
+import { mapState } from "pinia";
+
+import axios from "axios";
 
 export default {
   name: "CodePreview",
@@ -55,6 +63,7 @@ export default {
     JsRunner,
     JsonViewer,
     CodeRunner,
+    FileViewerDialog,
   },
   props: {
     sourceCode: {
@@ -171,8 +180,10 @@ export default {
     },
     handleFileUpload(event) {
       // we ignore what exactly it is ad just give back a temporary id;
-      event.idCallBack("temporary");
-      this.uploadedFiles.push(event.filename);
+      console.log(event);
+      const fileID = "temporary_" + this.uploadedFiles.length;
+      event.idCallBack(fileID);
+      this.uploadedFiles.push({ name: fileID, file: event.file });
     },
     handleError(error) {
       this.errorStore.raiseError("error", error);

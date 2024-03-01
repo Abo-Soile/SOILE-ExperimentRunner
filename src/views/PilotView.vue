@@ -26,7 +26,14 @@
         <h3>Persistent Data</h3>
         <JsonViewer :value="persistentData"></JsonViewer>
       </div>
-
+      <div v-if="uploadedFiles.length > 0" class="uploadedFiles">
+        Uploaded Files:
+        <FileViewerDialog
+          v-for="file in uploadedFiles"
+          :fileName="file.name"
+          :file="file.file"
+        ></FileViewerDialog>
+      </div>
       <div v-if="randomAssignments.length > 0">
         <h3>Random Assigments</h3>
         <JsonViewer :value="randomAssignments"></JsonViewer>
@@ -41,19 +48,25 @@
  * walk through process of a participant.
  */
 import CodeRunner from "@/components/coderunner/CodeRunner.vue";
-import { useElementStore, usePilotStore, useLanguageStore } from "@/stores";
-import axios from "axios";
 import JsonViewer from "vue-json-viewer";
-
+import FileViewerDialog from "@/components/utils/FileViewerDialog.vue";
 import Button from "primevue/button";
 import ProgressSpinner from "primevue/progressspinner";
 
+import { useElementStore, usePilotStore, useLanguageStore } from "@/stores";
 import { storeToRefs } from "pinia";
 import { nextTick } from "vue";
+import axios from "axios";
 
 export default {
   name: "PilotView",
-  components: { CodeRunner, JsonViewer, Button, ProgressSpinner },
+  components: {
+    FileViewerDialog,
+    CodeRunner,
+    JsonViewer,
+    Button,
+    ProgressSpinner,
+  },
   data() {
     return {
       persistentData: {},
@@ -72,6 +85,7 @@ export default {
       results: [],
       randomAssignments: [],
       randomization: {},
+      uploadedFiles: [],
     };
   },
   computed: {
@@ -259,7 +273,9 @@ export default {
      */
     handleFileUpload(event) {
       // we ignore what exactly it is ad just give back a temporary id;
-      event.idCallBack("temporary");
+      const fileID = "temporary_" + this.uploadedFiles.length;
+      event.idCallBack(fileID);
+      this.uploadedFiles.push({ name: fileID, file: event.file });
     },
     /**
      * Submit results. This finishes a task, changes to the loading view and performs updates.

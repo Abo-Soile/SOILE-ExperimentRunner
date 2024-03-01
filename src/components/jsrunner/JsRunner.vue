@@ -63,7 +63,9 @@ export default {
       }
     },
     async submitFile(fileName, fileFormat, file) {
-      this.emit("handleUpload", { fileName, fileFormat, file });
+      console.log("Submitting file " + fileName + " with format " + fileFormat);
+      console.log(file);
+      this.$emit("handleUpload", { fileName, fileFormat, file });
     },
     /**
      * Build the persisten Object used for the task

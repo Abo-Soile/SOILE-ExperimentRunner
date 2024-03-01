@@ -25,6 +25,7 @@ export default {
       editor: null,
       autoLanguage: null,
       languageConf: new Compartment(),
+      localtext: "",
     };
   },
   props: {
@@ -85,15 +86,9 @@ export default {
     },
   },
   watch: {
-    inputText(newValue, oldValue) {
+    localtext(newValue, oldValue) {
       if (newValue != oldValue) {
-        this.editor.dispatch({
-          changes: {
-            from: 0,
-            to: this.editor.state.doc.length,
-            insert: newValue,
-          },
-        });
+        this.$emit("update:inputText", newValue);
       }
     },
   },
@@ -110,11 +105,12 @@ export default {
         this.text = this.editor.state.doc.toString();
       }
     });
+    this.localtext = this.inputText;
     // we only set a language if we can properly detect it.
     // TODO: try to implement language support for elang and qlang
     if (this.language != null) {
       this.editor = new EditorView({
-        doc: this.text,
+        doc: this.localtext,
         extensions: [
           EditorView.lineWrapping,
           basicSetup,
@@ -126,7 +122,7 @@ export default {
       });
     } else {
       this.editor = new EditorView({
-        doc: this.text,
+        doc: this.localtext,
         extensions: [basicSetup, listener, EditorView.lineWrapping],
         parent: this.$refs.editorContainer,
       });

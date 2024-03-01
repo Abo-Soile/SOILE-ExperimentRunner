@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full h-full" v-if="!errored">
+  <div class="w-full h-full" v-if="!errored" v-show="jobRunning">
     <SoileExpRunner
       class="h-full w-full"
       v-if="
@@ -50,6 +50,13 @@
       @handleUpload="(event) => handleUpload(event)"
     ></JsRunner>
   </div>
+  <div
+    class="flex flex-column w-full h-full align-items-center justify-content-center"
+    v-if="!jobRunning"
+  >
+    <div>Uploading Files</div>
+    <ProgressSpinner></ProgressSpinner>
+  </div>
 </template>
 
 <script>
@@ -57,6 +64,7 @@ import SoileQuestionnaire from "@/components/questionnaire/SoileQuestionnaire.vu
 import SoileExpRunner from "@/components/experimentlang/SoileExpRunner.vue";
 import PsychoJsRunner from "@/components/psychopy/PsychoJsRunner.vue";
 import JsRunner from "@/components/jsrunner/JsRunner.vue";
+import ProgressSpinner from "primevue/progressspinner";
 
 /**
  * This component Should encapsulate all possibilities that tasks can have
@@ -69,6 +77,7 @@ export default {
     SoileExpRunner,
     PsychoJsRunner,
     JsRunner,
+    ProgressSpinner,
   },
   props: {
     currentTaskSettings: {
@@ -83,6 +92,8 @@ export default {
     return {
       files: [],
       errored: false,
+      uploadingFiles: [],
+      jobRunning: true,
     };
   },
   emits: ["submitResults", "handleUpload", "handleError"],
@@ -98,18 +109,30 @@ export default {
      * @param {*} results
      */
     async submitResults(results) {
+      // this has to wait, until all uploads are done.
+      this.jobRunning = false;
+      while (this.isUploading) {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
       results.resultData.fileData = this.files;
       this.$emit("submitResults", results);
     },
     addFile(filename, fileformat, targetid) {
       this.files.push({ filename, fileformat, targetid });
+      this.uploadingFiles.splice(this.uploadingFiles.indexOf(filename));
     },
     // The event contains, the file,the fileformat and  the filename
     handleUpload(event) {
+      console.log(event);
+      this.uploadingFiles.push(event.fileName);
       this.$emit("handleUpload", {
         file: event.file,
-        fileName: event.filename,
-        idCallBack: (id) => addFile(event.filename, event.fileformat, id),
+        fileName: event.fileName,
+        idCallBack: (id) => {
+          console.log(this);
+          console.log(event);
+          this.addFile(event.fileName, event.fileFormat, id);
+        },
         errorCallBack: (error) => {
           this.errored = true;
           this.$emit("handleError", error);
@@ -120,9 +143,15 @@ export default {
       this.$emit("handleError", error);
     },
   },
+  computed: {
+    isUploading() {
+      return this.uploadingFiles.length > 0;
+    },
+  },
   mounted() {
     console.log("codeRunner Mounted");
     console.log(this.$route);
+    this.jobRunning = true;
   },
   unmounted() {
     console.log("codeRunner unMounted");
