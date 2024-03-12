@@ -208,10 +208,11 @@ async function addTask(
     defaultY = defaultY + 100;
   }
   t.setElement(task.UUID, task.name);
-  // need to add the node before we can set the ElementVersion, since
-  // setting the element version does retrieve some data potentially that requires the node to be in a
-  graph.addNode(t);
   await t.setElementVersion(task.version, task.tag);
+
+  // need to add the node before we can set the ElementVersion, since
+  // setting the element version does retrieve some data potentially that requires the node to be in a graph
+  graph.addNode(t);
   t.title = task.instanceID;
   if (task.instanceID === start) {
     graphStore.setStartNode(t);
