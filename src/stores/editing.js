@@ -68,15 +68,14 @@ export const useEditorStore = defineStore({
     createElement(type, data) {
       console.log(data);
       var elementData = this.getDefaultDataForType(type.toLowerCase());
+      const existentNames = store.elements.map((x) => x.name);
       var name = this.uniqueID(type, existentNames);
       if (data) {
         console.log(data);
         elementData = data;
         name = data.name;
       }
-      const store = this.getStoreForType(type);
-      const existentNames = store.elements.map((x) => x.name);
-
+      const store = this.getStoreForType(type);      
       this.createElementForType(type, name, elementData, true);
       store.active = store.elements.length - 1;
       this.activeElement = type;
