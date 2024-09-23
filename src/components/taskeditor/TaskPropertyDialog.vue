@@ -2,7 +2,7 @@
   <Dialog
     v-model:visible="dialogVisible"
     modal
-    :header="'Create new Task'"
+    :header="existing ? 'Edit Task Properties' : 'Create new Task'"
     :style="{ width: '80vw' }"
   >
     <div class="flex w-full">
@@ -50,25 +50,41 @@
             class="col-9"
           ></DropDown>
         </div>
-        <div class="flex w-full m-3">
-          <label for="codetype" class="col-2 font-bold">Keywords:</label>
-          <Keywords
-            class="w-9"
-            :valid="keywordsOk"
-            ref="keywords_selector"
-            placeholder="Type or select keywords"
-            :addedKeywords="keywords"
-            @addKeyword="addKeyword"
-            @removeKeyword="removeKeyword"
-          ></Keywords>
+        <div class="flex w-full m-3 flex-column">
+          <div class="flex w-full">
+            <label for="codetype" class="col-2 font-bold">Keywords:</label>
+            <Keywords
+              class="w-9"
+              :valid="keywordsOk"
+              ref="keywords_selector"
+              placeholder="Type or select keywords"
+              :addedKeywords="keywords"
+              @addKeyword="addKeyword"
+              @removeKeyword="removeKeyword"
+            ></Keywords>
+          </div>
+          <div class="flex w-full">
+            <div class="col-2"></div>
+            <div v-if="!keywordsOk" class="text-red-500 text-sm">
+              At least 2 keywords are required
+            </div>
+          </div>
         </div>
-        <div class="flex w-full m-3">
-          <label class="col-2 font-bold">Description:</label>
-          <TextArea
-            class="col-9"
-            :class="descriptionOk ? '' : 'p-invalid'"
-            v-model="description"
-          ></TextArea>
+        <div class="flex w-full m-3 flex-column">
+          <div class="flex w-full">
+            <label class="col-2 font-bold">Description:</label>
+            <TextArea
+              class="col-9"
+              :class="descriptionOk ? '' : 'p-invalid'"
+              v-model="description"
+            ></TextArea>
+          </div>
+          <div class="flex w-full">
+            <div class="col-2"></div>
+            <div v-if="!descriptionOk" class="text-red-500 text-sm">
+              Description must be at least 20 characters long
+            </div>
+          </div>
         </div>
 
         <div v-if="existing" class="flex w-full m-3">
