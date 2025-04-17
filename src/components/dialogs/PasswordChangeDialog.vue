@@ -89,8 +89,8 @@ export default {
   methods: {
     updatePassword() {
       if (
-        !(this.settings.confirmPassword === this.settings.password) ||
-        this.settings.password.length < 10
+        !(this.confirmPassword === this.password) ||
+        this.password.length < 10
       ) {
         this.errorStore.raiseError(
           "error",
@@ -98,6 +98,7 @@ export default {
         );
       } else {
         this.$emit("updatePassword", this.password);
+        this.$emit("update:visible", false);
       }
     },
   },

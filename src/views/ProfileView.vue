@@ -13,6 +13,7 @@
       <Button class="flex" @click="showPasswordDialog = true"
         >Change Password</Button
       >
+      <div v-if="pwChanged">Password Changed successfully</div>
     </div>
   </div>
   <PasswordChangeDialog
@@ -45,6 +46,7 @@ export default {
     return {
       showPasswordDialog: false,
       userInfo: {},
+      pwChanged: false,
     };
   },
   computed: {
@@ -89,7 +91,13 @@ export default {
      * @param {*} newPass
      */
     updatePassword(newPass) {
-      this.userStore.setUserPassword(newPass, this.authStore.user);
+      this.userStore
+        .setUserPassword(newPass, this.authStore.user)
+        .then((result) => {
+          if (result) {
+            this.pwChanged = true;
+          }
+        });
     },
   },
   async mounted() {
@@ -98,6 +106,7 @@ export default {
         this.userInfo = res;
       });
     }
+    this.pwChanged = false;
   },
 };
 </script>
