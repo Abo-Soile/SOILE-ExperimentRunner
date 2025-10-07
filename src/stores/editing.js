@@ -68,14 +68,14 @@ export const useEditorStore = defineStore({
     createElement(type, data) {
       console.log(data);
       var elementData = this.getDefaultDataForType(type.toLowerCase());
-      const store = this.getStoreForType(type); 
+      const store = this.getStoreForType(type);
       const existentNames = store.elements.map((x) => x.name);
       var name = this.uniqueID(type, existentNames);
       if (data) {
         console.log(data);
         elementData = data;
         name = data.name;
-      }           
+      }
       this.createElementForType(type, name, elementData, true);
       store.active = store.elements.length - 1;
       this.activeElement = type;
@@ -194,10 +194,17 @@ export const useEditorStore = defineStore({
     },
     async createObject(type, data, index) {
       const elementStore = useElementStore();
-      const newObject = await elementStore.createElement(data.name, data, type);
-      const store = this.getStoreForType(type);
-      store.elements[index].data = reactive(newObject);
-      store.elements[index].newElement = false;
+      const updateElement = (newObject) => {
+        const store = this.getStoreForType(type);
+        store.elements[index].data = reactive(newObject);
+        store.elements[index].newElement = false;
+      };
+      const newObject = await elementStore.createElement(
+        data.name,
+        data,
+        type,
+        updateElement
+      );
     },
     updateCurrentTaskVersion(version, index) {
       this.tasks.elements[index].currentVersion = version;

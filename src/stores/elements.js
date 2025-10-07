@@ -451,38 +451,37 @@ export const useElementStore = defineStore({
      * @param {*} type the type (element, task or project) of the object
      * @return The new Version of the element;
      */
-    async createElement(name, data, type) {
-      try {
-        let params;
-        if (type.toLowerCase() === "task") {
-          params = {
-            name: name,
-            codeType: data.codeType.language,
-            codeVersion: data.codeType.version,
-          };
-        } else {
-          params = { name: name };
-        }
-        const response = await axios.post(
-          "/" + type.toLowerCase() + "/create",
-          null,
-          {
-            params: params,
-          }
-        );
-        data.UUID = response.data.UUID;
-        data.version = response.data.version;
-        const newVersion = await this.updateElement(
-          data.UUID,
-          data.version,
-          data,
-          type
-        );
-        data.version = newVersion;
-        return data;
-      } catch (err) {
-        this.processAxiosError(err);
+    async createElement(name, data, type, updateCallback) {
+      let params;
+      if (type.toLowerCase() === "task") {
+        params = {
+          name: name,
+          codeType: data.codeType.language,
+          codeVersion: data.codeType.version,
+        };
+      } else {
+        params = { name: name };
       }
+
+      axios
+        .post("/" + type.toLowerCase() + "/create", null, {
+          params: params,
+        })
+        .then(async (response) => {
+          data.UUID = response.data.UUID;
+          data.version = response.data.version;
+          const newVersion = await this.updateElement(
+            data.UUID,
+            data.version,
+            data,
+            type
+          );
+          data.version = newVersion;
+          updateCallback(data);
+        })
+        .catch((err) => {
+          this.processAxiosError(err);
+        });
     },
 
     /**
