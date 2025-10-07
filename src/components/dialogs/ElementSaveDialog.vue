@@ -2,12 +2,19 @@
   <Dialog v-model:visible="isVisible" modal :header="'Saving ' + name">
     <div>
       <div class="flex align-items-center mb-2">
-        <label for="tag">Please indicate a name for the version:</label>
-        <InputText
-          :class="isTagNotOk ? 'p-invalid' : ''"
-          id="tag"
-          v-model="tag"
-        />
+        <label for="tag" class="mr-1"
+          >Please indicate a name for the version:</label
+        >
+        <div class="flex flex-column">
+          <InputText
+            :class="isTagNotOk ? 'p-invalid' : ''"
+            id="tag"
+            v-model="tag"
+          />
+          <div v-if="isTagNotOk" class="text-red-500 text-sm">
+            Tag {{ tag }} already exists for {{ name }}
+          </div>
+        </div>
       </div>
     </div>
     <template #footer>
