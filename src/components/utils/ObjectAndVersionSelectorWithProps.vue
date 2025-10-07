@@ -107,7 +107,6 @@ export default defineComponent({
     },
     selectedVersion: {
       get() {
-        console.log(this.version);
         if (typeof this.version === "string") {
           return this.availableVersions.find((x) => x.version === this.version);
         } else {
@@ -116,7 +115,6 @@ export default defineComponent({
       },
       set(newValue) {
         // reset the version, since the value changed;
-        console.log("setting version");
         this.currentVersion = newValue;
         this.$emit("update:version", newValue);
       },
@@ -144,7 +142,6 @@ export default defineComponent({
     },
     "selectedItem.UUID": {
       async handler(newValue) {
-        console.log("SelectedItem UUID changed");
         if (newValue) {
           this.updateAvailableVersions(newValue);
         }
@@ -153,14 +150,16 @@ export default defineComponent({
   },
   async mounted() {
     // TODO: heck whether this savely works with onMounted or whether this should be done with onDisplay
-    console.log(this.objectType);
     this.loading = true;
     await this.elementStore.updateAvailableOptions(
       this.objectType.toLowerCase()
     );
-    this.availableItems = await this.elementStore.getListForType(
+    const availableElementsForType = await this.elementStore.getListForType(
       this.objectType.toLowerCase()
     );
+    this.availableItems = availableElementsForType.map((x) => {
+      return { name: x.name, UUID: x.UUID };
+    });
     if (this.selectedItem.UUID) {
       await this.updateAvailableVersions(this.selectedItem.UUID);
     }
