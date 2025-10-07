@@ -84,7 +84,7 @@ export default {
      * @param {*} objectToConvert
      * @param {boolean} resultHasToBeNumber
      */
-    buildArrayFromObject(objectToConvert, checkResult) {
+    buildArrayFromObject(objectToConvert, resultHasToBeNumber) {
       const result = [];
       Object.keys(objectToConvert).forEach((element) => {
         objectOK = true;
