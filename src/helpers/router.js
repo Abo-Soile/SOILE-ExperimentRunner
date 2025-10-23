@@ -10,6 +10,8 @@ import {
   LoginView,
   ProfileView,
   PilotView,
+  ForgotPasswordView,
+  ResetPasswordView,
 } from "@/views";
 import { useProjectStore } from "@/stores";
 import i18n from "../i18n";
@@ -74,6 +76,17 @@ const routes = [
     path: "/login",
     name: "Login",
     component: LoginView,
+  },
+  {
+    path: "/forgot_password",
+    name: "ForgotPassword",
+    component: ForgotPasswordView,
+  },
+  {
+    path: "/password_reset",
+    name: "PasswordReset",
+    component: ResetPasswordView,
+    props: (route) => ({ token: route.query.token }),
   },
   {
     path: "/profile",

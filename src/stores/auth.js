@@ -101,6 +101,55 @@ export const useAuthStore = defineStore({
         this.processAxiosError(e);
       }
     },
+    /**
+     * Log a user into the system using a one-time token.
+     * @param {*} token The token to use
+     */
+    async oneTimeAuth(token) {
+      console.log(token);
+      try {
+        const response = await axios.post(
+          "/password/one_time_auth",
+          {},
+          {
+            headers: { "Content-Type": "application/json" },
+            params: { token: token },
+          }
+        );
+
+        // update pinia state
+        await this.updateLoginStatus();
+        this.setAccessToken(response?.data.token);
+        // store user details and jwt in local storage to keep user logged in between page refreshes
+        await this.updateUserData();
+        // redirect to previous url or default to home page
+      } catch (e) {
+        this.processAxiosError(e);
+      }
+    },
+    /**
+     * Send a password reset request
+     * @param {*} emailOrUserName the email or username to requesta  password reset for
+     */
+    async resetPassword(emailOrUserName) {
+      var loginData = {
+        emailOrUserName,
+      };
+      console.log(loginData);
+      try {
+        const response = await axios.post(
+          "/password/request_reset",
+          loginData,
+          {
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+        return true;
+      } catch (e) {
+        this.processAxiosError(e);
+        return false;
+      }
+    },
 
     async logout() {
       try {

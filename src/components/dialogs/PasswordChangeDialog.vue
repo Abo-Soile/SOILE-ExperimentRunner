@@ -1,53 +1,17 @@
 <template>
   <Dialog v-model:visible="dialogVisible" header="Change Password" modal>
-    <template #footer>
-      <Button
-        label="Cancel"
-        icon="pi pi-times"
-        @click="dialogVisible = false"
-        text
-      />
-      <Button
-        label="Set New Password"
-        icon="pi pi-check"
-        @click="updatePassword"
-        autofocus
-      />
-    </template>
-    <div>
-      <div class="grid">
-        <div class="col flex align-items-center">
-          <label for="password">Password</label>
-        </div>
-        <div class="col flex align-items-center">
-          <Password
-            :class="passwordValid ? '' : 'p-invalid'"
-            id="password"
-            v-model="password"
-          />
-        </div>
-      </div>
-      <div class="grid">
-        <div class="col flex align-items-center">
-          <label for="confirmPassword">Confirm Password</label>
-        </div>
-        <div class="col flex align-items-center">
-          <Password
-            id="confirmPassword"
-            :class="confirmValid ? '' : 'p-invalid'"
-            v-model="confirmPassword"
-          />
-        </div>
-      </div>
-    </div>
+    <ResetPassword
+      :showCancel="true"
+      @updatePassword="updatePassword"
+      @cancel="dialogVisible = false"
+    />
   </Dialog>
 </template>
 <script>
-import UserSettings from "@/components/user/UserSettings.vue";
+import ResetPassword from "@/components/ResetPassword.vue";
 import { useErrorStore } from "@/stores";
 
 import Dialog from "primevue/dialog";
-import Button from "primevue/button";
 import Password from "primevue/password";
 
 export default {
@@ -59,9 +23,7 @@ export default {
   },
   components: {
     Dialog,
-    UserSettings,
-    Password,
-    Button,
+    ResetPassword,
   },
   data() {
     return {
