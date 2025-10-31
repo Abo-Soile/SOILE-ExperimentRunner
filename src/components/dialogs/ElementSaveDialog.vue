@@ -1,21 +1,16 @@
 <template>
   <Dialog v-model:visible="isVisible" modal :header="'Saving ' + name">
-    <div>
-      <div class="flex align-items-center mb-2">
-        <label for="tag" class="mr-1"
-          >Please indicate a name for the version:</label
-        >
-        <div class="flex flex-column">
-          <InputText
-            :class="isTagNotOk ? 'p-invalid' : ''"
-            id="tag"
-            v-model="tag"
-          />
-          <div v-if="isTagNotOk" class="text-red-500 text-sm">
-            Tag {{ tag }} already exists for {{ name }}
-          </div>
-        </div>
-      </div>
+    <div class="flex flex-column mb-2 w-full">
+      <label for="tag" class="mr-2">Version Name:</label>
+      <InputText
+        :class="isTagNotOk ? 'p-invalid' : ''"
+        id="tag"
+        v-model="tag"
+      />
+      <span v-if="isTagNotOk" class="text-red-500 text-sm">
+        {{ tagNotOkText }}
+      </span>
+      <span v-else="isTagNotOk" class="text-white text-sm"> Tag </span>
     </div>
     <template #footer>
       <Button
@@ -72,6 +67,11 @@ export default defineComponent({
   computed: {
     isTagNotOk() {
       return this.tag === "" || this.currentTags.includes(this.tag);
+    },
+    tagNotOkText() {
+      return this.tag === ""
+        ? "You need to provide a tag for this version"
+        : `Tag ${this.tag} already exists for ${this.name}`;
     },
     isVisible: {
       get() {
