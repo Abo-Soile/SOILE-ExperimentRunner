@@ -3,15 +3,11 @@
     <h1>{{ title }}</h1>
     <form @submit.prevent="saveSettings">
       <div class="grid">
-        <div class="col flex align-items-center">
+        <div v-tooltip="'Username must not contain @'" class="col flex align-items-center">
           <label for="username">Username</label>
         </div>
         <div class="col flex align-items-center">
-          <InputText
-            id="username"
-            v-model="settings.username"
-            :disabled="usernamefixed"
-          />
+          <InputText id="username" v-model="settings.username" :disabled="usernamefixed" :invalid="!userNameValid" />
         </div>
       </div>
       <div class="grid">
@@ -19,7 +15,7 @@
           <label for="email">Email</label>
         </div>
         <div class="col flex align-items-center">
-          <InputText id="email" v-model="settings.email" />
+          <InputText type="email" id="email" v-model="settings.email" :invalid="!emailPossible" />
         </div>
       </div>
       <div class="grid">
@@ -27,7 +23,7 @@
           <label for="fullname">Full Name</label>
         </div>
         <div class="col flex align-items-center">
-          <InputText id="fullname" v-model="settings.fullname" />
+          <InputText id="fullname" v-model="settings.fullname" invalid="!namePossible" />
         </div>
       </div>
       <div v-if="settings.role != null && settings.role != ''" class="grid">
@@ -58,7 +54,7 @@
       </div>
       <div class="grid">
         <div class="col">
-          <Button type="submit" :label="submitLabel" />
+          <Button type="submit" :label="submitLabel" :disabled="!inputValid" />
         </div>
         <div v-if="showCancel" class="flex col justify-content-end">
           <Button @click="$emit('cancel')" label="Cancel" />
@@ -140,6 +136,33 @@ export default {
   },
   mounted() {
     this.settings = { ...this.initialSettings };
+  },
+  computed: {
+    userNameValid() {
+      return this.settings.username && !this.settings.username.includes("@");
+    },
+    emailPossible() {
+      return (
+        this.settings.email &&
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.settings.email)
+      );
+    },
+    namePossible() {
+      return (
+        this.settings.fullname && this.settings.fullname.trim().length > 0 && !this.settings.fullname.includes(" ")
+      );
+    },
+    passwordValid() {
+      return (
+        !this.showPassword ||
+        (this.settings.password &&
+          this.settings.password.length >= 10 &&
+          this.settings.password === this.settings.confirmPassword)
+      );
+    },
+    inputValid() {
+      return this.userNameValid && this.passwordValid && this.emailPossible && this.namePossible;
+    },
   },
   watch: {
     initialSettings(newValue) {
