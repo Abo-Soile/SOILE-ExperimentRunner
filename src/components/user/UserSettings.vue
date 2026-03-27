@@ -19,7 +19,7 @@
         </div>
       </div>
       <div class="grid">
-        <div v-tooltip="Must include both a first and a last name" class="col flex align-items-center">
+        <div v-tooltip="'Must include both a first and a last name'" class="col flex align-items-center">
           <label for="fullname">Full Name</label>
         </div>
         <div class="col flex align-items-center">
