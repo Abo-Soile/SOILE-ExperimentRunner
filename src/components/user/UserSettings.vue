@@ -19,8 +19,8 @@
         </div>
       </div>
       <div class="grid">
-        <div class="col flex align-items-center">
-          <label v-tooltip="Must include botha a first and a last name" for="fullname">Full Name</label>
+        <div v-tooltip="Must include both a first and a last name" class="col flex align-items-center">
+          <label for="fullname">Full Name</label>
         </div>
         <div class="col flex align-items-center">
           <InputText id="fullname" v-model="settings.fullname" invalid="!namePossible" />
