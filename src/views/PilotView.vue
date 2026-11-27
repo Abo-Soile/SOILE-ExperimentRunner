@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="h-screen">
     <Button v-if="!started" :disabled="!pilotedElement" @click="start"
       >Start Study Pilot</Button
     >
