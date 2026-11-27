@@ -3,7 +3,7 @@
     <Button v-if="!started" :disabled="!pilotedElement" @click="start"
       >Start Study Pilot</Button
     >
-    <div v-if="started && !finished">
+    <div class="h-full" v-if="started && !finished">
       <ProgressSpinner v-if="loading"> </ProgressSpinner>
       <CodeRunner
         v-else
