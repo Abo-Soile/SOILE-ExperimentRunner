@@ -1,5 +1,5 @@
 <template>
-  <iframe ref="psychoJSWindow" allowfullscreen :srcdoc="code"></iframe>
+  <iframe class="w-full h-full" ref="psychoJSWindow" allowfullscreen :srcdoc="code"></iframe>
 </template>
 
 <script>
